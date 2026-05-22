@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Tasks | Access Wealth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-body: #070d14;         
+            --bg-cards: #112A46;        
+            --text-main: #ffffff;       
+            --text-muted: #8a99af;      
+            --primary-yellow: #d4af37;  
+            --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+            --border-light: rgba(212, 175, 55, 0.15); 
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 80px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
+
+        /* --- HEADER & SIDEBAR --- */
+        .mobile-header { display: none; width: 100%; background: var(--bg-cards); padding: 15px 25px; justify-content: space-between; align-items: center; position: fixed; top: 0; z-index: 1000; border-bottom: 1px solid var(--border-light); }
+        .mobile-header i.menu-btn { font-size: 24px; color: var(--primary-yellow); cursor: pointer; }
+        .mobile-header .logo-text { font-weight: 700; font-size: 16px; letter-spacing: 1px; color: var(--text-main); }
+        .mobile-header .logo-text span { color: var(--primary-yellow); }
+        .overlay-menu { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 900; backdrop-filter: blur(3px); }
+        .overlay-menu.active { display: block; }
+
+        .sidebar { width: var(--sidebar-width); background: var(--bg-cards); height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; border-right: 1px solid var(--border-light); z-index: 1100; transition: width 0.3s ease, left 0.3s ease; }
+        .logo-area { padding: 25px 20px; display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 700; border-bottom: 1px solid var(--border-light); margin-bottom: 10px; white-space: nowrap; overflow: hidden; }
+        .logo-area i { color: var(--primary-yellow); font-size: 26px; min-width: 26px; }
+        .nav-menu { flex-grow: 1; overflow-y: auto; overflow-x: hidden; padding: 0 15px 20px 15px; }
+        .nav-menu::-webkit-scrollbar { width: 4px; }
+        .nav-menu::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 5px; }
+        .nav-label { font-size: 11px; color: var(--primary-yellow); font-weight: 600; margin: 20px 0 5px 15px; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; transition: opacity 0.3s; }
+        .nav-item { display: flex; align-items: center; padding: 12px 15px; color: var(--text-muted); text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 14px; font-weight: 500; transition: 0.3s; cursor: pointer; white-space: nowrap; }
+        .nav-item i.main-icon { margin-right: 15px; font-size: 18px; width: 20px; text-align: center; }
+        .nav-item:hover { background: rgba(212, 175, 55, 0.1); color: var(--primary-yellow); }
+        .nav-item.active { background: var(--primary-yellow); color: #0b1421; font-weight: 600; }
+        .nav-item.active i { color: #0b1421; }
+        .nav-title-group { display: flex; align-items: center; flex-grow: 1; }
+        .has-dropdown { justify-content: space-between; }
+        .chevron { transition: transform 0.3s ease; font-size: 12px; opacity: 0.8; }
+        .has-dropdown.open .chevron { transform: rotate(180deg); }
+        .dropdown-container { display: none; background: rgba(0, 0, 0, 0.15); border-radius: 8px; margin-bottom: 5px; padding: 5px 0; }
+        .dropdown-container.show { display: block; }
+        .sub-item { padding: 10px 15px 10px 45px; font-size: 13px; margin-bottom: 2px; color: var(--text-muted); text-decoration: none; display: block; transition: 0.3s;}
+        .sub-item:hover { color: var(--primary-yellow); background: rgba(212, 175, 55, 0.05); }
+        .sub-item.active { color: var(--primary-yellow); font-weight: 600; }
+
+        .btn-upgrade-sidebar { background: var(--yellow-gradient); color: #0b1421; display: flex; justify-content: center; align-items: center; padding: 12px; border-radius: 8px; margin: 15px 0; text-decoration: none; font-weight: 600; border: none; cursor: pointer; width: 100%; white-space: nowrap; }
+        .btn-upgrade-sidebar span { margin-left: 8px; }
+
+        .sidebar.collapsed { width: var(--sidebar-collapsed-width); }
+        .sidebar.collapsed .logo-area { justify-content: center; padding: 25px 0; }
+        .sidebar.collapsed .logo-area span, .sidebar.collapsed .nav-label, .sidebar.collapsed .nav-item span, .sidebar.collapsed .chevron, .sidebar.collapsed .btn-upgrade-sidebar span { display: none; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding: 15px 0; }
+        .sidebar.collapsed .nav-item i.main-icon { margin-right: 0; font-size: 22px; }
+        .sidebar.collapsed .dropdown-container { display: none !important; }
+
+        .top-header { height: 75px; background: var(--bg-body); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; border-bottom: 1px solid var(--border-light); }
+        .header-left i { font-size: 22px; color: var(--primary-yellow); cursor: pointer; transition: 0.3s; }
+        .header-left i:hover { transform: scale(1.1); }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .user-info { text-align: right; }
+        .user-info h4 { font-size: 14px; font-weight: 600; margin-bottom: -3px; color: var(--text-main); }
+        .user-info p { font-size: 12px; color: var(--text-muted); }
+        .avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-yellow); }
+
+        /* --- MAIN CONTENT & TASK UI --- */
+        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); display: flex; flex-direction: column; transition: margin-left 0.3s, width 0.3s; }
+        .sidebar.collapsed ~ .main-content { margin-left: var(--sidebar-collapsed-width); width: calc(100% - var(--sidebar-collapsed-width)); }
+        .content-area { padding: 50px 40px; max-width: 900px; margin: 0 auto; width: 100%; position: relative; }
+
+        /* LOCK SCREEN (THE GATEKEEPER) */
+        .lock-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(7, 13, 20, 0.85); backdrop-filter: blur(8px); z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border-radius: 20px; display: none; }
+        .lock-overlay i { font-size: 60px; color: #ff4d4d; margin-bottom: 20px; }
+        .lock-overlay h2 { font-size: 28px; margin-bottom: 10px; color: #fff; }
+        .lock-overlay p { color: var(--text-muted); margin-bottom: 30px; max-width: 400px; }
+        .lock-overlay button { background: var(--yellow-gradient); border: none; padding: 15px 30px; border-radius: 30px; color: #0b1421; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.3s; }
+        .lock-overlay button:hover { transform: scale(1.05); }
+
+        .page-header { text-align: center; margin-bottom: 40px; }
+        .page-title { font-size: 32px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
+        .page-subtitle { color: var(--text-muted); font-size: 15px; }
+
+        /* TASK CARD */
+        .task-card { background: linear-gradient(180deg, #112A46 0%, #070d14 100%); border: 1px solid var(--primary-yellow); border-radius: 24px; padding: 40px 30px; text-align: center; box-shadow: 0 15px 40px rgba(212, 175, 55, 0.15); margin-bottom: 30px;}
+        .task-icon { width: 80px; height: 80px; background: rgba(212, 175, 55, 0.1); color: var(--primary-yellow); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; margin: 0 auto 20px auto; border: 1px solid rgba(212, 175, 55, 0.3);}
+        .task-amount { font-size: 45px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
+        .task-desc { color: var(--text-muted); margin-bottom: 30px; font-size: 15px;}
+        
+        .btn-task { background: var(--yellow-gradient); color: #0b1421; border: none; padding: 18px 50px; border-radius: 50px; font-size: 18px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3); transition: 0.3s; width: 100%; max-width: 400px;}
+        .btn-task:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(212, 175, 55, 0.5); }
+        .btn-task:disabled { background: #333; color: #777; box-shadow: none; cursor: not-allowed; transform: none; border: 1px solid #555;}
+
+        /* TIMER DISPLAY */
+        .timer-display { display: none; font-size: 24px; font-family: monospace; color: var(--primary-yellow); font-weight: bold; margin-top: 20px; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; border: 1px solid var(--border-light); width: max-content; margin-left: auto; margin-right: auto;}
+
+        @media (max-width: 768px) {
+            .sidebar { left: -260px; width: var(--sidebar-width) !important; }
+            .sidebar.active { left: 0; }
+            .mobile-header { display: flex; }
+            .top-header { display: none; }
+            .main-content { margin-left: 0 !important; width: 100% !important; }
+            .content-area { padding: 90px 20px 40px 20px; }
+            .task-amount { font-size: 35px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <i class="fa-solid fa-bars-staggered menu-btn" onclick="toggleMobileSidebar()"></i>
+        <div class="logo-text">ACCESS <span>WEALTH</span></div>
+        <img src="" class="avatar" id="mobileAvatar">
+    </div>
+    <div class="overlay-menu" id="overlayMenu" onclick="toggleMobileSidebar()"></div>
+
+    <div class="sidebar collapsed" id="sidebar">
+        <div class="logo-area"><i class="fa-solid fa-crown"></i><span>ACCESS WEALTH</span></div>
+        <div class="nav-menu">
+            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> <span>Dashboard</span></a>
+            <div class="nav-item has-dropdown open active" onclick="toggleDropdown('activityDropdown', this)">
+                <div class="nav-title-group"><i class="fa-solid fa-list-check main-icon"></i> <span>Daily Activity Earning</span></div>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+            <div class="dropdown-container show" id="activityDropdown">
+                <a href="daily-tasks.html" class="sub-item active"><i class="fa-regular fa-clipboard main-icon"></i> Daily Tasks</a>
+                <a href="sponsored-posts.html" class="sub-item"><i class="fa-solid fa-bullhorn main-icon"></i> Sponsored Posts</a>
+            </div>
+            <a href="activation.html" class="nav-item"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
+            <a href="spin-win.html" class="nav-item"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
+            <div class="nav-item has-dropdown" onclick="toggleDropdown('marketplaceDropdown', this)">
+                <div class="nav-title-group"><i class="fa-solid fa-shop main-icon"></i> <span>Marketplace</span></div>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+            <div class="dropdown-container" id="marketplaceDropdown">
+                <a href="#" class="nav-item sub-item"><i class="fa-solid fa-cart-shopping main-icon"></i> All Markets</a>
+                <a href="#" class="nav-item sub-item"><i class="fa-solid fa-plus main-icon"></i> Add Product</a>
+            </div>
+            <a href="withdraw.html" class="nav-item"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
+            <a href="referral.html" class="nav-item"><i class="fa-solid fa-users main-icon"></i> <span>Top Earners</span></a>
+            <button onclick="window.location.href='activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
+            <a href="#" class="nav-item" onclick="logout()" style="color: #ff4d4d; margin-top: 30px;"><i class="fa-solid fa-power-off main-icon" style="color: #ff4d4d;"></i> <span>Logout</span></a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-header">
+            <div class="header-left"><i class="fa-solid fa-bars-staggered" onclick="toggleDesktopSidebar()"></i></div>
+            <div class="header-right">
+                <div class="user-info"><h4 id="displayName">USER</h4><p id="displayHandle">@user</p></div>
+                <img src="" class="avatar" id="desktopAvatar">
+            </div>
+        </div>
+
+        <div class="content-area">
+
+            <div class="lock-overlay" id="lockScreen">
+                <i class="fa-solid fa-lock"></i>
+                <h2>Activation Required</h2>
+                <p>You must fund your account and activate a premium plan to unlock Daily Tasks and Sponsored Posts.</p>
+                <button onclick="window.location.href='activation.html'">Activate Now</button>
+            </div>
+            
+            <div class="page-header">
+                <h1 class="page-title">24-Hour Daily Task</h1>
+                <p class="page-subtitle">Your daily earning potential is permanently linked to your active package.</p>
+            </div>
+
+            <div class="task-card">
+                <div class="task-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                <p style="color: var(--primary-yellow); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;" id="planNameDisplay">Loading...</p>
+                <h1 class="task-amount" id="taskPayoutDisplay">₦0.00</h1>
+                <p class="task-desc">Click the button below to claim your daily guaranteed earnings to your task balance.</p>
+                
+                <button class="btn-task" id="taskBtn" onclick="claimTask()">Claim Earnings</button>
+                <div class="timer-display" id="cooldownTimer">24:00:00</div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // UI Navigation
+        function toggleDesktopSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+        function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlayMenu').classList.toggle('active'); }
+        function toggleDropdown(dropdownId, element) { element.classList.toggle('open'); document.getElementById(dropdownId).classList.toggle('show'); element.classList.toggle('active'); }
+        function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+
+        // --- DYNAMIC PLAN PAYOUTS ---
+        const planDailyEarnings = {
+            'Access Starter': 500,
+            'Access Basic': 900,
+            'Access Plus': 1300,
+            'Access Pro': 1800,
+            'Wealth Premium': 2800,
+            'Wealth Elite': 4800,
+            'Wealth Pro Max': 6600,
+            'Wealth Executive': 8500,
+            'Wealth Apex': 10500
+        };
+
+        let userPlan = null;
+        let dailyPayout = 0;
+        let timerInterval;
+
+        window.onload = () => {
+            // Setup User Info
+            const user = localStorage.getItem('username') || "Guest";
+            document.getElementById('displayName').innerText = user.toUpperCase();
+            document.getElementById('displayHandle').innerText = "@" + user.toLowerCase().replace(/\s+/g, '');
+            const avatarUrl = `https://ui-avatars.com/api/?name=${user}&background=d4af37&color=112A46&bold=true`;
+            document.getElementById('desktopAvatar').src = avatarUrl;
+            document.getElementById('mobileAvatar').src = avatarUrl;
+
+            // THE GATEKEEPER: Check if Activated
+            const isActivated = localStorage.getItem('planActivated') === 'true';
+            userPlan = localStorage.getItem('activePackage');
+            
+            if (!isActivated || !userPlan || !planDailyEarnings[userPlan]) {
+                document.getElementById('lockScreen').style.display = 'flex'; // Lock the screen!
+                return;
+            }
+
+            // Set the dynamic payout based on their plan
+            dailyPayout = planDailyEarnings[userPlan];
+            document.getElementById('planNameDisplay').innerText = `${userPlan} Package`;
+            document.getElementById('taskPayoutDisplay').innerText = `₦${dailyPayout.toLocaleString()}`;
+
+            checkTaskStatus();
+        };
+
+        function checkTaskStatus() {
+            const lastClaimTime = localStorage.getItem('lastTaskClaimTime');
+            if (lastClaimTime) {
+                const timePassed = Date.now() - parseInt(lastClaimTime);
+                const twentyFourHours = 24 * 60 * 60 * 1000;
+
+                if (timePassed < twentyFourHours) {
+                    // Task is still locked
+                    startTimer(twentyFourHours - timePassed);
+                }
+            }
+        }
+
+        function claimTask() {
+            const btn = document.getElementById('taskBtn');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                // Update their task earnings
+                let currentEarnings = parseFloat(localStorage.getItem('taskEarnings')) || 0;
+                localStorage.setItem('taskEarnings', currentEarnings + dailyPayout);
+                
+                // Set the lock time
+                localStorage.setItem('lastTaskClaimTime', Date.now().toString());
+
+                alert(`🎉 Task Completed! ₦${dailyPayout.toLocaleString()} has been added to your Task Earnings.`);
+                
+                startTimer(24 * 60 * 60 * 1000); // Start 24hr timer
+            }, 1500); // Fake processing delay for realism
+        }
+
+        function startTimer(durationMs) {
+            const btn = document.getElementById('taskBtn');
+            const timerDisplay = document.getElementById('cooldownTimer');
+            
+            btn.style.display = 'none';
+            timerDisplay.style.display = 'block';
+
+            let remainingTime = durationMs;
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                remainingTime -= 1000;
+
+                if (remainingTime <= 0) {
+                    clearInterval(timerInterval);
+                    btn.style.display = 'block';
+                    btn.innerText = "Claim Earnings";
+                    btn.disabled = false;
+                    timerDisplay.style.display = 'none';
+                    localStorage.removeItem('lastTaskClaimTime');
+                } else {
+                    // Format ms to HH:MM:SS
+                    let hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    let minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+                    let seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+
+                    hours = (hours < 10) ? "0" + hours : hours;
+                    minutes = (minutes < 10) ? "0" + minutes : minutes;
+                    seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+                    timerDisplay.innerText = `Available in: ${hours}:${minutes}:${seconds}`;
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

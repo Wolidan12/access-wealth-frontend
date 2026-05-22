@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fund Account | Access Wealth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-body: #070d14;         
+            --bg-cards: #112A46;        
+            --text-main: #ffffff;       
+            --text-muted: #8a99af;      
+            --primary-yellow: #d4af37;  
+            --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+            --border-light: rgba(212, 175, 55, 0.15); 
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 80px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
+
+        /* --- HEADER & SIDEBAR --- */
+        .mobile-header { display: none; width: 100%; background: var(--bg-cards); padding: 15px 25px; justify-content: space-between; align-items: center; position: fixed; top: 0; z-index: 1000; border-bottom: 1px solid var(--border-light); }
+        .mobile-header i.menu-btn { font-size: 24px; color: var(--primary-yellow); cursor: pointer; }
+        .mobile-header .logo-text { font-weight: 700; font-size: 16px; letter-spacing: 1px; color: var(--text-main); }
+        .mobile-header .logo-text span { color: var(--primary-yellow); }
+        .overlay-menu { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 900; backdrop-filter: blur(3px); }
+        .overlay-menu.active { display: block; }
+
+        .sidebar { width: var(--sidebar-width); background: var(--bg-cards); height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; border-right: 1px solid var(--border-light); z-index: 1100; transition: width 0.3s ease, left 0.3s ease; }
+        .logo-area { padding: 25px 20px; display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 700; border-bottom: 1px solid var(--border-light); margin-bottom: 10px; white-space: nowrap; overflow: hidden; }
+        .logo-area i { color: var(--primary-yellow); font-size: 26px; min-width: 26px; }
+        .nav-menu { flex-grow: 1; overflow-y: auto; overflow-x: hidden; padding: 0 15px 20px 15px; }
+        .nav-menu::-webkit-scrollbar { width: 4px; }
+        .nav-menu::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 5px; }
+        .nav-label { font-size: 11px; color: var(--primary-yellow); font-weight: 600; margin: 20px 0 5px 15px; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; transition: opacity 0.3s; }
+        .nav-item { display: flex; align-items: center; padding: 12px 15px; color: var(--text-muted); text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 14px; font-weight: 500; transition: 0.3s; cursor: pointer; white-space: nowrap; }
+        .nav-item i.main-icon { margin-right: 15px; font-size: 18px; width: 20px; text-align: center; }
+        .nav-item:hover { background: rgba(212, 175, 55, 0.1); color: var(--primary-yellow); }
+        .nav-item.active { background: var(--primary-yellow); color: #0b1421; font-weight: 600; }
+        .nav-item.active i { color: #0b1421; }
+        .nav-title-group { display: flex; align-items: center; flex-grow: 1; }
+        .has-dropdown { justify-content: space-between; }
+        .chevron { transition: transform 0.3s ease; font-size: 12px; opacity: 0.8; }
+        .has-dropdown.open .chevron { transform: rotate(180deg); }
+        .dropdown-container { display: none; background: rgba(0, 0, 0, 0.15); border-radius: 8px; margin-bottom: 5px; padding: 5px 0; }
+        .dropdown-container.show { display: block; }
+        .sub-item { padding: 10px 15px 10px 45px; font-size: 13px; margin-bottom: 2px; color: var(--text-muted); text-decoration: none; display: block; transition: 0.3s;}
+        .sub-item:hover { color: var(--primary-yellow); background: rgba(212, 175, 55, 0.05); }
+
+        .btn-upgrade-sidebar { background: var(--yellow-gradient); color: #0b1421; display: flex; justify-content: center; align-items: center; padding: 12px; border-radius: 8px; margin: 15px 0; text-decoration: none; font-weight: 600; border: none; cursor: pointer; width: 100%; white-space: nowrap; }
+        .btn-upgrade-sidebar span { margin-left: 8px; }
+
+        .sidebar.collapsed { width: var(--sidebar-collapsed-width); }
+        .sidebar.collapsed .logo-area { justify-content: center; padding: 25px 0; }
+        .sidebar.collapsed .logo-area span, .sidebar.collapsed .nav-label, .sidebar.collapsed .nav-item span, .sidebar.collapsed .chevron, .sidebar.collapsed .btn-upgrade-sidebar span { display: none; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding: 15px 0; }
+        .sidebar.collapsed .nav-item i.main-icon { margin-right: 0; font-size: 22px; }
+        .sidebar.collapsed .dropdown-container { display: none !important; }
+
+        .top-header { height: 75px; background: var(--bg-body); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; border-bottom: 1px solid var(--border-light); }
+        .header-left i { font-size: 22px; color: var(--primary-yellow); cursor: pointer; transition: 0.3s; }
+        .header-left i:hover { transform: scale(1.1); }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .user-info { text-align: right; }
+        .user-info h4 { font-size: 14px; font-weight: 600; margin-bottom: -3px; color: var(--text-main); }
+        .user-info p { font-size: 12px; color: var(--text-muted); }
+        .avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-yellow); }
+
+        /* --- MAIN CONTENT & DEPOSIT UI --- */
+        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); display: flex; flex-direction: column; transition: margin-left 0.3s, width 0.3s; }
+        .sidebar.collapsed ~ .main-content { margin-left: var(--sidebar-collapsed-width); width: calc(100% - var(--sidebar-collapsed-width)); }
+        .content-area { padding: 50px 40px; max-width: 900px; margin: 0 auto; width: 100%; }
+
+        .page-header { text-align: center; margin-bottom: 40px; }
+        .page-title { font-size: 32px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
+        .page-subtitle { color: var(--text-muted); font-size: 15px; }
+
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
+
+        /* BANK DETAILS CARD */
+        .bank-card { background: linear-gradient(135deg, #112A46 0%, #0a192f 100%); border: 1px solid var(--primary-yellow); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(212, 175, 55, 0.1); position: relative; overflow: hidden; }
+        .bank-card::before { content: ''; position: absolute; top: 0; right: 0; width: 150px; height: 150px; background: radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 70%); border-radius: 50%; transform: translate(30%, -30%); }
+        .bank-card h3 { font-size: 20px; color: var(--primary-yellow); margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+        
+        .detail-row { margin-bottom: 20px; }
+        .detail-row p { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .detail-row h4 { font-size: 18px; font-weight: 600; color: #fff; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.1);}
+        .copy-btn { color: var(--primary-yellow); cursor: pointer; transition: 0.3s; font-size: 16px;}
+        .copy-btn:hover { transform: scale(1.2); }
+
+        .warning-text { font-size: 13px; color: #ffeb3b; background: rgba(255, 235, 59, 0.1); padding: 15px; border-radius: 10px; display: flex; gap: 10px; align-items: flex-start; line-height: 1.5;}
+
+        /* FORM CARD */
+        .form-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; padding: 30px; }
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 10px; }
+        .input-wrapper { position: relative; }
+        .input-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 16px; }
+        .form-control { width: 100%; padding: 15px 15px 15px 45px; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px; outline: none; transition: 0.3s; }
+        .form-control:focus { border-color: var(--primary-yellow); background: rgba(0, 0, 0, 0.4); }
+        
+        .btn-submit { background: var(--yellow-gradient); color: #0b1421; border: none; padding: 18px; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; width: 100%; text-transform: uppercase; letter-spacing: 1px;}
+        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3); }
+        .btn-submit:disabled { background: #333; color: #777; cursor: not-allowed; box-shadow: none; transform: none;}
+
+        @media (max-width: 768px) {
+            .sidebar { left: -260px; width: var(--sidebar-width) !important; }
+            .sidebar.active { left: 0; }
+            .mobile-header { display: flex; }
+            .top-header { display: none; }
+            .main-content { margin-left: 0 !important; width: 100% !important; }
+            .content-area { padding: 90px 20px 40px 20px; }
+            .grid-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <i class="fa-solid fa-bars-staggered menu-btn" onclick="toggleMobileSidebar()"></i>
+        <div class="logo-text">ACCESS <span>WEALTH</span></div>
+        <img src="" class="avatar" id="mobileAvatar">
+    </div>
+    <div class="overlay-menu" id="overlayMenu" onclick="toggleMobileSidebar()"></div>
+
+    <div class="sidebar collapsed" id="sidebar">
+        <div class="logo-area"><i class="fa-solid fa-crown"></i><span>ACCESS WEALTH</span></div>
+        <div class="nav-menu">
+            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> <span>Dashboard</span></a>
+            <div class="nav-item has-dropdown" onclick="toggleDropdown('activityDropdown', this)">
+                <div class="nav-title-group"><i class="fa-solid fa-list-check main-icon"></i> <span>Daily Activity Earning</span></div>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+            <div class="dropdown-container" id="activityDropdown">
+                <a href="daily-tasks.html" class="nav-item sub-item"><i class="fa-regular fa-clipboard main-icon"></i> Daily Tasks</a>
+                <a href="sponsored-posts.html" class="nav-item sub-item"><i class="fa-solid fa-bullhorn main-icon"></i> Sponsored Posts</a>
+            </div>
+            <a href="activation.html" class="nav-item"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
+            <a href="spin-win.html" class="nav-item"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
+            
+            <a href="deposit.html" class="nav-item active"><i class="fa-solid fa-money-bill-transfer main-icon"></i> <span>Fund Account</span></a>
+            <a href="withdraw.html" class="nav-item"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
+            <a href="referral.html" class="nav-item"><i class="fa-solid fa-users main-icon"></i> <span>Top Earners</span></a>
+            <button onclick="window.location.href='activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
+            <a href="#" class="nav-item" onclick="logout()" style="color: #ff4d4d; margin-top: 30px;"><i class="fa-solid fa-power-off main-icon" style="color: #ff4d4d;"></i> <span>Logout</span></a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-header">
+            <div class="header-left"><i class="fa-solid fa-bars-staggered" onclick="toggleDesktopSidebar()"></i></div>
+            <div class="header-right">
+                <div class="user-info"><h4 id="displayName">USER</h4><p id="displayHandle">@user</p></div>
+                <img src="" class="avatar" id="desktopAvatar">
+            </div>
+        </div>
+
+        <div class="content-area">
+            
+            <div class="page-header">
+                <h1 class="page-title">Fund Your Account</h1>
+                <p class="page-subtitle">Make a transfer to the official Access Wealth account below, then fill out the form to request your deposit.</p>
+            </div>
+
+            <div class="grid-container">
+                <div class="bank-card">
+                    <h3><i class="fa-solid fa-building-columns"></i> Official Bank Details</h3>
+                    
+                    <div class="detail-row">
+                        <p>Bank Name</p>
+                        <h4>Moniepoint Microfinance Bank</h4>
+                    </div>
+
+                    <div class="detail-row">
+                        <p>Account Number</p>
+                        <h4>8123456789 <i class="fa-regular fa-copy copy-btn" onclick="copyText('8123456789')" title="Copy Account Number"></i></h4>
+                    </div>
+
+                    <div class="detail-row">
+                        <p>Account Name</p>
+                        <h4>Access Wealth Enterprise</h4>
+                    </div>
+
+                    <div class="warning-text">
+                        <i class="fa-solid fa-triangle-exclamation" style="margin-top: 3px;"></i>
+                        <span><strong>IMPORTANT:</strong> Only send funds to this exact account. Keep your payment receipt or sender name handy to fill out the form.</span>
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <form id="depositForm">
+                        <div class="form-group">
+                            <label>Amount Sent (₦)</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-naira-sign"></i>
+                                <input type="number" id="amount" class="form-control" placeholder="E.g. 3000" required min="3000">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Sender Account Name (Proof of Payment)</label>
+                            <div class="input-wrapper">
+                                <i class="fa-regular fa-user"></i>
+                                <input type="text" id="senderName" class="form-control" placeholder="E.g. John Doe" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-submit" id="submitBtn">Confirm Payment</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // UI Navigation
+        function toggleDesktopSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+        function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlayMenu').classList.toggle('active'); }
+        function toggleDropdown(dropdownId, element) { element.classList.toggle('open'); document.getElementById(dropdownId).classList.toggle('show'); element.classList.toggle('active'); }
+        function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+        
+        function copyText(text) {
+            navigator.clipboard.writeText(text);
+            alert("Account number copied!");
+        }
+
+        window.onload = () => {
+            const user = localStorage.getItem('username') || "Guest";
+            document.getElementById('displayName').innerText = user.toUpperCase();
+            document.getElementById('displayHandle').innerText = "@" + user.toLowerCase().replace(/\s+/g, '');
+            const avatarUrl = `https://ui-avatars.com/api/?name=${user}&background=d4af37&color=112A46&bold=true`;
+            document.getElementById('desktopAvatar').src = avatarUrl;
+            document.getElementById('mobileAvatar').src = avatarUrl;
+        };
+
+        // HANDLE DEPOSIT SUBMISSION
+        document.getElementById('depositForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = localStorage.getItem('username');
+            const amount = document.getElementById('amount').value;
+            const senderName = document.getElementById('senderName').value; // Grab sender name
+            const btn = document.getElementById('submitBtn');
+
+            if (!username) return alert("You must be logged in to fund your account.");
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('http://https://accesswealth-backend-production.up.railway.app/api/deposit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: username,
+                        amount: amount,
+                        senderName: senderName
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(`✅ Request Submitted! Your deposit of ₦${amount} is now pending Admin Approval. Please check your dashboard later.`);
+                    window.location.href = 'dashboard.html'; // Send them back to dashboard to wait
+                } else {
+                    alert(data.error || "Deposit failed.");
+                    btn.innerHTML = 'Confirm Payment';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error("Deposit Error:", err);
+                alert("Server error. Please make sure your backend is running.");
+                btn.innerHTML = 'Confirm Payment';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

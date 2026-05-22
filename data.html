@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Data | Access Wealth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --bg-body: #070d14; --bg-cards: #112A46; --text-main: #ffffff; --text-muted: #8a99af; --primary-yellow: #d4af37; --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); --border-light: rgba(212, 175, 55, 0.15); --sidebar-width: 260px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
+
+        /* Sidebar & Header (Standardized) */
+        .sidebar { width: var(--sidebar-width); background: var(--bg-cards); height: 100vh; position: fixed; border-right: 1px solid var(--border-light); z-index: 1100; display: flex; flex-direction: column; }
+        .logo-area { padding: 25px 20px; font-size: 18px; font-weight: 700; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: 10px; }
+        .logo-area i { color: var(--primary-yellow); font-size: 24px; }
+        .nav-menu { padding: 20px 15px; overflow-y: auto; flex-grow: 1; }
+        .nav-item { display: flex; align-items: center; padding: 12px 15px; color: var(--text-muted); text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 14px; transition: 0.3s; }
+        .nav-item i.main-icon { margin-right: 15px; width: 20px; text-align: center; }
+        .nav-item:hover, .nav-item.active { background: rgba(212, 175, 55, 0.1); color: var(--primary-yellow); }
+        .nav-item.active { background: var(--primary-yellow); color: #0b1421; font-weight: 600; }
+        
+        /* Main Content */
+        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 40px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; align-items: start;}
+        
+        .page-header { grid-column: 1 / -1; margin-bottom: 10px; }
+        .page-header h1 { font-size: 28px; color: var(--text-main); }
+        .page-header p { color: var(--text-muted); font-size: 14px; }
+
+        /* Form Card */
+        .form-card, .history-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; padding: 35px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        
+        /* Network Grid */
+        .network-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+        .network-option { background: rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px 10px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .network-option h4 { font-size: 14px; font-weight: 600; color: var(--text-muted); transition: 0.3s; }
+        .network-option.active { border-color: var(--primary-yellow); background: rgba(212, 175, 55, 0.05); transform: translateY(-3px); }
+        .network-option.active h4 { color: #fff; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+        .input-wrapper { position: relative; }
+        .input-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--primary-yellow); }
+        .form-control { width: 100%; padding: 15px 15px 15px 45px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; font-size: 14px; outline: none; }
+        .form-control:focus { border-color: var(--primary-yellow); }
+        select.form-control { appearance: none; cursor: pointer; }
+
+        .btn-submit { width: 100%; padding: 15px; border-radius: 50px; background: var(--yellow-gradient); color: #0b1421; font-weight: 700; border: none; cursor: pointer; margin-top: 10px; transition: 0.3s;}
+        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(212,175,55,0.3); }
+
+        /* History Card */
+        .history-card h3 { font-size: 16px; margin-bottom: 20px; color: var(--text-main); display: flex; align-items: center; gap: 10px;}
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+        .empty-state i { font-size: 40px; color: rgba(212, 175, 55, 0.2); margin-bottom: 15px; }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; width: 100%; padding: 20px; grid-template-columns: 1fr; }
+            .network-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-area"><i class="fa-solid fa-crown"></i> ACCESS WEALTH</div>
+        <div class="nav-menu">
+            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> Dashboard</a>
+            <a href="airtime.html" class="nav-item"><i class="fa-solid fa-mobile-screen-button main-icon"></i> Buy Airtime</a>
+            <a href="data.html" class="nav-item active"><i class="fa-solid fa-wifi main-icon"></i> Buy Data</a>
+            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-arrow-left main-icon"></i> Back</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Buy Data</h1>
+            <p>Get affordable data bundles for all networks.</p>
+        </div>
+
+        <!-- Left Form -->
+        <div class="form-card">
+            <label style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px; display:block;">Select Network</label>
+            <div class="network-grid">
+                <div class="network-option active" data-network="MTN"><h4>MTN</h4></div>
+                <div class="network-option" data-network="Airtel"><h4>Airtel</h4></div>
+                <div class="network-option" data-network="Glo"><h4>Glo</h4></div>
+                <div class="network-option" data-network="9Mobile"><h4>9Mobile</h4></div>
+            </div>
+
+            <form id="dataForm">
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-phone"></i>
+                        <input type="tel" id="phone" class="form-control" placeholder="080 000 0000" maxlength="11" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Plan</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-database"></i>
+                        <select id="dataPlan" class="form-control" required>
+                            <option value="">-- Choose Data Plan --</option>
+                            <option value="500">1GB - 30 Days (₦500)</option>
+                            <option value="1000">2.5GB - 30 Days (₦1,000)</option>
+                            <option value="2000">5GB - 30 Days (₦2,000)</option>
+                            <option value="5000">15GB - 30 Days (₦5,000)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">Recharge Data</button>
+            </form>
+        </div>
+
+        <!-- Right History -->
+        <div class="history-card">
+            <h3><i class="fa-solid fa-clock-rotate-left" style="color: var(--primary-yellow);"></i> Purchase History</h3>
+            <div class="empty-state">
+                <i class="fa-solid fa-receipt"></i>
+                <p>No transactions yet</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.network-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.network-option').forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+            });
+        });
+
+        document.getElementById('dataForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert("Data backend route will be added in server.js!");
+        });
+    </script>
+</body>
+</html>

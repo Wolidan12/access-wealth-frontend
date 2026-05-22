@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banner Ads | Access Wealth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-body: #070d14;         
+            --bg-cards: #112A46;        
+            --text-main: #ffffff;       
+            --text-muted: #8a99af;      
+            --primary-yellow: #d4af37;  
+            --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+            --border-light: rgba(212, 175, 55, 0.15); 
+            --sidebar-width: 260px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; }
+
+        /* UI Containers */
+        .sidebar { width: var(--sidebar-width); background: var(--bg-cards); height: 100vh; position: fixed; border-right: 1px solid var(--border-light); display: flex; flex-direction: column; z-index: 1000; }
+        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 40px; }
+
+        .page-header { margin-bottom: 30px; }
+        .page-header h1 { font-size: 28px; color: var(--primary-yellow); }
+        .page-header p { color: var(--text-muted); font-size: 14px; }
+
+        /* Tab Buttons */
+        .tab-container { display: flex; gap: 10px; margin-bottom: 30px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 50px; width: fit-content; }
+        .tab-btn { padding: 10px 25px; border-radius: 50px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.3s; background: transparent; color: var(--text-muted); }
+        .tab-btn.active { background: var(--yellow-gradient); color: #0b1421; }
+
+        /* Ad Form Card */
+        .ad-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; padding: 35px; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 10px; }
+        .input-wrapper { position: relative; }
+        .input-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--primary-yellow); }
+        .form-control { width: 100%; padding: 15px 15px 15px 45px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; outline: none; transition: 0.3s; }
+        .form-control:focus { border-color: var(--primary-yellow); }
+
+        /* Duration Selector */
+        .duration-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+        .duration-item { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .duration-item h5 { font-size: 13px; color: var(--text-muted); margin-bottom: 5px; }
+        .duration-item p { font-weight: 700; color: #fff; }
+        .duration-item.selected { border-color: var(--primary-yellow); background: rgba(212, 175, 55, 0.05); box-shadow: 0 0 15px rgba(212, 175, 55, 0.1); }
+        .duration-item.selected h5 { color: var(--primary-yellow); }
+
+        /* Upload Area */
+        .upload-area { border: 2px dashed rgba(212, 175, 55, 0.3); border-radius: 15px; padding: 40px; text-align: center; cursor: pointer; transition: 0.3s; margin-bottom: 30px; }
+        .upload-area:hover { border-color: var(--primary-yellow); background: rgba(212, 175, 55, 0.02); }
+        .upload-area i { font-size: 40px; color: var(--primary-yellow); margin-bottom: 10px; }
+        .upload-area p { font-size: 14px; color: var(--text-muted); }
+
+        .btn-launch { width: 100%; padding: 18px; border: none; border-radius: 12px; background: var(--yellow-gradient); color: #0b1421; font-weight: 700; font-size: 16px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
+        .btn-launch:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3); }
+        .balance-note { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 15px; }
+
+        @media (max-width: 768px) {
+            .duration-grid { grid-template-columns: 1fr 1fr; }
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; width: 100%; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <!-- Sidebar links same as dashboard.html -->
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Banner Ads</h1>
+            <p>Place image ads across our platform to reach thousands of users.</p>
+        </div>
+
+        <div class="tab-container">
+            <button class="tab-btn active"><i class="fa-solid fa-plus"></i> Create Ad</button>
+            <button class="tab-btn"><i class="fa-regular fa-image"></i> My Ads</button>
+        </div>
+
+        <div class="ad-card">
+            <form id="adForm">
+                <div class="form-group">
+                    <label>Campaign Title</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <input type="text" id="adTitle" class="form-control" placeholder="e.g., My Business Promo" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Target URL (Landing Page)</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-link"></i>
+                        <input type="url" id="adUrl" class="form-control" placeholder="https://yourwebsite.com" required>
+                    </div>
+                </div>
+
+                <label style="display: block; font-size: 14px; color: var(--text-muted); margin-bottom: 10px;">Select Duration</label>
+                <div class="duration-grid" id="durationGrid">
+                    <div class="duration-item selected" data-price="2000" data-days="1">
+                        <h5>1 Day</h5>
+                        <p>₦2,000</p>
+                    </div>
+                    <div class="duration-item" data-price="5000" data-days="3">
+                        <h5>3 Days</h5>
+                        <p>₦5,000</p>
+                    </div>
+                    <div class="duration-item" data-price="10000" data-days="7">
+                        <h5>1 Week</h5>
+                        <p>₦10,000</p>
+                    </div>
+                    <div class="duration-item" data-price="35000" data-days="30">
+                        <h5>1 Month</h5>
+                        <p>₦35,000</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ad Banner Image URL (Wide Landscape)</label>
+                    <div class="input-wrapper">
+                        <i class="fa-regular fa-image"></i>
+                        <input type="text" id="adImage" class="form-control" placeholder="Paste image link here" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-launch" id="launchBtn"><i class="fa-solid fa-rocket"></i> Launch Campaign</button>
+                <p class="balance-note"><i class="fa-solid fa-circle-info"></i> Ad cost will be deducted from your deposit balance.</p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let selectedPrice = 2000;
+
+        // Handle Duration Selection
+        document.querySelectorAll('.duration-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.duration-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+                selectedPrice = parseInt(item.getAttribute('data-price'));
+            });
+        });
+
+        document.getElementById('adForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = localStorage.getItem('username');
+            const btn = document.getElementById('launchBtn');
+
+            if (!username) return alert("Please log in.");
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
+            try {
+                const response = await fetch('http://https://accesswealth-backend-production.up.railway.app/api/ads/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: username,
+                        title: document.getElementById('adTitle').value,
+                        url: document.getElementById('adUrl').value,
+                        image: document.getElementById('adImage').value,
+                        price: selectedPrice
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("✅ Ad Campaign Launched Successfully! Your ad is now live.");
+                    localStorage.setItem('balance', data.newBalance); // Update local balance
+                    window.location.reload();
+                } else {
+                    alert(data.error || "Failed to launch ad.");
+                }
+            } catch (err) {
+                alert("Server error.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Campaign';
+            }
+        });
+    </script>
+</body>
+</html>

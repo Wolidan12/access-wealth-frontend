@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrade Plan | Access Wealth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --bg-body: #070d14; 
+            --bg-cards: #112A46; 
+            --text-main: #ffffff; 
+            --text-muted: #8a99af; 
+            --primary-yellow: #d4af37; 
+            --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); 
+            --card-gradient: linear-gradient(135deg, #112A46 0%, #0b1a2a 100%); 
+            --border-light: rgba(212, 175, 55, 0.15); 
+            --sidebar-width: 260px; 
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
+
+        /* --- MOBILE HEADER & OVERLAY --- */
+        .mobile-header { display: none; width: 100%; background: var(--bg-cards); padding: 15px 25px; justify-content: space-between; align-items: center; position: fixed; top: 0; z-index: 1000; border-bottom: 1px solid var(--border-light); }
+        .mobile-header i.menu-btn { font-size: 24px; color: var(--primary-yellow); cursor: pointer; }
+        .mobile-header .logo-text { font-weight: 700; font-size: 16px; letter-spacing: 1px; color: var(--text-main); }
+        .mobile-header .logo-text span { color: var(--primary-yellow); }
+        .mobile-avatar { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--primary-yellow); }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 900; backdrop-filter: blur(3px); }
+        .overlay.active { display: block; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: var(--sidebar-width); background: var(--bg-cards); height: 100vh; position: fixed; border-right: 1px solid var(--border-light); z-index: 1100; transition: left 0.3s ease; }
+        .logo-area { padding: 25px 20px; font-size: 18px; font-weight: 700; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: 10px; }
+        .logo-area i { color: var(--primary-yellow); font-size: 24px; }
+        .nav-menu { padding: 20px 15px; overflow-y: auto; height: calc(100vh - 80px); }
+        .nav-item { display: flex; align-items: center; padding: 12px 15px; color: var(--text-muted); text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 14px; transition: 0.3s;}
+        .nav-item i { margin-right: 15px; width: 20px; text-align: center; }
+        .nav-item:hover, .nav-item.active { background: rgba(212, 175, 55, 0.1); color: var(--primary-yellow); }
+        .nav-item.active { background: var(--yellow-gradient); color: #0b1421; font-weight: 600; }
+        .nav-item.active i { color: #0b1421; }
+
+        /* --- MAIN CONTENT & PLANS GRID --- */
+        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 40px; }
+        .page-header { margin-bottom: 40px; text-align: center; }
+        .page-header h1 { font-size: 32px; color: var(--primary-yellow); margin-bottom: 10px; }
+        .page-header p { color: var(--text-muted); font-size: 15px; max-width: 600px; margin: 0 auto; }
+
+        .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        
+        .plan-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; padding: 30px; transition: 0.3s; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        .plan-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(212, 175, 55, 0.15); border-color: var(--primary-yellow); }
+        
+        .plan-name { font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;}
+        .plan-price { font-size: 36px; font-weight: 700; color: var(--primary-yellow); margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px;}
+        
+        .plan-features { list-style: none; margin-bottom: 30px; flex-grow: 1; }
+        .plan-features li { margin-bottom: 15px; font-size: 14px; color: #d1d5db; display: flex; align-items: flex-start; gap: 10px; }
+        .plan-features li i { color: var(--primary-yellow); margin-top: 3px; font-size: 12px; }
+        
+        .btn-activate { background: var(--yellow-gradient); color: #0b1421; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;}
+        .btn-activate:hover { box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); transform: scale(1.02); }
+
+        /* Premium Badge for High Tiers */
+        .badge-premium { position: absolute; top: 20px; right: -35px; background: #ff4d4d; color: #fff; padding: 5px 40px; font-size: 11px; font-weight: 700; transform: rotate(45deg); text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 2px 10px rgba(0,0,0,0.5);}
+
+        /* --- MODAL --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--card-gradient); border: 1px solid var(--primary-yellow); border-radius: 20px; padding: 40px; width: 90%; max-width: 450px; text-align: center; }
+        .modal-content h2 { color: var(--text-main); margin-bottom: 20px; }
+        .modal-info { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 20px; margin-bottom: 20px; text-align: left; }
+        .modal-info p { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: var(--text-muted); }
+        .modal-info p span { color: var(--text-main); font-weight: 600; }
+        
+        .warning-text { color: #ff4d4d; font-size: 13px; font-weight: 600; margin-bottom: 20px; background: rgba(255, 77, 77, 0.1); padding: 10px; border-radius: 8px; display: none; }
+        .btn-fund { display: block; background: transparent; border: 1px solid var(--primary-yellow); color: var(--primary-yellow); padding: 12px; border-radius: 8px; text-decoration: none; margin-bottom: 15px; font-weight: 600; transition: 0.3s;}
+        .btn-fund:hover { background: var(--primary-yellow); color: #0b1421; }
+        
+        .modal-btns { display: flex; gap: 15px; }
+        .modal-btns button { flex: 1; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: 0.3s; }
+        .btn-cancel { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-cancel:hover { background: rgba(255,255,255,0.2); }
+        .btn-confirm { background: var(--yellow-gradient); color: #0b1421; }
+
+        @media (max-width: 768px) {
+            .sidebar { left: -260px; width: var(--sidebar-width); }
+            .sidebar.active { left: 0; }
+            .mobile-header { display: flex; }
+            .main-content { margin-left: 0; width: 100%; padding: 100px 20px 40px 20px; }
+            .plans-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <i class="fa-solid fa-bars-staggered menu-btn" onclick="toggleMobileSidebar()"></i>
+        <div class="logo-text">ACCESS <span>WEALTH</span></div>
+        <img src="" class="mobile-avatar" id="mobileAvatar">
+    </div>
+    <div class="overlay" id="overlay" onclick="toggleMobileSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="logo-area"><i class="fa-solid fa-crown"></i> ACCESS WEALTH</div>
+        <div class="nav-menu">
+            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-border-all"></i> Dashboard</a>
+            <a href="deposit.html" class="nav-item"><i class="fa-solid fa-money-bill-transfer"></i> Fund Account</a>
+            <a href="activation.html" class="nav-item active"><i class="fa-solid fa-bolt"></i> Upgrade Plan</a>
+            <a href="withdraw.html" class="nav-item"><i class="fa-solid fa-wallet"></i> Withdraw</a>
+            <a href="support.html" class="nav-item" style="margin-top:20px;"><i class="fa-solid fa-headset"></i> Support</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Select Your Wealth Plan</h1>
+            <p>Upgrade your account to unlock higher daily earnings, instant affiliate payouts, and massive multipliers.</p>
+        </div>
+
+        <div class="plans-grid">
+            
+            <div class="plan-card">
+                <div class="plan-name">Access Starter</div>
+                <div class="plan-price">₦3,000</div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-check"></i> Welcome Bonus: ₦1,500</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Task Earning: ₦500</li>
+                    <li><i class="fa-solid fa-check"></i> Affiliate Referral: ₦1,500</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Spins: 1 Free Spin</li>
+                    <li><i class="fa-solid fa-check"></i> Min Withdrawal: ₦4,500</li>
+                </ul>
+                <button class="btn-activate" onclick="openModal('Access Starter', 3000)">Activate Plan</button>
+            </div>
+
+            <div class="plan-card">
+                <div class="plan-name">Access Basic</div>
+                <div class="plan-price">₦5,500</div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-check"></i> Welcome Bonus: ₦2,500</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Task Earning: ₦900</li>
+                    <li><i class="fa-solid fa-check"></i> Affiliate Referral: ₦2,800</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Spins: 1 Free Spin</li>
+                    <li><i class="fa-solid fa-check"></i> Min Withdrawal: ₦7,500</li>
+                </ul>
+                <button class="btn-activate" onclick="openModal('Access Basic', 5500)">Activate Plan</button>
+            </div>
+
+            <div class="plan-card">
+                <div class="plan-name">Access Plus</div>
+                <div class="plan-price">₦7,500</div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-check"></i> Welcome Bonus: ₦3,500</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Task Earning: ₦1,300</li>
+                    <li><i class="fa-solid fa-check"></i> Affiliate Referral: ₦4,000</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Spins: 2 Free Spins</li>
+                    <li><i class="fa-solid fa-check"></i> Min Withdrawal: ₦10,500</li>
+                </ul>
+                <button class="btn-activate" onclick="openModal('Access Plus', 7500)">Activate Plan</button>
+            </div>
+
+            <div class="plan-card">
+                <div class="plan-name">Access Pro</div>
+                <div class="plan-price">₦10,000</div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-check"></i> Welcome Bonus: ₦4,800</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Task Earning: ₦1,800</li>
+                    <li><i class="fa-solid fa-check"></i> Affiliate Referral: ₦5,500</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Spins: 2 Free Spins</li>
+                    <li><i class="fa-solid fa-check"></i> Min Withdrawal: ₦14,500</li>
+                </ul>
+                <button class="btn-activate" onclick="openModal('Access Pro', 10000)">Activate Plan</button>
+            </div>
+
+            <div class="plan-card">
+                <div class="plan-name">Wealth Premium</div>
+                <div class="plan-price">₦15,000</div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-check"></i> Welcome Bonus: ₦6,500</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Task Earning: ₦2,800</li>
+                    <li><i class="fa-solid fa-check"></i> Affiliate Referral: ₦8,500</li>
+                    <li><i class="fa-solid fa-check"></i> Spins: 3 Free + x1.2 Multiplier</li>
+                    <li><i class="fa-solid fa-check"></i> Min Withdrawal: ₦21,000</li>
+                </ul>
+                <button class="btn-activate" onclick="openModal('Wealth Premium', 15000)">Activate Plan</button>
+            </div>
+
+            <div class="plan-card">
+                <div class="plan-name">Wealth Elite</div>
+                <div class="plan-price">₦25,000</div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-check"></i> Welcome Bonus: ₦10,000</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Task Earning: ₦4,800</li>
+                    <li><i class="fa-solid fa-check"></i> Affiliate Referral: ₦14,000</li>
+                    <li><i class="fa-solid fa-check"></i> Spins: 4 Free + x1.5 Multiplier</li>
+                    <li><i class="fa-solid fa-check"></i> Min Withdrawal: ₦35,000</li>
+                </ul>
+                <button class="btn-activate" onclick="openModal('Wealth Elite', 25000)">Activate Plan</button>
+            </div>
+
+            <div class="plan-card">
+                <div class="plan-name">Wealth Pro Max</div>
+                <div class="plan-price">₦35,000</div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-check"></i> Welcome Bonus: ₦14,000</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Task Earning: ₦6,600</li>
+                    <li><i class="fa-solid fa-check"></i> Affiliate Referral: ₦20,000</li>
+                    <li><i class="fa-solid fa-check"></i> Spins: 4 Free + x1.8 Multiplier</li>
+                    <li><i class="fa-solid fa-check"></i> Min Withdrawal: ₦50,000</li>
+                </ul>
+                <button class="btn-activate" onclick="openModal('Wealth Pro Max', 35000)">Activate Plan</button>
+            </div>
+
+            <div class="plan-card">
+                <div class="plan-name">Wealth Executive</div>
+                <div class="plan-price">₦45,000</div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-check"></i> Welcome Bonus: ₦18,000</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Task Earning: ₦8,500</li>
+                    <li><i class="fa-solid fa-check"></i> Affiliate Referral: ₦25,500</li>
+                    <li><i class="fa-solid fa-check"></i> Spins: 5 Free + x2.0 Multiplier</li>
+                    <li><i class="fa-solid fa-check"></i> Min Withdrawal: ₦65,000</li>
+                </ul>
+                <button class="btn-activate" onclick="openModal('Wealth Executive', 45000)">Activate Plan</button>
+            </div>
+
+            <div class="plan-card" style="border-color: #d4af37;">
+                <div class="badge-premium">Hot</div>
+                <div class="plan-name">Wealth Apex</div>
+                <div class="plan-price">₦55,000</div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-check"></i> Welcome Bonus: ₦22,000</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Task Earning: ₦10,500</li>
+                    <li><i class="fa-solid fa-check"></i> Affiliate Referral: ₦31,000</li>
+                    <li><i class="fa-solid fa-check"></i> Spins: 5 Free + x2.5 Multiplier</li>
+                    <li><i class="fa-solid fa-check"></i> Min Withdrawal: ₦80,000</li>
+                </ul>
+                <button class="btn-activate" onclick="openModal('Wealth Apex', 55000)">Activate Plan</button>
+            </div>
+
+            <div class="plan-card" style="border-color: #d4af37;">
+                <div class="badge-premium">VIP</div>
+                <div class="plan-name">Wealth VIP</div>
+                <div class="plan-price">₦100,000</div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-check"></i> Welcome Bonus: ₦40,000</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Task Earning: ₦18,000</li>
+                    <li><i class="fa-solid fa-check"></i> Affiliate Referral: ₦55,000</li>
+                    <li><i class="fa-solid fa-check"></i> Spins: 6 Free + x3.0 Multiplier</li>
+                    <li><i class="fa-solid fa-check"></i> Min Withdrawal: ₦150,000</li>
+                </ul>
+                <button class="btn-activate" onclick="openModal('Wealth VIP', 100000)">Activate Plan</button>
+            </div>
+
+            <div class="plan-card" style="border-color: #d4af37; background: linear-gradient(135deg, #112A46 0%, #1a1a1a 100%);">
+                <div class="badge-premium">Tycoon</div>
+                <div class="plan-name">Wealth Tycoon</div>
+                <div class="plan-price">₦200,000</div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-check"></i> Welcome Bonus: ₦80,000</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Task Earning: ₦35,000</li>
+                    <li><i class="fa-solid fa-check"></i> Affiliate Referral: ₦115,000</li>
+                    <li><i class="fa-solid fa-check"></i> Spins: 7 Free + x3.5 Multiplier</li>
+                    <li><i class="fa-solid fa-check"></i> Min Withdrawal: ₦300,000</li>
+                </ul>
+                <button class="btn-activate" onclick="openModal('Wealth Tycoon', 200000)">Activate Plan</button>
+            </div>
+
+            <div class="plan-card" style="border-color: #d4af37; background: linear-gradient(135deg, #112A46 0%, #1a1a1a 100%);">
+                <div class="badge-premium">Mogul</div>
+                <div class="plan-name">Wealth Mogul</div>
+                <div class="plan-price">₦350,000</div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-check"></i> Welcome Bonus: ₦140,000</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Task Earning: ₦60,000</li>
+                    <li><i class="fa-solid fa-check"></i> Affiliate Referral: ₦200,000</li>
+                    <li><i class="fa-solid fa-check"></i> Spins: 8 Free + x4.0 Multiplier</li>
+                    <li><i class="fa-solid fa-check"></i> Min Withdrawal: ₦500,000</li>
+                </ul>
+                <button class="btn-activate" onclick="openModal('Wealth Mogul', 350000)">Activate Plan</button>
+            </div>
+
+            <div class="plan-card" style="border-color: #d4af37; background: linear-gradient(135deg, #112A46 0%, #000000 100%); box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);">
+                <div class="badge-premium" style="background:#000; color:var(--primary-yellow); border:1px solid var(--primary-yellow);">Infinity</div>
+                <div class="plan-name">Access Infinity</div>
+                <div class="plan-price">₦500,000</div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-check"></i> Welcome Bonus: ₦200,000</li>
+                    <li><i class="fa-solid fa-check"></i> Daily Task Earning: ₦85,000</li>
+                    <li><i class="fa-solid fa-check"></i> Affiliate Referral: ₦300,000</li>
+                    <li><i class="fa-solid fa-check"></i> Spins: 10 Free + x5.0 Multiplier</li>
+                    <li><i class="fa-solid fa-check"></i> Min Withdrawal: ₦750,000</li>
+                </ul>
+                <button class="btn-activate" onclick="openModal('Access Infinity', 500000)">Activate Plan</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal" id="activationModal">
+        <div class="modal-content">
+            <h2>Confirm Upgrade</h2>
+            <div class="modal-info">
+                <p>Selected Plan: <span id="modalPlanName" style="color: var(--primary-yellow);">Starter</span></p>
+                <p>Plan Cost: <span id="modalPlanPrice">₦0</span></p>
+                <p style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-top: 10px;">Your Deposit Balance: <span id="modalCurrentBal">₦0</span></p>
+            </div>
+            
+            <div class="warning-text" id="modalWarning">
+                <i class="fa-solid fa-circle-exclamation"></i> Insufficient funds in Deposit Wallet. Please fund your account to proceed.
+            </div>
+            <a href="deposit.html" class="btn-fund" id="btnFund" style="display: none;">Fund Account Now</a>
+
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-confirm" id="confirmBtn" onclick="processActivation()">Confirm Upgrade</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="global.js"></script>
+    <script>
+        function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); }
+
+        let activePlan = '';
+        let activePrice = 0;
+
+        function openModal(planName, price) {
+            activePlan = planName;
+            activePrice = price;
+            
+            // Get live balance from browser memory
+            const currentBal = parseFloat(localStorage.getItem('balance') || 0);
+            
+            document.getElementById('modalPlanName').innerText = planName;
+            document.getElementById('modalPlanPrice').innerText = `₦${price.toLocaleString()}`;
+            document.getElementById('modalCurrentBal').innerText = `₦${currentBal.toLocaleString()}`;
+
+            const warning = document.getElementById('modalWarning');
+            const fundBtn = document.getElementById('btnFund');
+            const confirmBtn = document.getElementById('confirmBtn');
+
+            // Logic Check: Does the user have enough money?
+            if (currentBal < price) {
+                warning.style.display = 'block';
+                fundBtn.style.display = 'block';
+                confirmBtn.disabled = true;
+                confirmBtn.style.opacity = '0.5';
+                confirmBtn.style.cursor = 'not-allowed';
+            } else {
+                warning.style.display = 'none';
+                fundBtn.style.display = 'none';
+                confirmBtn.disabled = false;
+                confirmBtn.style.opacity = '1';
+                confirmBtn.style.cursor = 'pointer';
+            }
+
+            document.getElementById('activationModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('activationModal').style.display = 'none';
+        }
+
+        async function processActivation() {
+            const username = localStorage.getItem('username');
+            if(!username) return;
+
+            const btn = document.getElementById('confirmBtn');
+            btn.innerText = "Activating...";
+            btn.disabled = true;
+
+            try {
+                // USING https://accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
+                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/activate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, name: activePlan, price: activePrice })
+                });
+                const data = await res.json();
+
+                if(data.success) {
+                    alert(`Success! Your account is now upgraded to ${activePlan}.`);
+                    localStorage.setItem('balance', data.newBalance); 
+                    window.location.href = 'dashboard.html'; // Redirect back to see the new balances
+                } else {
+                    alert(data.error);
+                    btn.innerText = "Confirm Upgrade";
+                    btn.disabled = false;
+                }
+            } catch(e) {
+                alert("Server Connection Error. Please ensure your terminal is running.");
+                btn.innerText = "Confirm Upgrade";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

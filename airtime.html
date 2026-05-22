@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Airtime | Access Wealth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-body: #070d14;         
+            --bg-cards: #112A46;        
+            --text-main: #ffffff;       
+            --text-muted: #8a99af;      
+            --primary-yellow: #d4af37;  
+            --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+            --border-light: rgba(212, 175, 55, 0.15); 
+            --sidebar-width: 260px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
+
+        /* --- MOBILE HEADER & OVERLAY --- */
+        .mobile-header { display: none; width: 100%; background: var(--bg-cards); padding: 15px 25px; justify-content: space-between; align-items: center; position: fixed; top: 0; z-index: 1000; border-bottom: 1px solid var(--border-light); }
+        .mobile-header i.menu-btn { font-size: 24px; color: var(--primary-yellow); cursor: pointer; }
+        .mobile-header .logo-text { font-weight: 700; font-size: 16px; letter-spacing: 1px; color: var(--text-main); }
+        .mobile-header .logo-text span { color: var(--primary-yellow); }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 900; backdrop-filter: blur(3px); }
+        .overlay.active { display: block; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: var(--sidebar-width); background: var(--bg-cards); height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; border-right: 1px solid var(--border-light); z-index: 1100; transition: width 0.3s ease, left 0.3s ease; }
+        .logo-area { padding: 25px 20px; display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 700; color: var(--text-main); border-bottom: 1px solid var(--border-light); margin-bottom: 10px; white-space: nowrap; overflow: hidden; }
+        .logo-area i { color: var(--primary-yellow); font-size: 26px; min-width: 26px; }
+        .nav-menu { flex-grow: 1; overflow-y: auto; overflow-x: hidden; padding: 0 15px 20px 15px; }
+        .nav-menu::-webkit-scrollbar { width: 4px; }
+        .nav-menu::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 5px; }
+        .nav-label { font-size: 11px; color: var(--primary-yellow); font-weight: 600; margin: 20px 0 5px 15px; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; transition: opacity 0.3s; }
+        .nav-item { display: flex; align-items: center; padding: 12px 15px; color: var(--text-muted); text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 14px; font-weight: 500; transition: 0.3s; cursor: pointer; white-space: nowrap; }
+        .nav-item i.main-icon { margin-right: 15px; font-size: 18px; width: 20px; text-align: center; transition: 0.3s; }
+        .nav-item:hover { background: rgba(212, 175, 55, 0.1); color: var(--primary-yellow); }
+        .nav-item.active { background: var(--primary-yellow); color: #0b1421; font-weight: 600; }
+        .nav-item.active i { color: #0b1421; }
+        .nav-title-group { display: flex; align-items: center; flex-grow: 1; }
+        .has-dropdown { justify-content: space-between; }
+        .chevron { transition: transform 0.3s ease; font-size: 12px; opacity: 0.8; }
+        .has-dropdown.open .chevron { transform: rotate(180deg); }
+        .dropdown-container { display: none; background: rgba(0, 0, 0, 0.15); border-radius: 8px; margin-bottom: 5px; padding: 5px 0; }
+        .dropdown-container.show { display: block; }
+        .sub-item { padding: 10px 15px 10px 45px; font-size: 13px; margin-bottom: 2px; color: var(--text-muted); text-decoration: none; display: block; transition: 0.3s;}
+        .sub-item:hover { color: var(--primary-yellow); background: rgba(212, 175, 55, 0.05); }
+        .sub-item.active { color: var(--primary-yellow); font-weight: 600; }
+
+        .btn-upgrade-sidebar { background: var(--yellow-gradient); color: #0b1421; display: flex; justify-content: center; align-items: center; padding: 12px; border-radius: 8px; margin: 15px 0; text-decoration: none; font-weight: 600; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2); border: none; cursor: pointer; width: 100%; white-space: nowrap; }
+        .btn-upgrade-sidebar span { margin-left: 8px; }
+
+        /* --- DESKTOP TOP HEADER --- */
+        .top-header { height: 75px; background: var(--bg-body); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; border-bottom: 1px solid var(--border-light); }
+        .header-left i { font-size: 22px; color: var(--primary-yellow); cursor: pointer; transition: 0.3s; }
+        .header-left i:hover { transform: scale(1.1); }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .user-info { text-align: right; }
+        .user-info h4 { font-size: 14px; font-weight: 600; margin-bottom: -3px; color: var(--text-main); }
+        .user-info p { font-size: 12px; color: var(--text-muted); }
+        .avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-yellow); }
+
+        /* --- MAIN CONTENT & BILLS UI --- */
+        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); display: flex; flex-direction: column; transition: 0.3s ease; }
+        .content-area { padding: 40px; max-width: 800px; margin: 0 auto; width: 100%; }
+
+        .page-header { margin-bottom: 30px; text-align: center; }
+        .page-header h1 { font-size: 32px; color: var(--text-main); font-weight: 700; margin-bottom: 10px; }
+        .page-header p { color: var(--text-muted); font-size: 15px; }
+
+        .bill-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        /* Network Selector */
+        .network-label { display: block; font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 15px; }
+        .network-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
+        .network-option { background: rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px 10px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .network-option h4 { font-size: 15px; font-weight: 600; color: var(--text-muted); transition: 0.3s; }
+        
+        /* Network Active States */
+        .network-option.active { border-color: var(--primary-yellow); background: rgba(212, 175, 55, 0.05); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.15); transform: translateY(-3px); }
+        .network-option.active h4 { color: #fff; }
+        
+        /* MTN Specific */
+        .network-option[data-network="MTN"].active { border-color: #ffcc00; background: rgba(255, 204, 0, 0.05); box-shadow: 0 5px 15px rgba(255, 204, 0, 0.15); }
+        /* Airtel Specific */
+        .network-option[data-network="Airtel"].active { border-color: #ff0000; background: rgba(255, 0, 0, 0.05); box-shadow: 0 5px 15px rgba(255, 0, 0, 0.15); }
+        /* Glo Specific */
+        .network-option[data-network="Glo"].active { border-color: #009900; background: rgba(0, 153, 0, 0.05); box-shadow: 0 5px 15px rgba(0, 153, 0, 0.15); }
+        /* 9Mobile Specific */
+        .network-option[data-network="9Mobile"].active { border-color: #006600; background: rgba(0, 102, 0, 0.05); box-shadow: 0 5px 15px rgba(0, 102, 0, 0.15); }
+
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 10px; }
+        .input-wrapper { position: relative; }
+        .input-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--primary-yellow); font-size: 16px; }
+        .form-control { width: 100%; padding: 15px 15px 15px 45px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; font-size: 15px; outline: none; transition: 0.3s; font-family: 'Poppins', sans-serif;}
+        .form-control:focus { border-color: var(--primary-yellow); background: rgba(0,0,0,0.4); }
+
+        .wallet-balance-info { display: flex; justify-content: space-between; align-items: center; background: rgba(212, 175, 55, 0.05); padding: 15px; border-radius: 10px; border: 1px dashed var(--border-light); margin-bottom: 25px;}
+        .wallet-balance-info p { font-size: 13px; color: var(--text-muted); }
+        .wallet-balance-info h4 { color: var(--primary-yellow); font-size: 16px; }
+
+        .btn-submit { width: 100%; padding: 18px; border: none; border-radius: 50px; background: var(--yellow-gradient); color: #0b1421; font-weight: 700; font-size: 16px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 10px;}
+        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3); }
+        .btn-submit:disabled { background: #333; color: #777; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        @media (max-width: 768px) {
+            .sidebar { left: -260px; width: var(--sidebar-width) !important; }
+            .sidebar.active { left: 0; }
+            .mobile-header { display: flex; }
+            .top-header { display: none; }
+            .main-content { margin-left: 0 !important; width: 100% !important; }
+            .content-area { padding: 90px 20px 40px 20px; }
+            .network-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <i class="fa-solid fa-bars-staggered menu-btn" onclick="toggleMobileSidebar()"></i>
+        <div class="logo-text">ACCESS <span>WEALTH</span></div>
+        <img src="" class="avatar" id="mobileAvatar">
+    </div>
+    <div class="overlay" id="overlay" onclick="toggleMobileSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="logo-area"><i class="fa-solid fa-crown"></i><span>ACCESS WEALTH</span></div>
+        <div class="nav-menu">
+            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> <span>Dashboard</span></a>
+            
+            <div class="nav-label">EARN</div>
+            <div class="nav-item has-dropdown" onclick="toggleDropdown('activityDropdown', this)">
+                <div class="nav-title-group"><i class="fa-solid fa-list-check main-icon"></i> <span>Daily Activity Earning</span></div>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+            <div class="dropdown-container" id="activityDropdown">
+                <a href="daily-tasks.html" class="nav-item sub-item"><i class="fa-regular fa-clipboard main-icon"></i> Daily Tasks</a>
+                <a href="sponsored-posts.html" class="nav-item sub-item"><i class="fa-solid fa-bullhorn main-icon"></i> Sponsored Posts</a>
+            </div>
+            <a href="spin-win.html" class="nav-item"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
+            
+            <div class="nav-label">BUSINESS & UTILITIES</div>
+            <div class="nav-item has-dropdown open active" onclick="toggleDropdown('payBillsDropdown', this)">
+                <div class="nav-title-group"><i class="fa-solid fa-file-invoice-dollar main-icon"></i> <span>Pay Bills</span></div>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+            <div class="dropdown-container show" id="payBillsDropdown">
+                <a href="airtime.html" class="nav-item sub-item active"><i class="fa-solid fa-mobile-screen-button main-icon"></i> Airtime</a>
+                <a href="data.html" class="nav-item sub-item"><i class="fa-solid fa-wifi main-icon"></i> Data</a>
+            </div>
+            
+            <a href="payment-links.html" class="nav-item"><i class="fa-solid fa-link main-icon"></i> <span>Payment Links</span></a>
+            <a href="invoice.html" class="nav-item"><i class="fa-solid fa-file-lines main-icon"></i> <span>Invoice</span></a>
+            <a href="bulk-sms.html" class="nav-item"><i class="fa-solid fa-message main-icon"></i> <span>Bulk SMS</span></a>
+            <a href="banner-ads.html" class="nav-item"><i class="fa-solid fa-desktop main-icon"></i> <span>Banner Ads</span></a>
+            
+            <div class="nav-label">MARKETPLACE</div>
+            <div class="nav-item has-dropdown" onclick="toggleDropdown('marketplaceDropdown', this)">
+                <div class="nav-title-group"><i class="fa-solid fa-shop main-icon"></i> <span>Marketplace</span></div>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+            <div class="dropdown-container" id="marketplaceDropdown">
+                <a href="#" class="nav-item sub-item"><i class="fa-solid fa-cart-shopping main-icon"></i> All Markets</a>
+                <a href="#" class="nav-item sub-item"><i class="fa-solid fa-plus main-icon"></i> Add Product</a>
+            </div>
+            
+            <div class="nav-label">WALLET & ACCOUNT</div>
+            <a href="deposit.html" class="nav-item"><i class="fa-solid fa-money-bill-transfer main-icon"></i> <span>Fund Account</span></a>
+            <a href="withdraw.html" class="nav-item"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
+            <a href="activation.html" class="nav-item"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
+            <a href="referral.html" class="nav-item"><i class="fa-solid fa-users main-icon"></i> <span>Top Earners</span></a>
+            
+            <a href="https://t.me/accesswealthofficial" target="_blank" class="nav-item" style="color: #0088cc; margin-top: 15px;">
+                <i class="fa-brands fa-telegram main-icon" style="color: #0088cc;"></i> <span>Telegram Community</span>
+            </a>
+            
+            <button onclick="window.location.href='activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
+            <a href="#" class="nav-item" onclick="logout()" style="color: #ff4d4d; margin-top: 20px;"><i class="fa-solid fa-power-off main-icon" style="color: #ff4d4d;"></i> <span>Logout</span></a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-header">
+            <div class="header-left"><i class="fa-solid fa-bars-staggered" onclick="toggleMobileSidebar()"></i></div>
+            <div class="header-right">
+                <div class="user-info">
+                    <h4 id="displayName">USER</h4>
+                    <p id="displayHandle">@user</p>
+                </div>
+                <img src="" class="avatar" id="desktopAvatar">
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="page-header">
+                <h1>Buy Airtime</h1>
+                <p>Recharge any network instantly using your deposit balance.</p>
+            </div>
+
+            <div class="bill-card">
+                <form id="airtimeForm">
+                    
+                    <span class="network-label">Select Network</span>
+                    <div class="network-grid">
+                        <div class="network-option active" data-network="MTN">
+                            <h4>MTN</h4>
+                        </div>
+                        <div class="network-option" data-network="Airtel">
+                            <h4>Airtel</h4>
+                        </div>
+                        <div class="network-option" data-network="Glo">
+                            <h4>Glo</h4>
+                        </div>
+                        <div class="network-option" data-network="9Mobile">
+                            <h4>9Mobile</h4>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-phone"></i>
+                            <input type="tel" id="phoneNumber" class="form-control" placeholder="e.g. 08012345678" maxlength="11" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Amount (₦)</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-naira-sign"></i>
+                            <input type="number" id="amount" class="form-control" placeholder="Minimum ₦50" min="50" required>
+                        </div>
+                    </div>
+
+                    <div class="wallet-balance-info">
+                        <p>Available Balance:</p>
+                        <h4 id="displayBalance">₦0.00</h4>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        <i class="fa-solid fa-bolt"></i> Recharge Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); }
+        function toggleDropdown(dropdownId, element) { element.classList.toggle('open'); document.getElementById(dropdownId).classList.toggle('show'); element.classList.toggle('active'); }
+        function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+
+        let selectedNetwork = "MTN"; // Default
+        let currentBalance = 0;
+
+        window.onload = () => {
+            const user = localStorage.getItem('username') || "Guest";
+            currentBalance = parseFloat(localStorage.getItem('balance')) || 0;
+
+            document.getElementById('displayName').innerText = user.toUpperCase();
+            document.getElementById('displayHandle').innerText = "@" + user.toLowerCase().replace(/\s+/g, '');
+            document.getElementById('displayBalance').innerText = "₦" + currentBalance.toLocaleString();
+            
+            const avatarUrl = `https://ui-avatars.com/api/?name=${user}&background=d4af37&color=112A46&bold=true`;
+            document.getElementById('desktopAvatar').src = avatarUrl;
+            document.getElementById('mobileAvatar').src = avatarUrl;
+        };
+
+        // Handle Network Selection
+        const networkOptions = document.querySelectorAll('.network-option');
+        networkOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                // Remove active class from all
+                networkOptions.forEach(opt => opt.classList.remove('active'));
+                // Add to clicked
+                option.classList.add('active');
+                selectedNetwork = option.getAttribute('data-network');
+            });
+        });
+
+        // Form Submission Logic
+        document.getElementById('airtimeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = localStorage.getItem('username');
+            const phone = document.getElementById('phoneNumber').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const btn = document.getElementById('submitBtn');
+
+            if (!username) return alert("You must be logged in.");
+            if (phone.length < 11) return alert("Please enter a valid 11-digit phone number.");
+            if (amount > currentBalance) {
+                return alert("Insufficient Balance! Please fund your account to buy this airtime.");
+            }
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+
+            try {
+                // Send request to the backend (We will add this route to server.js next)
+                const response = await fetch('http://https://accesswealth-backend-production.up.railway.app/api/bills/airtime', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: username,
+                        network: selectedNetwork,
+                        phone: phone,
+                        amount: amount
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(`✅ Success! ₦${amount} Airtime has been sent to ${phone} (${selectedNetwork}).`);
+                    localStorage.setItem('balance', data.newBalance); // Update local balance
+                    window.location.reload(); // Refresh to show new balance
+                } else {
+                    alert(data.error || "Failed to process airtime.");
+                    btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Recharge Now';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error("Airtime Error:", err);
+                alert("Server error. Please ensure your backend server is running.");
+                btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Recharge Now';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

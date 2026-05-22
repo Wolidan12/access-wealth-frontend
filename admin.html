@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Center | Access Wealth Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --bg-body: #070d14; 
+            --bg-cards: #112A46; 
+            --text-main: #ffffff; 
+            --text-muted: #8a99af; 
+            --primary-yellow: #d4af37; 
+            --border-light: rgba(212, 175, 55, 0.15); 
+            --sidebar-width: 260px; 
+            --danger: #ff4d4d; 
+            --success: #2ecc71; 
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden;}
+
+        /* --- MOBILE HEADER & OVERLAY --- */
+        .mobile-header { display: none; width: 100%; background: #0b1a2a; padding: 15px 25px; justify-content: space-between; align-items: center; position: fixed; top: 0; z-index: 1000; border-bottom: 1px solid var(--border-light); }
+        .mobile-header i.menu-btn { font-size: 24px; color: var(--danger); cursor: pointer; }
+        .mobile-header .logo-text { font-weight: 700; font-size: 16px; letter-spacing: 1px; color: var(--text-main); }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1050; backdrop-filter: blur(3px); }
+        .overlay.active { display: block; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: var(--sidebar-width); background: #0b1a2a; height: 100vh; position: fixed; border-right: 1px solid var(--border-light); z-index: 1100; display: flex; flex-direction: column; transition: left 0.3s ease; }
+        .logo-area { padding: 25px 20px; font-size: 18px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--danger); display: flex; align-items: center; gap: 10px;}
+        .nav-menu { padding: 20px 15px; overflow-y: auto; flex-grow: 1; }
+        .nav-item { display: flex; align-items: center; padding: 12px 15px; color: var(--text-muted); text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 14px; transition: 0.3s; cursor: pointer; }
+        .nav-item i { margin-right: 15px; width: 20px; text-align: center; }
+        .nav-item:hover, .nav-item.active { background: rgba(255, 77, 77, 0.1); color: var(--danger); }
+        .nav-label { font-size: 11px; color: rgba(255,255,255,0.3); font-weight: 600; margin: 15px 0 5px 15px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 40px; transition: 0.3s; }
+        .admin-section { display: none; animation: fadeIn 0.3s ease; }
+        .admin-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .page-header { margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px;}
+        .page-header h1 { font-size: 28px; color: var(--text-main); margin-bottom: 5px; }
+        .page-header p { color: var(--text-muted); font-size: 14px; }
+        
+        /* --- GRIDS & CARDS --- */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: var(--bg-cards); border: 1px solid var(--border-light); padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .stat-card h3 { color: var(--text-muted); font-size: 13px; text-transform: uppercase; margin-bottom: 10px; }
+        .stat-card h2 { font-size: 28px; color: var(--primary-yellow); }
+
+        .card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 15px; padding: 25px; margin-bottom: 30px; }
+        .card-title { font-size: 16px; margin-bottom: 20px; color: var(--text-main); border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; display: flex; align-items: center; gap: 10px;}
+
+        /* --- RESPONSIVE TABLES --- */
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; white-space: nowrap; }
+        th { color: var(--text-muted); font-weight: 500; background: rgba(0,0,0,0.2); text-transform: uppercase; font-size: 11px; letter-spacing: 1px;}
+        
+        .badge { padding: 5px 10px; border-radius: 50px; font-size: 11px; font-weight: 600; }
+        .badge.success { background: rgba(46, 204, 113, 0.1); color: var(--success); }
+        .badge.warning { background: rgba(243, 156, 18, 0.1); color: #f39c12; }
+        .badge.danger { background: rgba(255, 77, 77, 0.1); color: var(--danger); }
+        
+        .action-btn { background: transparent; border: 1px solid var(--text-muted); color: var(--text-main); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: 0.3s; margin-right: 5px;}
+        .action-btn:hover { background: var(--primary-yellow); border-color: var(--primary-yellow); color: #0b1421; }
+
+        /* --- FORMS --- */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+        .form-control { width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; outline: none; font-size: 14px;}
+        .form-control:focus { border-color: var(--primary-yellow); }
+        select.form-control { cursor: pointer; }
+        
+        .btn-submit { padding: 12px 25px; border-radius: 8px; background: var(--primary-yellow); color: #0b1421; font-weight: 600; border: none; cursor: pointer; transition: 0.3s; width: 100%; }
+        .btn-submit:hover { background: #fff; }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 992px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { left: -260px; z-index: 1100; }
+            .sidebar.active { left: 0; }
+            .mobile-header { display: flex; }
+            .main-content { margin-left: 0; width: 100%; padding: 100px 15px 30px 15px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .page-header h1 { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <i class="fa-solid fa-bars-staggered menu-btn" onclick="toggleSidebar()"></i>
+        <div class="logo-text"><i class="fa-solid fa-shield-halved" style="color: var(--danger);"></i> ADMIN <span>PORTAL</span></div>
+        <div style="width:24px;"></div>
+    </div>
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="logo-area"><i class="fa-solid fa-shield-halved"></i> COMMAND CENTER</div>
+        <div class="nav-menu">
+            <div class="nav-label">Core</div>
+            <a class="nav-item active" onclick="switchTab('dashboard', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-chart-line"></i> Overview</a>
+            <a class="nav-item" onclick="switchTab('users', this); loadUsers(); toggleSidebarMobileOnly();"><i class="fa-solid fa-users"></i> User Management</a>
+            
+            <div class="nav-label">Finance & Payouts</div>
+            <a class="nav-item" onclick="switchTab('instant-payouts', this); loadWithdrawals(); toggleSidebarMobileOnly();" style="position:relative;">
+                <i class="fa-solid fa-bolt"></i> Instant Withdrawals 
+                <span class="badge danger" style="position:absolute; right:15px;" id="badgeInstant">0</span>
+            </a>
+            <a class="nav-item" onclick="switchTab('payouts', this); loadDeposits(); toggleSidebarMobileOnly();" style="position:relative;">
+                <i class="fa-solid fa-money-bill-transfer"></i> Deposit Approvals
+                <span class="badge warning" style="position:absolute; right:15px;" id="badgeDeposits">0</span>
+            </a>
+            <a class="nav-item" onclick="switchTab('financials', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-wallet"></i> Manual Credit</a>
+            
+            <div class="nav-label">Support</div>
+            <a href="support-agent.html" class="nav-item" target="_blank"><i class="fa-solid fa-headset"></i> Support Portal</a>
+
+            <a href="login.html" class="nav-item" style="margin-top: 50px; color: var(--danger);" onclick="localStorage.clear();"><i class="fa-solid fa-power-off"></i> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <div id="dashboard" class="admin-section active">
+            <div class="page-header"><div><h1>Platform Overview</h1><p>Welcome back, Administrator.</p></div></div>
+            <div class="stats-grid">
+                <div class="stat-card"><h3>Total Users</h3><h2 id="statTotalUsers">0</h2></div>
+                <div class="stat-card"><h3>Active Plans</h3><h2 id="statActivePlans">0</h2></div>
+                <div class="stat-card"><h3>Total Revenue</h3><h2 id="statRevenue">₦0.00</h2></div>
+                <div class="stat-card" style="border-color: #f39c12;"><h3>Pending Deposits</h3><h2 id="statPending" style="color: #f39c12;">0</h2></div>
+                <div class="stat-card" style="border-color: var(--danger);"><h3>Instant Payouts</h3><h2 id="statPendingWithdrawals" style="color: var(--danger);">0</h2></div>
+            </div>
+        </div>
+
+        <div id="users" class="admin-section">
+            <div class="page-header"><div><h1>User Management</h1><p>Monitor balances across all wallet categories.</p></div></div>
+            <div class="card">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Total Bal</th>
+                                <th>Deposit</th>
+                                <th>Engage</th>
+                                <th>Daily</th>
+                                <th>Affiliate</th>
+                                <th>Plan Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <tr><td colspan="7" style="text-align:center;">Loading users...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="instant-payouts" class="admin-section">
+            <div class="page-header"><div><h1>Instant Affiliate Payouts</h1><p>Process the 5% fee instant referral withdrawals here.</p></div></div>
+            <div class="card">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date requested</th>
+                                <th>Username</th>
+                                <th>Gross (₦)</th>
+                                <th>Fee (5%)</th>
+                                <th>Net to Pay (₦)</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="withdrawalTableBody">
+                            <tr><td colspan="6" style="text-align:center;">Loading instant requests...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="payouts" class="admin-section">
+            <div class="page-header"><div><h1>Deposit Approvals</h1><p>Approve funds sent to company accounts.</p></div></div>
+            <div class="card">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="depositTableBody">
+                            <tr><td colspan="5" style="text-align:center;">Loading deposits...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="financials" class="admin-section">
+            <div class="page-header"><div><h1>Manual Credit</h1><p>Credit any specific wallet category directly.</p></div></div>
+            <div class="form-grid">
+                <div class="card">
+                    <div class="card-title"><i class="fa-solid fa-bolt"></i> Force Credit Account</div>
+                    <form id="manualCreditForm">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="creditUsername" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Wallet to Credit</label>
+                            <select id="creditWallet" class="form-control" required>
+                                <option value="balance">Deposit Wallet</option>
+                                <option value="taskEarnings">Engagements Wallet</option>
+                                <option value="daily_earnings">Daily Earnings Wallet</option>
+                                <option value="affiliate_balance">Affiliates Wallet</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Amount to Add (₦)</label>
+                            <input type="number" id="creditAmount" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn-submit" style="background: var(--success); color:#fff;" id="btnCredit">Credit User Now</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- UI & Navigation Logic ---
+        function toggleSidebar() { 
+            document.getElementById('sidebar').classList.toggle('active'); 
+            document.getElementById('overlay').classList.toggle('active'); 
+        }
+        function toggleSidebarMobileOnly() {
+            if(window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('active');
+                document.getElementById('overlay').classList.remove('active');
+            }
+        }
+
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            document.querySelectorAll('.admin-section').forEach(sec => sec.classList.remove('active'));
+            element.classList.add('active'); 
+            document.getElementById(tabId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        // --- Data Fetching Logic ---
+        window.onload = () => { loadDashboardStats(); };
+
+        async function loadDashboardStats() {
+            try {
+                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/admin/stats');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('statTotalUsers').innerText = data.stats.totalUsers;
+                    document.getElementById('statActivePlans').innerText = data.stats.activePlans;
+                    document.getElementById('statRevenue').innerText = `₦${(data.stats.revenue || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                    
+                    document.getElementById('statPending').innerText = data.stats.pendingPayouts;
+                    document.getElementById('badgeDeposits').innerText = data.stats.pendingPayouts;
+
+                    document.getElementById('statPendingWithdrawals').innerText = data.stats.pendingWithdrawals;
+                    document.getElementById('badgeInstant').innerText = data.stats.pendingWithdrawals;
+                }
+            } catch (error) { console.error("Stats Error:", error); }
+        }
+
+        async function loadUsers() {
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading users...</td></tr>';
+            try {
+                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/admin/users');
+                const data = await res.json();
+                if (data.success) {
+                    tbody.innerHTML = ''; 
+                    data.users.forEach(user => {
+                        const total = (user.balance || 0) + (user.taskEarnings || 0) + (user.daily_earnings || 0) + (user.affiliate_balance || 0);
+                        const statusBadge = user.planActivated === 'true' ? `<span class="badge success">${user.activePackage}</span>` : '<span class="badge warning">No Plan</span>';
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td><strong>${user.username}</strong></td>
+                            <td style="color:var(--primary-yellow); font-weight:bold;">₦${total.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                            <td>₦${(user.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                            <td>₦${(user.taskEarnings || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                            <td>₦${(user.daily_earnings || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                            <td>₦${(user.affiliate_balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                            <td>${statusBadge}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (error) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Connection Error.</td></tr>'; }
+        }
+
+        async function loadDeposits() {
+            const tbody = document.getElementById('depositTableBody');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>';
+            try {
+                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/admin/deposits');
+                const data = await res.json();
+                if (data.success) {
+                    tbody.innerHTML = '';
+                    if(data.deposits.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No pending deposits.</td></tr>'; return; }
+                    data.deposits.forEach(dep => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${new Date(dep.created_at).toLocaleDateString()}</td>
+                            <td><strong>${dep.username}</strong></td>
+                            <td style="font-weight:bold;">₦${dep.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                            <td><span class="badge warning">Pending</span></td>
+                            <td><button class="action-btn" style="color:var(--success); border-color:var(--success);" onclick="approveDeposit(${dep.id})">Approve</button></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (error) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Connection Error.</td></tr>'; }
+        }
+
+        async function loadWithdrawals() {
+            const tbody = document.getElementById('withdrawalTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading...</td></tr>';
+            try {
+                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/admin/withdrawals');
+                const data = await res.json();
+                if (data.success) {
+                    tbody.innerHTML = '';
+                    if(data.withdrawals.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No pending instant payouts.</td></tr>'; return; }
+                    data.withdrawals.forEach(w => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${new Date(w.created_at).toLocaleString()}</td>
+                            <td><strong>${w.username}</strong></td>
+                            <td>₦${w.total_deducted.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                            <td style="color:#ff4d4d;">-₦${w.fee.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                            <td style="color:#2ecc71; font-weight:bold; font-size:14px;">₦${w.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                            <td><button class="action-btn" style="color:var(--success); border-color:var(--success); background: rgba(46, 204, 113, 0.1);" onclick="approveWithdrawal(${w.id})">Mark as Paid</button></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (error) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Connection Error.</td></tr>'; }
+        }
+
+        async function approveDeposit(id) {
+            if(!confirm("Are you sure you want to approve this deposit?")) return;
+            try {
+                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/admin/approve-deposit', { 
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ depositId: id }) 
+                });
+                const data = await res.json();
+                if(data.success) { alert("Deposit Approved!"); loadDeposits(); loadDashboardStats(); } 
+                else alert(data.error);
+            } catch(e) { alert("Server Error."); }
+        }
+
+        async function approveWithdrawal(id) {
+            if(!confirm("Have you successfully transferred the funds to this user's bank account?")) return;
+            try {
+                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/admin/approve-withdrawal', { 
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) 
+                });
+                const data = await res.json();
+                if(data.success) { alert("Payout Marked as Paid!"); loadWithdrawals(); loadDashboardStats(); } 
+            } catch(e) { alert("Server Error."); }
+        }
+
+        document.getElementById('manualCreditForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnCredit');
+            btn.innerText = "Processing..."; btn.disabled = true;
+
+            const username = document.getElementById('creditUsername').value;
+            const amount = document.getElementById('creditAmount').value;
+            const walletType = document.getElementById('creditWallet').value;
+
+            try {
+                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/admin/manual-credit', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, amount, walletType })
+                });
+                const data = await res.json();
+                if (data.success) { 
+                    alert(data.message); 
+                    document.getElementById('manualCreditForm').reset(); 
+                } else alert(data.error); 
+            } catch (err) { alert("Server error."); } 
+            finally { btn.innerText = "Credit User Now"; btn.disabled = false; }
+        });
+    </script>
+</body>
+</html>

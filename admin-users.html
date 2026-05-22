@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users | Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --bg-body: #070d14; --bg-cards: #112A46; --text-main: #ffffff; --text-muted: #8a99af; --primary-yellow: #d4af37; --border-light: rgba(212, 175, 55, 0.15); --sidebar-width: 260px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden;}
+
+        .sidebar { width: var(--sidebar-width); background: #0b1a2a; height: 100vh; position: fixed; border-right: 1px solid var(--border-light); z-index: 1100; display: flex; flex-direction: column; }
+        .logo-area { padding: 25px 20px; font-size: 18px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ff4d4d; display: flex; align-items: center; gap: 10px;}
+        .nav-menu { padding: 20px 15px; overflow-y: auto; flex-grow: 1; }
+        .nav-item { display: flex; align-items: center; padding: 12px 15px; color: var(--text-muted); text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 14px; transition: 0.3s; }
+        .nav-item i { margin-right: 15px; width: 20px; text-align: center; }
+        .nav-item:hover, .nav-item.active { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; }
+
+        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 40px; }
+        .page-header { margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
+        .page-header h1 { font-size: 28px; color: var(--text-main); }
+        .page-header p { color: var(--text-muted); font-size: 14px; }
+        
+        .search-bar { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 50px; display: flex; align-items: center; width: 300px;}
+        .search-bar input { background: transparent; border: none; outline: none; color: #fff; width: 100%; margin-left: 10px; font-family: 'Poppins', sans-serif;}
+
+        .card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 18px 25px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
+        th { color: var(--text-muted); font-weight: 500; background: rgba(0,0,0,0.1); text-transform: uppercase; font-size: 12px; letter-spacing: 1px;}
+        .badge { padding: 5px 12px; border-radius: 50px; font-size: 11px; font-weight: 600; }
+        .badge.active { background: rgba(46, 204, 113, 0.1); color: #2ecc71; }
+        .badge.inactive { background: rgba(255, 255, 255, 0.1); color: var(--text-muted); }
+        .action-btn { background: transparent; border: 1px solid var(--border-light); color: var(--text-main); padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: 0.3s; font-size: 12px;}
+        .action-btn:hover { background: #ff4d4d; border-color: #ff4d4d; color: #fff; }
+
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-area"><i class="fa-solid fa-shield-halved"></i> ADMIN PANEL</div>
+        <div class="nav-menu">
+            <a href="admin.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Overview</a>
+            <a href="admin-users.html" class="nav-item active"><i class="fa-solid fa-users"></i> Manage Users</a>
+            <a href="admin-support.html" class="nav-item"><i class="fa-solid fa-headset"></i> Support Desk</a>
+            <a href="login.html" class="nav-item" style="margin-top: 50px;"><i class="fa-solid fa-power-off"></i> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <div>
+                <h1>Manage Users</h1>
+                <p>View, edit, or ban registered users.</p>
+            </div>
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+                <input type="text" placeholder="Search username...">
+            </div>
+        </div>
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Deposit Bal</th>
+                        <th>Earnings</th>
+                        <th>Plan Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTable">
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-muted);">Loading users...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Access Wealth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --bg-body: #070d14; --bg-cards: #112A46; --text-main: #ffffff; --text-muted: #8a99af; --primary-yellow: #d4af37; --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+
+        .auth-card { background: var(--bg-cards); padding: 40px; border-radius: 20px; width: 100%; max-width: 450px; border: 1px solid rgba(212, 175, 55, 0.15); box-shadow: 0 15px 35px rgba(0,0,0,0.5); text-align: center; }
+        .auth-logo { font-size: 30px; color: var(--primary-yellow); margin-bottom: 10px; }
+        .auth-card h2 { font-size: 24px; margin-bottom: 5px; }
+        .auth-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 30px; }
+
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+        .input-wrapper { position: relative; }
+        .input-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--primary-yellow); }
+        .form-control { width: 100%; padding: 15px 15px 15px 45px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; font-size: 14px; outline: none; transition: 0.3s;}
+        .form-control:focus { border-color: var(--primary-yellow); }
+
+        .btn-auth { width: 100%; padding: 15px; border-radius: 50px; background: var(--yellow-gradient); color: #0b1421; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; margin-top: 10px; font-size: 16px;}
+        .btn-auth:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(212,175,55,0.3); }
+
+        .auth-links { margin-top: 25px; font-size: 14px; color: var(--text-muted); }
+        .auth-links a { color: var(--primary-yellow); text-decoration: none; font-weight: 600; }
+        .auth-links a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <i class="fa-solid fa-crown auth-logo"></i>
+        <h2>Create Account</h2>
+        <p>Join Access Wealth and start earning today.</p>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label>Username</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" id="regUsername" class="form-control" placeholder="Enter a unique username" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="regPassword" class="form-control" placeholder="Create a password" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Referral Code (Optional)</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <input type="text" id="regReferral" class="form-control" placeholder="Enter referral code if you have one">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-auth" id="regBtn">Create Account</button>
+        </form>
+
+        <div class="auth-links">
+            Already have an account? <a href="login.html">Login here</a>
+        </div>
+    </div>
+
+    <script>
+        // Auto-fill referral code from URL if it exists (e.g., ?ref=AW12345)
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.has('ref')) {
+            document.getElementById('regReferral').value = urlParams.get('ref');
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('regBtn');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            const referred_by = document.getElementById('regReferral').value;
+
+            try {
+                const response = await fetch('http://https://accesswealth-backend-production.up.railway.app/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, referred_by })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("Account created successfully! Please login.");
+                    window.location.href = 'login.html';
+                } else {
+                    alert(data.error || "Registration failed. Username might be taken.");
+                }
+            } catch (err) {
+                alert("Server error. Ensure your backend is running.");
+            } finally {
+                btn.innerHTML = 'Create Account';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

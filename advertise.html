@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advertise | Access Wealth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --bg-body: #070d14; --bg-cards: #112A46; --text-main: #ffffff; --text-muted: #8a99af; --primary-yellow: #d4af37; --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); --border-light: rgba(212, 175, 55, 0.15); --sidebar-width: 260px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden;}
+
+        .sidebar { width: var(--sidebar-width); background: var(--bg-cards); height: 100vh; position: fixed; border-right: 1px solid var(--border-light); z-index: 1100; display: flex; flex-direction: column; }
+        .logo-area { padding: 25px 20px; font-size: 18px; font-weight: 700; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: 10px; }
+        .logo-area i { color: var(--primary-yellow); font-size: 24px; }
+        .nav-menu { padding: 20px 15px; overflow-y: auto; flex-grow: 1; }
+        .nav-item { display: flex; align-items: center; padding: 12px 15px; color: var(--text-muted); text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 14px; transition: 0.3s; }
+        .nav-item i.main-icon { margin-right: 15px; width: 20px; text-align: center; }
+        .nav-item:hover, .nav-item.active { background: rgba(212, 175, 55, 0.1); color: var(--primary-yellow); }
+        .nav-item.active { background: var(--primary-yellow); color: #0b1421; font-weight: 600; }
+        
+        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 40px; }
+        
+        /* Header */
+        .header-flex { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; }
+        .page-header h1 { font-size: 28px; color: var(--text-main); }
+        .page-header p { color: var(--text-muted); font-size: 14px; }
+        .btn-create { background: var(--yellow-gradient); color: #0b1421; padding: 12px 25px; border-radius: 50px; font-weight: 600; border: none; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px;}
+        .btn-create:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(212,175,55,0.3); }
+
+        /* Main Grid */
+        .layout-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px; }
+
+        /* Left Side: Stats & Tips */
+        .left-column { display: flex; flex-direction: column; gap: 20px; }
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .stat-card-small { background: var(--bg-cards); border: 1px solid var(--border-light); padding: 20px; border-radius: 15px; display: flex; align-items: center; gap: 15px; }
+        .stat-card-small i { font-size: 18px; }
+        .stat-card-small i.active-icon { color: #2ecc71; background: rgba(46, 204, 113, 0.1); padding: 10px; border-radius: 50%; }
+        .stat-card-small i.pending-icon { color: #f39c12; background: rgba(243, 156, 18, 0.1); padding: 10px; border-radius: 50%; }
+        .stat-card-small div p { font-size: 12px; color: var(--text-muted); margin-bottom: 3px; font-weight: 600;}
+        .stat-card-small div h3 { font-size: 20px; color: #fff; }
+
+        /* Growth Tip Card */
+        .tip-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; padding: 25px; }
+        .tip-header { display: flex; align-items: center; gap: 10px; color: #00aaff; font-weight: 600; font-size: 15px; margin-bottom: 15px; }
+        .tip-card p { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 25px; }
+        .btn-outline-light { width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #fff; border-radius: 50px; font-weight: 500; cursor: pointer; transition: 0.3s; }
+        .btn-outline-light:hover { background: rgba(255,255,255,0.05); color: var(--primary-yellow); border-color: var(--primary-yellow);}
+
+        /* Right Side: Campaigns Card */
+        .campaigns-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; display: flex; flex-direction: column; }
+        .card-header { padding: 20px 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .card-header h3 { font-size: 15px; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
+        .card-header i.icon-left { color: var(--primary-yellow); background: rgba(212, 175, 55, 0.1); padding: 8px; border-radius: 8px; }
+        
+        .empty-state { padding: 80px 20px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;}
+        .empty-icon { width: 70px; height: 70px; background: rgba(212, 175, 55, 0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; color: rgba(212, 175, 55, 0.4); margin-bottom: 20px; }
+        .empty-state h3 { color: var(--text-main); margin-bottom: 8px; font-size: 18px; }
+        .empty-state p { color: var(--text-muted); font-size: 14px; max-width: 300px; line-height: 1.5;}
+
+        @media (max-width: 992px) {
+            .layout-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; width: 100%; padding: 20px; }
+            .stats-row { grid-template-columns: 1fr; }
+            .header-flex { flex-direction: column; align-items: flex-start; gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-area"><i class="fa-solid fa-crown"></i> ACCESS WEALTH</div>
+        <div class="nav-menu">
+            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> Dashboard</a>
+            <a href="banner-ads.html" class="nav-item"><i class="fa-solid fa-desktop main-icon"></i> Banner Ads</a>
+            <a href="advertise.html" class="nav-item active"><i class="fa-solid fa-bullhorn main-icon"></i> Advertise</a>
+            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-arrow-left main-icon"></i> Back</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header-flex">
+            <div class="page-header">
+                <h1>Advertise</h1>
+                <p>Boost your social presence and business</p>
+            </div>
+            <button class="btn-create" onclick="window.location.href='banner-ads.html'"><i class="fa-solid fa-plus"></i> Create New Ad</button>
+        </div>
+
+        <div class="layout-grid">
+            <!-- Left Side -->
+            <div class="left-column">
+                <div class="stats-row">
+                    <div class="stat-card-small">
+                        <i class="fa-solid fa-chart-pie active-icon"></i>
+                        <div><p>Active</p><h3>0</h3></div>
+                    </div>
+                    <div class="stat-card-small">
+                        <i class="fa-regular fa-clock pending-icon"></i>
+                        <div><p>Pending</p><h3>0</h3></div>
+                    </div>
+                </div>
+
+                <div class="tip-card">
+                    <div class="tip-header"><i class="fa-solid fa-volume-high"></i> Growth Tip</div>
+                    <p>Consistency is key. Regular campaigns help you maintain a steady growth trajectory and build social proof.</p>
+                    <button class="btn-outline-light" onclick="window.location.href='banner-ads.html'">Launch first ad now</button>
+                </div>
+            </div>
+
+            <!-- Right Side -->
+            <div class="campaigns-card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-bars-staggered icon-left"></i> Your campaigns</h3>
+                </div>
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="fa-solid fa-volume-high"></i></div>
+                    <h3>No campaigns found</h3>
+                    <p>Ready to boost your presence? Create your first ad today.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help & Support | Access Wealth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --bg-body: #070d14; 
+            --bg-cards: #112A46; 
+            --text-main: #ffffff; 
+            --primary-yellow: #d4af37; 
+            --sidebar-width: 260px; 
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
+
+        .sidebar { width: var(--sidebar-width); background: var(--bg-cards); height: 100vh; position: fixed; border-right: 1px solid rgba(212, 175, 55, 0.15); z-index: 1100; }
+        .logo-area { padding: 25px 20px; font-size: 18px; font-weight: 700; border-bottom: 1px solid rgba(212, 175, 55, 0.15); display: flex; align-items: center; gap: 10px; }
+        .logo-area i { color: var(--primary-yellow); font-size: 24px; }
+        .nav-menu { padding: 20px 15px; }
+        .nav-item { display: flex; align-items: center; padding: 12px 15px; color: #8a99af; text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 14px; }
+        .nav-item i { margin-right: 15px; width: 20px; text-align: center; }
+        .nav-item.active { background: var(--primary-yellow); color: #0b1421; font-weight: 600; }
+
+        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 40px; display: flex; flex-direction: column; height: 100vh; }
+        
+        .chat-container { flex-grow: 1; background: var(--bg-cards); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; }
+        .chat-header { padding: 20px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(212, 175, 55, 0.15); text-align: center;}
+        .chat-header h3 { color: var(--primary-yellow); }
+        
+        .chat-box { flex-grow: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .message { max-width: 60%; padding: 12px 18px; border-radius: 15px; font-size: 14px; line-height: 1.5; }
+        .msg-support { background: rgba(212, 175, 55, 0.2); align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid var(--primary-yellow); }
+        .msg-user { background: rgba(255,255,255,0.05); align-self: flex-end; border-bottom-right-radius: 2px; }
+
+        .chat-input-area { padding: 20px; background: rgba(0,0,0,0.2); display: flex; gap: 15px; border-top: 1px solid rgba(212, 175, 55, 0.15); }
+        .chat-input { flex-grow: 1; padding: 15px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); background: var(--bg-body); color: #fff; outline: none; padding-left: 25px;}
+        .chat-input:focus { border-color: var(--primary-yellow); }
+        .btn-send { background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); color: #0b1421; border: none; width: 50px; height: 50px; border-radius: 50%; font-weight: 600; cursor: pointer; font-size: 18px;}
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-area"><i class="fa-solid fa-crown"></i> ACCESS WEALTH</div>
+        <div class="nav-menu">
+            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-border-all"></i> Dashboard</a>
+            <a href="support.html" class="nav-item active"><i class="fa-solid fa-headset"></i> Live Support</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="chat-container">
+            <div class="chat-header">
+                <h3><i class="fa-solid fa-headset"></i> Access Wealth Live Support</h3>
+                <p style="font-size: 12px; color: #8a99af;">We typically reply within a few minutes.</p>
+            </div>
+            
+            <div class="chat-box" id="chatBox">
+                <div class="message msg-support">Connecting to secure server...</div>
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" id="msgInput" class="chat-input" placeholder="Type your message here...">
+                <button class="btn-send" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="global.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            setInterval(loadMessages, 3000); 
+            setTimeout(loadMessages, 500);
+        });
+
+        async function loadMessages() {
+            const username = localStorage.getItem('username');
+            if(!username) return;
+
+            try {
+                // USING https://accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
+                const res = await fetch(`http://https://accesswealth-backend-production.up.railway.app:5000/api/chat/history/${username}`);
+                const data = await res.json();
+                if(data.success) {
+                    const box = document.getElementById('chatBox');
+                    box.innerHTML = '<div class="message msg-support">Hello! I am an Access Wealth Customer Representative. How can I assist you with your account today?</div>';
+                    data.messages.forEach(msg => {
+                        const div = document.createElement('div');
+                        div.className = `message ${msg.sender === username ? 'msg-user' : 'msg-support'}`;
+                        div.innerText = msg.message;
+                        box.appendChild(div);
+                    });
+                    box.scrollTop = box.scrollHeight;
+                }
+            } catch(e) {
+                 document.getElementById('chatBox').innerHTML = '<p style="text-align: center; color: #ff4d4d; font-weight:bold; margin-top:auto; margin-bottom:auto;"><i class="fa-solid fa-triangle-exclamation"></i> Cannot connect to Support Server.</p>';
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('msgInput');
+            const username = localStorage.getItem('username');
+            if(!input.value.trim() || !username) return;
+
+            const text = input.value;
+            input.value = '';
+
+            // USING https://accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
+            await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/chat/send', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: username, sender: username, message: text })
+            });
+            loadMessages();
+        }
+    </script>
+</body>
+</html>
