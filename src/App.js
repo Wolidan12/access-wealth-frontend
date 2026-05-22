@@ -1,7 +1,7 @@
 function App() {
   return (
     <iframe
-      src="/dashboard.html"
+      src="/login.html"
       title="AccessWealth"
       style={{
         width: "100%",
