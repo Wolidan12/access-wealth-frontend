@@ -64,7 +64,7 @@
 </head>
 <body>
     <div class="sidebar">
-        <div class="logo-area"><i class="fa-solid fa-crown"></i> ACCESS WEALTH</div>
+        <div class="logo-area"><i class="fa-solid fa-crown"></i>ACCESS WEALTH</div>
         <div class="nav-menu">
             <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> Dashboard</a>
             <a href="bulk-sms.html" class="nav-item active"><i class="fa-solid fa-message main-icon"></i> Bulk SMS</a>
@@ -94,7 +94,7 @@
                         <div class="form-header"><label>Recipients</label><span class="badge" id="recipientCountBadge">0 Numbers</span></div>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-users"></i>
-                            <textarea id="recipients" class="form-control" placeholder="Enter phone numbers separated by commas..." required></textarea>
+                            <textarea id="recipients" class="form-control" placeholder="Enter phone numbers separated by commas" required></textarea>
                         </div>
                     </div>
 
@@ -102,7 +102,7 @@
                         <div class="form-header"><label>Message</label><span class="badge" id="messageCountBadge">0 / 160 (Page 1)</span></div>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-pen"></i>
-                            <textarea id="message" class="form-control" placeholder="Type your message here..." required></textarea>
+                            <textarea id="message" class="form-control" placeholder="Type your message here" required></textarea>
                         </div>
                     </div>
 
@@ -168,10 +168,10 @@
             if (finalCost <= 0) return alert("Please add recipients and a message.");
 
             const btn = document.getElementById('submitBtn');
-            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
 
             try {
-                const response = await fetch('http://https://accesswealth-backend-production.up.railway.app/api/sms/send', {
+                const response = await fetch('https://accesswealth-backend-production.up.railway.app/api/sms/send', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, senderId: document.getElementById('senderId').value, cost: finalCost, count: finalRecipients })
                 });

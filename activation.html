@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upgrade Plan | Access Wealth</title>
+    <title>Upgrade Plan | <title>Upgrade Plan | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -96,7 +96,7 @@
 
     <div class="mobile-header">
         <i class="fa-solid fa-bars-staggered menu-btn" onclick="toggleMobileSidebar()"></i>
-        <div class="logo-text">ACCESS <span>WEALTH</span></div>
+        <div class="logo-text"> ACCESS<span>WEALTH</span></div>
         <img src="" class="mobile-avatar" id="mobileAvatar">
     </div>
     <div class="overlay" id="overlay" onclick="toggleMobileSidebar()"></div>
@@ -115,7 +115,7 @@
     <div class="main-content">
         <div class="page-header">
             <h1>Select Your Wealth Plan</h1>
-            <p>Upgrade your account to unlock higher daily earnings, instant affiliate payouts, and massive multipliers.</p>
+            <p>Upgrade your plan</p> amount to unlock higher daily earnings, instant affiliate payouts, and massive multipliers.</p>
         </div>
 
         <div class="plans-grid">
@@ -307,7 +307,7 @@
             </div>
             
             <div class="warning-text" id="modalWarning">
-                <i class="fa-solid fa-circle-exclamation"></i> Insufficient funds in Deposit Wallet. Please fund your account to proceed.
+                <i class="fa-solid fa-circle-exclamation"></i> Insufficient funds in Deposit Wallet. Please fund your Account to proceed.
             </div>
             <a href="deposit.html" class="btn-fund" id="btnFund" style="display: none;">Fund Account Now</a>
 
@@ -367,12 +367,12 @@
             if(!username) return;
 
             const btn = document.getElementById('confirmBtn');
-            btn.innerText = "Activating...";
+            btn.innerText = "Activating";
             btn.disabled = true;
 
             try {
-                // USING https://accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/activate', {
+                // USING 'https://accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
+                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/activate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: username, name: activePlan, price: activePrice })

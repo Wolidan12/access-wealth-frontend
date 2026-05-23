@@ -176,7 +176,7 @@
             <a href="activation.html" class="nav-item"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
             <a href="referral.html" class="nav-item"><i class="fa-solid fa-users main-icon"></i> <span>Top Earners</span></a>
             
-            <a href="https://t.me/accesswealthofficial" target="_blank" class="nav-item" style="color: #0088cc; margin-top: 15px;">
+            <a href="wealthofficial" target="_blank" class="nav-item" style="color: #0088cc; margin-top: 15px;">
                 <i class="fa-brands fa-telegram main-icon" style="color: #0088cc;"></i> <span>Telegram Community</span>
             </a>
             
@@ -296,15 +296,15 @@
             if (!username) return alert("You must be logged in.");
             if (phone.length < 11) return alert("Please enter a valid 11-digit phone number.");
             if (amount > currentBalance) {
-                return alert("Insufficient Balance! Please fund your account to buy this airtime.");
+                return alert("Insufficient Balance! Please fund your Account to buy this airtime.");
             }
 
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
             btn.disabled = true;
 
             try {
                 // Send request to the backend (We will add this route to server.js next)
-                const response = await fetch('http://https://accesswealth-backend-production.up.railway.app/api/bills/airtime', {
+                const response = await bills/airtime', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

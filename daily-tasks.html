@@ -175,7 +175,7 @@
 
             <div class="task-card">
                 <div class="task-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
-                <p style="color: var(--primary-yellow); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;" id="planNameDisplay">Loading...</p>
+                <p style="color: var(--primary-yellow); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;" id="planNameDisplay">Loading</p>
                 <h1 class="task-amount" id="taskPayoutDisplay">₦0.00</h1>
                 <p class="task-desc">Click the button below to claim your daily guaranteed earnings to your task balance.</p>
                 
@@ -195,16 +195,19 @@
 
         // --- DYNAMIC PLAN PAYOUTS ---
         const planDailyEarnings = {
-            'Access Starter': 500,
-            'Access Basic': 900,
-            'Access Plus': 1300,
-            'Access Pro': 1800,
+            'access Starter': 500,
+            'access Basic': 900,
+            'access Plus': 1300,
+            'access Pro': 1800,
             'Wealth Premium': 2800,
             'Wealth Elite': 4800,
             'Wealth Pro Max': 6600,
             'Wealth Executive': 8500,
-            'Wealth Apex': 10500
-        };
+            'Wealth Apex': 10500,
+            'Wealthh Vip': 18000,
+            'Wealth Tycoon': 35000,
+            'Wealth Mogul': 60000,
+            'Access Infinity': 85000 
 
         let userPlan = null;
         let dailyPayout = 0;
@@ -251,7 +254,7 @@
 
         function claimTask() {
             const btn = document.getElementById('taskBtn');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
             btn.disabled = true;
 
             setTimeout(() => {

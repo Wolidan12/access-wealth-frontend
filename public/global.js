@@ -20,14 +20,14 @@ async function globalSync() {
     }
 
     try {
-        // 3. FETCH: Pull latest data from backend using the https://accesswealth-backend-production.up.railway.app bypass
-        const response = await fetch(`http://https://accesswealth-backend-production.up.railway.app:5000/api/user/${username}?t=${Date.now()}`);
+        // 3. FETCH: Pull latest data from backend using the 'https://accesswealth-backend-production.up.railway.app bypass
+        const response = await fetch(`https://accesswealth-backend-production.up.railway.app:5000/api/user/${username}?t=${Date.now()}`);
         const data = await response.json();
         
         if (data.success) {
             const u = data.user;
             
-            // 4. STORE: Keep browser memory perfectly accurate
+            // 4. STORE: Keep browser memory perfectly up to date
             localStorage.setItem('balance', u.balance || 0); 
             localStorage.setItem('taskEarnings', u.taskEarnings || 0); 
             localStorage.setItem('daily_earnings', u.daily_earnings || 0); 
@@ -59,7 +59,7 @@ async function globalSync() {
             // Update Premium Status globally
             if(u.planActivated === 'true') {
                 safeUpdate('sidebarStatus', `Premium (${u.activePackage})`);
-                safeUpdate('accountStatusText', `Premium Account (${u.activePackage})`);
+                safeUpdate('accountStatusText', `Premium account (${u.activePackage})`);
                 
                 const setupCard = document.getElementById('setupCard');
                 if(setupCard) setupCard.style.display = 'none';

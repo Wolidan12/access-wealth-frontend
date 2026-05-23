@@ -159,7 +159,7 @@
                             </tr>
                         </thead>
                         <tbody id="userTableBody">
-                            <tr><td colspan="7" style="text-align:center;">Loading users...</td></tr>
+                            <tr><td colspan="7" style="text-align:center;">Loading users</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -182,7 +182,7 @@
                             </tr>
                         </thead>
                         <tbody id="withdrawalTableBody">
-                            <tr><td colspan="6" style="text-align:center;">Loading instant requests...</td></tr>
+                            <tr><td colspan="6" style="text-align:center;">Loading instant requests</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -190,7 +190,7 @@
         </div>
 
         <div id="payouts" class="admin-section">
-            <div class="page-header"><div><h1>Deposit Approvals</h1><p>Approve funds sent to company accounts.</p></div></div>
+            <div class="page-header"><div><h1>Deposit Approvals</h1><p>Approve funds sent to company Accounts.</p></div></div>
             <div class="card">
                 <div class="table-responsive">
                     <table>
@@ -204,7 +204,7 @@
                             </tr>
                         </thead>
                         <tbody id="depositTableBody">
-                            <tr><td colspan="5" style="text-align:center;">Loading deposits...</td></tr>
+                            <tr><td colspan="5" style="text-align:center;">Loading deposits</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -268,7 +268,7 @@
 
         async function loadDashboardStats() {
             try {
-                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/admin/stats');
+                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/')
                 const data = await res.json();
                 if (data.success) {
                     document.getElementById('statTotalUsers').innerText = data.stats.totalUsers;
@@ -286,9 +286,9 @@
 
         async function loadUsers() {
             const tbody = document.getElementById('userTableBody');
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading users...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading users</td></tr>';
             try {
-                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/admin/users');
+                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/admin/users');
                 const data = await res.json();
                 if (data.success) {
                     tbody.innerHTML = ''; 
@@ -313,9 +313,9 @@
 
         async function loadDeposits() {
             const tbody = document.getElementById('depositTableBody');
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading</td></tr>';
             try {
-                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/admin/deposits');
+                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/admin/deposits');
                 const data = await res.json();
                 if (data.success) {
                     tbody.innerHTML = '';
@@ -337,9 +337,9 @@
 
         async function loadWithdrawals() {
             const tbody = document.getElementById('withdrawalTableBody');
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading</td></tr>';
             try {
-                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/admin/withdrawals');
+                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/admin/withdrawals');
                 const data = await res.json();
                 if (data.success) {
                     tbody.innerHTML = '';
@@ -363,7 +363,7 @@
         async function approveDeposit(id) {
             if(!confirm("Are you sure you want to approve this deposit?")) return;
             try {
-                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/admin/approve-deposit', { 
+                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/admin/approve-deposit', { 
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ depositId: id }) 
                 });
                 const data = await res.json();
@@ -375,7 +375,7 @@
         async function approveWithdrawal(id) {
             if(!confirm("Have you successfully transferred the funds to this user's bank account?")) return;
             try {
-                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/admin/approve-withdrawal', { 
+                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/admin/approve-withdrawal', { 
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) 
                 });
                 const data = await res.json();
@@ -386,14 +386,14 @@
         document.getElementById('manualCreditForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnCredit');
-            btn.innerText = "Processing..."; btn.disabled = true;
+            btn.innerText = "Processing"; btn.disabled = true;
 
             const username = document.getElementById('creditUsername').value;
             const amount = document.getElementById('creditAmount').value;
             const walletType = document.getElementById('creditWallet').value;
 
             try {
-                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/admin/manual-credit', {
+                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/admin/manual-credit', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, amount, walletType })
                 });

@@ -45,7 +45,7 @@
     <div class="sidebar">
         <div class="logo-area"><i class="fa-solid fa-headset"></i> Support Portal</div>
         <div class="user-list" id="userList">
-            <p style="text-align: center; color: #8a99af; font-size: 13px; margin-top: 20px;">Checking Connection...</p>
+            <p style="text-align: center; color: #8a99af; font-size: 13px; margin-top: 20px;">Checking Connection</p>
         </div>
         <button onclick="logout()" style="padding: 15px; background: #ff4d4d; color: #fff; border: none; cursor: pointer; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Logout Agent</button>
     </div>
@@ -55,10 +55,10 @@
             <h3 id="activeChatUser">Select a user to start chatting</h3>
         </div>
         <div class="chat-box" id="chatBox">
-            <p style="text-align: center; color: #8a99af; margin-top: auto; margin-bottom: auto;">Waiting for selection...</p>
+            <p style="text-align: center; color: #8a99af; margin-top: auto; margin-bottom: auto;">Waiting for selection</p>
         </div>
         <div class="chat-input-area">
-            <input type="text" id="msgInput" class="chat-input" placeholder="Type a response to the user..." disabled>
+            <input type="text" id="msgInput" class="chat-input" placeholder="Type a response to the user" disabled>
             <button class="btn-send" id="sendBtn" onclick="sendMessage()" disabled><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
@@ -78,8 +78,8 @@
 
         async function loadUsers() {
             try {
-                // USING https://accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-                const res = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/support/users');
+                // USING https://accesswealth-backend-production.up.railway.accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
+                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/support/users');
                 const data = await res.json();
                 
                 if(data.success) {
@@ -117,8 +117,8 @@
         async function loadMessages() {
             if(!currentUser) return;
             try {
-                // USING https://accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-                const res = await fetch(`http://https://accesswealth-backend-production.up.railway.app:5000/api/chat/history/${currentUser}`);
+                // USING https://accesswealth-backend-production.up.railway.accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
+                const res = await fetch(`https://accesswealth-backend-production.up.railway.accesswealth-backend-production.up.railway.app:5000/api/chat/history/${currentUser}`);
                 const data = await res.json();
                 if(data.success) {
                     const box = document.getElementById('chatBox');
@@ -141,8 +141,8 @@
             const text = input.value;
             input.value = '';
 
-            // USING https://accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-            await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/chat/send', {
+            // USING https://accesswealth-backend-production.up.railway.accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
+            const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/chat/send', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: currentUser, sender: 'Support_Agent', message: text })
             });

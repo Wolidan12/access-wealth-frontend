@@ -122,13 +122,13 @@
 
     <div class="mobile-header">
         <i class="fa-solid fa-bars-staggered menu-btn" onclick="toggleMobileSidebar()"></i>
-        <div class="logo-text">ACCESS <span>WEALTH</span></div>
+        <div class="logo-text">Access <span>WEALTH</span></div>
         <img src="" class="avatar" id="mobileAvatar">
     </div>
     <div class="overlay-menu" id="overlayMenu" onclick="toggleMobileSidebar()"></div>
 
     <div class="sidebar collapsed" id="sidebar">
-        <div class="logo-area"><i class="fa-solid fa-crown"></i><span>ACCESS WEALTH</span></div>
+        <div class="logo-area"><i class="fa-solid fa-crown"></i><span>Access Wealth</span></div>
         <div class="nav-menu">
             <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> <span>Dashboard</span></a>
             <div class="nav-item has-dropdown" onclick="toggleDropdown('activityDropdown', this)">
@@ -163,7 +163,7 @@
             
             <div class="page-header">
                 <h1 class="page-title">Fund Your Account</h1>
-                <p class="page-subtitle">Make a transfer to the official Access Wealth account below, then fill out the form to request your deposit.</p>
+                <p class="page-subtitle">Make a transfer to the official account below, then fill out the form to request your deposit.</p>
             </div>
 
             <div class="grid-container">
@@ -177,7 +177,7 @@
 
                     <div class="detail-row">
                         <p>Account Number</p>
-                        <h4>8123456789 <i class="fa-regular fa-copy copy-btn" onclick="copyText('8123456789')" title="Copy Account Number"></i></h4>
+                        <h4><i class="fa-regular fa-copy copy-btn" onclick="copyText('')" title="Copy Account Number"></i></h4>
                     </div>
 
                     <div class="detail-row">
@@ -192,7 +192,7 @@
                 </div>
 
                 <div class="form-card">
-                    <form id="depositForm">
+                 <form id="depositForm">
                         <div class="form-group">
                             <label>Amount Sent (₦)</label>
                             <div class="input-wrapper">
@@ -249,11 +249,11 @@
 
             if (!username) return alert("You must be logged in to fund your account.");
 
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting';
             btn.disabled = true;
 
             try {
-                const response = await fetch('http://https://accesswealth-backend-production.up.railway.app/api/deposit', {
+                const response = await fetch('https://accesswealth-backend-production.up.railway.app/api/deposit', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

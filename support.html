@@ -59,11 +59,11 @@
             </div>
             
             <div class="chat-box" id="chatBox">
-                <div class="message msg-support">Connecting to secure server...</div>
+                <div class="message msg-support">Connecting to secure server</div>
             </div>
 
             <div class="chat-input-area">
-                <input type="text" id="msgInput" class="chat-input" placeholder="Type your message here...">
+                <input type="text" id="msgInput" class="chat-input" placeholder="Type your message here">
                 <button class="btn-send" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
         </div>
@@ -81,12 +81,12 @@
             if(!username) return;
 
             try {
-                // USING https://accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-                const res = await fetch(`http://https://accesswealth-backend-production.up.railway.app:5000/api/chat/history/${username}`);
+                // USING https://accesswealth-backend-production.up.railway.accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
+                const res = await fetch(`https://accesswealth-backend-production.up.railway.app:5000/api/chat/history/${username}`);
                 const data = await res.json();
                 if(data.success) {
                     const box = document.getElementById('chatBox');
-                    box.innerHTML = '<div class="message msg-support">Hello! I am an Access Wealth Customer Representative. How can I assist you with your account today?</div>';
+                    box.innerHTML = '<div class="message msg-support">Hello! I am an Access Wealth Customer Representative. How can I assist you with your amount today?</div>';
                     data.messages.forEach(msg => {
                         const div = document.createElement('div');
                         div.className = `message ${msg.sender === username ? 'msg-user' : 'msg-support'}`;
@@ -108,8 +108,8 @@
             const text = input.value;
             input.value = '';
 
-            // USING https://accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-            await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/chat/send', {
+            // USING https://accesswealth-backend-production.up.railway.accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
+            const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/chat/send', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: username, sender: username, message: text })
             });

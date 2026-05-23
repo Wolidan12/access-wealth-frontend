@@ -157,10 +157,9 @@
             if (!username) return alert("Please log in.");
 
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
 
-            try {
-                const response = await fetch('http://https://accesswealth-backend-production.up.railway.app/api/ads/create', {
+             const response = await fetch('https://accesswealth-backend-production.up.railway.app/api/ads/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

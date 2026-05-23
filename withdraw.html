@@ -129,7 +129,7 @@
     <div class="main-content">
         <div class="page-header">
             <h1>Withdraw Funds</h1>
-            <p>Access your earnings. Please note the different rules for Tasks vs Affiliate withdrawals.</p>
+            <p>access your earnings. Please note the different rules for Tasks vs Affiliate withdrawals.</p>
         </div>
 
         <div class="balances-wrapper">
@@ -295,12 +295,12 @@
             }
 
             // Lock Button
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
             btn.disabled = true;
 
             try {
-                // USING https://accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-                const response = await fetch('http://https://accesswealth-backend-production.up.railway.app:5000/api/withdraw/affiliate', {
+                // USING 'https://accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
+                const response = await fetch('https://accesswealth-backend-production.up.railway.app/api/withdraw/affiliate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: username, amount: amount })
