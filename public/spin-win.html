@@ -289,7 +289,7 @@
 
         // --- THE SPIN ANIMATION & LOGIC ---
         async function startSpin() {
-            if (spinsUsedToday >= planData.spins) return alert("You have used all your spins for today!");
+            if (spinsUsedToday >= planData.spins) { showToast('info', "You have used all your spins for today!"); return; }
 
             const spinBtn = document.getElementById('spinBtn');
             const display = document.getElementById('prizeAmount');
@@ -323,10 +323,10 @@
                 let currentEarnings = parseFloat(localStorage.getItem('taskEarnings')) || 0;
                 localStorage.setItem('taskEarnings', currentEarnings + finalAmount);
                 addHistoryItem(`Won ₦${finalAmount.toFixed(2)} (Base: ₦${baseAmount} x${planData.multiplier})`, true);
-                alert(`🎉 Congratulations! You won ₦${finalAmount.toFixed(2)}!`);
+                showToast('success', `🎉 Congratulations! You won ₦${finalAmount.toFixed(2)}!`);
             } else {
                 addHistoryItem(`Better luck next time! (Won ₦0)`, false);
-                alert(`Aww, you won ₦0. Better luck on your next spin!`);
+                showToast('info', `Aww, you won ₦0. Better luck on your next spin!`);
             }
 
             // Reset UI

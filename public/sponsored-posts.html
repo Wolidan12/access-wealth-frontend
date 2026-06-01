@@ -232,7 +232,7 @@
         function simulateShare(e) {
             e.preventDefault(); // Prevent page jump
             // Unlock the claim button after they "share"
-            alert("Opening WhatsApp Make sure you actually post the text to your status!");
+            showToast('info', "Opening WhatsApp. Make sure you actually post the text to your status!");
             
             const claimBtn = document.getElementById('claimBtn');
             claimBtn.disabled = false;
@@ -266,7 +266,7 @@
                 const today = new Date().toDateString();
                 localStorage.setItem('lastPostClaim', today);
 
-                alert("🎉 Success! ₦300 has been added to your Task Earnings.");
+                showToast('success', "🎉 Success! ₦300 has been added to your Task Earnings.");
                 checkPostStatus();
             }, 1000);
         }

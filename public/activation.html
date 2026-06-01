@@ -371,25 +371,23 @@
             btn.disabled = true;
 
             try {
-                // USING 'https://accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/activate', {
+                const { ok, data, error } = await apiFetchJson('/activate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: username, name: activePlan, price: activePrice })
                 });
-                const data = await res.json();
 
-                if(data.success) {
-                    alert(`Success! Your account is now upgraded to ${activePlan}.`);
+                if(ok && data.success) {
+                    showToast('success', `Success! Your account is now upgraded to ${activePlan}.`);
                     localStorage.setItem('balance', data.newBalance); 
                     window.location.href = 'dashboard.html'; // Redirect back to see the new balances
                 } else {
-                    alert(data.error);
+                    showToast('error', data.error || error || 'Upgrade failed');
                     btn.innerText = "Confirm Upgrade";
                     btn.disabled = false;
                 }
             } catch(e) {
-                alert("Server Connection Error. Please ensure your terminal is running.");
+                showToast('error', "Server Connection Error. Please ensure your terminal is running.");
                 btn.innerText = "Confirm Upgrade";
                 btn.disabled = false;
             }

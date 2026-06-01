@@ -68,3 +68,31 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Deploy to Netlify (quick)
+
+This project is a static site served from the `public/` folder. The repository already includes a `netlify.toml` that sets the publish directory to `public`.
+
+Two common ways to deploy:
+
+- Netlify UI (recommended):
+	1. Push this repository to GitHub (or Git provider).
+	2. In Netlify, click "New site from Git" → connect your Git provider → choose the repo and branch.
+	3. Set build command to empty (no build) and set **Publish directory** to `public`.
+	4. Deploy site and enable automatic deploys on push.
+
+- Netlify CLI (direct deploy):
+	- Install CLI: `npm install -g netlify-cli`
+	- Login: `netlify login`
+	- From the project root run (one-off production deploy):
+		```bash
+		netlify deploy --prod --dir=public
+		```
+	- Or initialize a site and link it to Netlify:
+		```bash
+		netlify init
+		```
+
+If you prefer automatic deploys from GitHub, use the Netlify UI option and confirm **Publish directory** is `public` (the `netlify.toml` in the repo already does this for you).
+
+If you want, I can help prepare a GitHub push command sequence for this repo and guidance to create the Netlify site (I cannot perform the remote deploy without your Netlify/Git credentials).

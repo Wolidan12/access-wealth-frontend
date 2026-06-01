@@ -293,18 +293,16 @@
             const amount = parseFloat(document.getElementById('amount').value);
             const btn = document.getElementById('submitBtn');
 
-            if (!username) return alert("You must be logged in.");
-            if (phone.length < 11) return alert("Please enter a valid 11-digit phone number.");
-            if (amount > currentBalance) {
-                return alert("Insufficient Balance! Please fund your Account to buy this airtime.");
-            }
+                if (!username) { showToast('error', "You must be logged in."); return; }
+                if (phone.length < 11) { showToast('error', "Please enter a valid 11-digit phone number."); return; }
+                if (amount > currentBalance) { showToast('error', "Insufficient Balance! Please fund your Account to buy this airtime."); return; }
 
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
             btn.disabled = true;
 
             try {
                 // Send request to the backend (We will add this route to server.js next)
-                const response = await bills/airtime', {
+                const { ok, data, error } = await apiFetchJson('/bills/airtime', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -315,20 +313,18 @@
                     })
                 });
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    alert(`✅ Success! ₦${amount} Airtime has been sent to ${phone} (${selectedNetwork}).`);
+                if (ok && data.success) {
+                    showToast('success', `✅ Success! ₦${amount} Airtime sent to ${phone} (${selectedNetwork}).`);
                     localStorage.setItem('balance', data.newBalance); // Update local balance
                     window.location.reload(); // Refresh to show new balance
                 } else {
-                    alert(data.error || "Failed to process airtime.");
+                    showToast('error', data.error || error || "Failed to process airtime.");
                     btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Recharge Now';
                     btn.disabled = false;
                 }
             } catch (err) {
                 console.error("Airtime Error:", err);
-                alert("Server error. Please ensure your backend server is running.");
+                    showToast('error', "Server error. Please ensure your backend server is running.");
                 btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Recharge Now';
                 btn.disabled = false;
             }

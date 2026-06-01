@@ -70,6 +70,7 @@
         </div>
     </div>
 
+    <script src="global.js"></script>
     <script>
         // Auto-fill referral code from URL if it exists (e.g., ?ref=AW12345)
         const urlParams = new URLSearchParams(window.location.search);
@@ -88,22 +89,20 @@
             const referred_by = document.getElementById('regReferral').value;
 
             try {
-                const response = await fetch('https://accesswealth-backend-production.up.railway.app/api/register', {
+                const { ok, data, error } = await apiFetchJson('/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password, referred_by })
                 });
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    alert("Account created successfully! Please login.");
+                if (ok && data.success) {
+                    showToast('success', "Account created successfully! Please login.");
                     window.location.href = 'login.html';
                 } else {
-                    alert(data.error || "Registration failed. Username might be taken.");
+                    showToast('error', data.error || error || "Registration failed. Username might be taken.");
                 }
             } catch (err) {
-                alert("Server error. Ensure your backend is running.");
+                showToast('error', "Server error. Ensure your backend is running.");
             } finally {
                 btn.innerHTML = 'Create Account';
                 btn.disabled = false;

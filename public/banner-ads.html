@@ -137,6 +137,7 @@
         </div>
     </div>
 
+    <script src="global.js"></script>
     <script>
         let selectedPrice = 2000;
 
@@ -154,12 +155,12 @@
             const username = localStorage.getItem('username');
             const btn = document.getElementById('launchBtn');
 
-            if (!username) return alert("Please log in.");
+            if (!username) { showToast('error', "Please log in."); return; }
 
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
 
-             const response = await fetch('https://accesswealth-backend-production.up.railway.app/api/ads/create', {
+             const { ok, data, error } = await apiFetchJson('/ads/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -171,17 +172,15 @@
                     })
                 });
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    alert("✅ Ad Campaign Launched Successfully! Your ad is now live.");
+                if (ok && data.success) {
+                    showToast('success', "✅ Ad Campaign Launched Successfully! Your ad is now live.");
                     localStorage.setItem('balance', data.newBalance); // Update local balance
                     window.location.reload();
                 } else {
-                    alert(data.error || "Failed to launch ad.");
+                    showToast('error', data.error || error || "Failed to launch ad.");
                 }
             } catch (err) {
-                alert("Server error.");
+                showToast('error', "Server error.");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Campaign';

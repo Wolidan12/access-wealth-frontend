@@ -127,12 +127,13 @@
         </div>
     </div>
 
+    <script src="global.js"></script>
     <script>
         // STRICT ACTIVATION CHECK
         window.onload = () => {
             const isActivated = localStorage.getItem('planActivated') === 'true';
             if (!isActivated) {
-                alert("Premium Feature Locked! Please activate an account package to use Bulk SMS, Airtime, and Business Utilities.");
+                showToast('warning', "Premium Feature Locked! Please activate an account package to use Bulk SMS, Airtime, and Business Utilities.");
                 window.location.href = 'activation.html';
             }
         };
@@ -165,22 +166,21 @@
         document.getElementById('smsForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = localStorage.getItem('username');
-            if (finalCost <= 0) return alert("Please add recipients and a message.");
+            if (finalCost <= 0) { showToast('error', "Please add recipients and a message."); return; }
 
             const btn = document.getElementById('submitBtn');
             btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
 
             try {
-                const response = await fetch('https://accesswealth-backend-production.up.railway.app/api/sms/send', {
+                const { ok, data, error } = await apiFetchJson('/sms/send', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, senderId: document.getElementById('senderId').value, cost: finalCost, count: finalRecipients })
                 });
-                const data = await response.json();
-                if (response.ok) {
-                    alert(`✅ Bulk SMS Sent Successfully!\n₦${finalCost.toLocaleString()} was deducted.`);
+                if (ok && data.success) {
+                    showToast('success', `✅ Bulk SMS Sent Successfully!\n₦${finalCost.toLocaleString()} was deducted.`);
                     localStorage.setItem('balance', data.newBalance); window.location.reload();
-                } else { alert(data.error); }
-            } catch (err) { alert("Server error."); } 
+                } else { showToast('error', data.error || error); }
+            } catch (err) { showToast('error', "Server error."); } 
             finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Bulk SMS'; }
         });
     </script>

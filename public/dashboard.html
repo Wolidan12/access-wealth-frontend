@@ -230,7 +230,7 @@
             <div class="nav-label">SETTINGS</div>
             <a href="#" class="nav-item"><i class="fa-regular fa-user main-icon"></i> <span>Profile Setting</span></a>
             <a href="#" class="nav-item"><i class="fa-solid fa-building-columns main-icon"></i> <span>Set Bank Details</span></a>
-            <a href="#" class="nav-item"><i class="fa-solid fa-key main-icon"></i> <span>Reset Password</span></a>
+            <a href="reset-password.html" class="nav-item"><i class="fa-solid fa-key main-icon"></i> <span>Reset Password</span></a>
             <a href="support.html" class="nav-item" style="margin-top:15px; border-top:1px solid rgba(255,255,255,0.05); border-radius:0;"><i class="fa-regular fa-circle-question main-icon"></i> <span>Help and Support</span></a>
             <a href="#" class="nav-item" onclick="logout()" style="color: #ff4d4d;"><i class="fa-solid fa-power-off main-icon" style="color: #ff4d4d;"></i> <span>Logout</span></a>
         </div>
@@ -352,7 +352,7 @@
                 copyText.select();
                 copyText.setSelectionRange(0, 99999); 
                 navigator.clipboard.writeText(copyText.value);
-                alert("Invite link copied to clipboard!");
+                showToast('success', "Invite link copied to clipboard!");
             }
         }
 

@@ -31,10 +31,14 @@
         /* --- SIDEBAR --- */
         .sidebar { width: var(--sidebar-width); background: #0b1a2a; height: 100vh; position: fixed; border-right: 1px solid var(--border-light); z-index: 1100; display: flex; flex-direction: column; transition: left 0.3s ease; }
         .logo-area { padding: 25px 20px; font-size: 18px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--danger); display: flex; align-items: center; gap: 10px;}
-        .nav-menu { padding: 20px 15px; overflow-y: auto; flex-grow: 1; }
+        .nav-menu { padding: 20px 15px; overflow-y: auto; flex-grow: 1; max-height: calc(100vh - 100px); }
         .nav-item { display: flex; align-items: center; padding: 12px 15px; color: var(--text-muted); text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 14px; transition: 0.3s; cursor: pointer; }
         .nav-item i { margin-right: 15px; width: 20px; text-align: center; }
         .nav-item:hover, .nav-item.active { background: rgba(255, 77, 77, 0.1); color: var(--danger); }
+        .submenu-toggle { justify-content: space-between; gap: 10px; }
+        .submenu { display: none; flex-direction: column; margin-top: 5px; }
+        .submenu.active { display: flex; }
+        .submenu .nav-item { padding-left: 35px; font-size: 13px; }
         .nav-label { font-size: 11px; color: rgba(255,255,255,0.3); font-weight: 600; margin: 15px 0 5px 15px; text-transform: uppercase; letter-spacing: 1px; }
 
         /* --- MAIN CONTENT --- */
@@ -58,7 +62,7 @@
 
         /* --- RESPONSIVE TABLES --- */
         .table-responsive { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        table { width: 100%; border-collapse: collapse; min-width: 100%; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; white-space: nowrap; }
         th { color: var(--text-muted); font-weight: 500; background: rgba(0,0,0,0.2); text-transform: uppercase; font-size: 11px; letter-spacing: 1px;}
         
@@ -89,9 +93,14 @@
             .sidebar { left: -260px; z-index: 1100; }
             .sidebar.active { left: 0; }
             .mobile-header { display: flex; }
+            .nav-menu { max-height: calc(100vh - 130px); }
+            .nav-item { padding: 10px 12px; font-size: 13px; }
+            .nav-item i { margin-right: 10px; width: 18px; }
             .main-content { margin-left: 0; width: 100%; padding: 100px 15px 30px 15px; }
             .stats-grid { grid-template-columns: 1fr; }
             .page-header h1 { font-size: 24px; }
+            .table-responsive table { min-width: 100%; }
+            th, td { padding: 10px; font-size: 12px; }
         }
     </style>
 </head>
@@ -124,6 +133,30 @@
             
             <div class="nav-label">Support</div>
             <a href="support-agent.html" class="nav-item" target="_blank"><i class="fa-solid fa-headset"></i> Support Portal</a>
+
+            <div class="nav-label">Quick Access</div>
+            <a class="nav-item submenu-toggle" onclick="toggleSubmenu('allPagesSubmenu', this)"><span><i class="fa-solid fa-grid"></i> All Pages</span><i class="fa-solid fa-chevron-down"></i></a>
+            <div id="allPagesSubmenu" class="submenu">
+                <a href="index.html" class="nav-item" target="_blank"><i class="fa-solid fa-house"></i> Home</a>
+                <a href="dashboard.html" class="nav-item" target="_blank"><i class="fa-solid fa-chart-simple"></i> User Dashboard</a>
+                <a href="admin-users.html" class="nav-item" target="_blank"><i class="fa-solid fa-user-secret"></i> Admin Users</a>
+                <a href="activation.html" class="nav-item" target="_blank"><i class="fa-solid fa-bolt"></i> Activate Account</a>
+                <a href="advertise.html" class="nav-item" target="_blank"><i class="fa-solid fa-bullhorn"></i> Advertise</a>
+                <a href="airtime.html" class="nav-item" target="_blank"><i class="fa-solid fa-mobile-screen-button"></i> Airtime</a>
+                <a href="banner-ads.html" class="nav-item" target="_blank"><i class="fa-solid fa-image"></i> Banner Ads</a>
+                <a href="bulk-sms.html" class="nav-item" target="_blank"><i class="fa-solid fa-message"></i> Bulk SMS</a>
+                <a href="daily-tasks.html" class="nav-item" target="_blank"><i class="fa-solid fa-calendar-day"></i> Daily Tasks</a>
+                <a href="data.html" class="nav-item" target="_blank"><i class="fa-solid fa-database"></i> Data Bundle</a>
+                <a href="deposit.html" class="nav-item" target="_blank"><i class="fa-solid fa-wallet"></i> Deposit</a>
+                <a href="invoice.html" class="nav-item" target="_blank"><i class="fa-solid fa-file-invoice"></i> Invoice</a>
+                <a href="payment-links.html" class="nav-item" target="_blank"><i class="fa-solid fa-link"></i> Payment Links</a>
+                <a href="referral.html" class="nav-item" target="_blank"><i class="fa-solid fa-share-nodes"></i> Referral</a>
+                <a href="register.html" class="nav-item" target="_blank"><i class="fa-solid fa-user-plus"></i> Register</a>
+                <a href="spin-win.html" class="nav-item" target="_blank"><i class="fa-solid fa-gift"></i> Spin & Win</a>
+                <a href="sponsored-posts.html" class="nav-item" target="_blank"><i class="fa-solid fa-star"></i> Sponsored Posts</a>
+                <a href="support.html" class="nav-item" target="_blank"><i class="fa-solid fa-headset"></i> Support</a>
+                <a href="withdraw.html" class="nav-item" target="_blank"><i class="fa-solid fa-money-bill-wave"></i> Withdraw</a>
+            </div>
 
             <a href="login.html" class="nav-item" style="margin-top: 50px; color: var(--danger);" onclick="localStorage.clear();"><i class="fa-solid fa-power-off"></i> Logout</a>
         </div>
@@ -242,6 +275,7 @@
 
     </div>
 
+    <script src="global.js"></script>
     <script>
         // --- UI & Navigation Logic ---
         function toggleSidebar() { 
@@ -263,34 +297,55 @@
             window.scrollTo(0, 0);
         }
 
-        // --- Data Fetching Logic ---
-        window.onload = () => { loadDashboardStats(); };
+        function toggleSubmenu(id, element) {
+            const submenu = document.getElementById(id);
+            if (!submenu) return;
+            submenu.classList.toggle('active');
+            const icon = element.querySelector('.fa-chevron-down');
+            if (icon) icon.classList.toggle('fa-rotate-180');
+        }
+
+        // --- Admin Access & Data Fetching Logic ---
+        function ensureAdminAccess() {
+            const role = localStorage.getItem('role');
+            if (role !== 'admin') {
+                localStorage.clear();
+                window.location.href = 'login.html';
+            }
+        }
+
+        window.onload = () => { ensureAdminAccess(); loadDashboardStats(); };
 
         async function loadDashboardStats() {
             try {
-                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/')
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('statTotalUsers').innerText = data.stats.totalUsers;
-                    document.getElementById('statActivePlans').innerText = data.stats.activePlans;
-                    document.getElementById('statRevenue').innerText = `₦${(data.stats.revenue || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                    
-                    document.getElementById('statPending').innerText = data.stats.pendingPayouts;
-                    document.getElementById('badgeDeposits').innerText = data.stats.pendingPayouts;
-
-                    document.getElementById('statPendingWithdrawals').innerText = data.stats.pendingWithdrawals;
-                    document.getElementById('badgeInstant').innerText = data.stats.pendingWithdrawals;
+                let result = await apiFetchJson('/admin/stats');
+                if (!result.ok || !result.data.success) {
+                    result = await apiFetchJson('/');
                 }
-            } catch (error) { console.error("Stats Error:", error); }
+
+                const { ok, data, error } = result;
+                if (ok && data.success && data.stats) {
+                    document.getElementById('statTotalUsers').innerText = data.stats.totalUsers || 0;
+                    document.getElementById('statActivePlans').innerText = data.stats.activePlans || 0;
+                    document.getElementById('statRevenue').innerText = `₦${(data.stats.revenue || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                    document.getElementById('statPending').innerText = data.stats.pendingPayouts || 0;
+                    document.getElementById('badgeDeposits').innerText = data.stats.pendingPayouts || 0;
+                    document.getElementById('statPendingWithdrawals').innerText = data.stats.pendingWithdrawals || 0;
+                    document.getElementById('badgeInstant').innerText = data.stats.pendingWithdrawals || 0;
+                } else {
+                    console.error('Stats Error:', error || 'Unable to load admin statistics');
+                }
+            } catch (error) {
+                console.error('Stats Error:', error);
+            }
         }
 
         async function loadUsers() {
             const tbody = document.getElementById('userTableBody');
             tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading users</td></tr>';
             try {
-                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/admin/users');
-                const data = await res.json();
-                if (data.success) {
+                const { ok, data, error } = await apiFetchJson('/admin/users');
+                if (ok && data.success) {
                     tbody.innerHTML = ''; 
                     data.users.forEach(user => {
                         const total = (user.balance || 0) + (user.taskEarnings || 0) + (user.daily_earnings || 0) + (user.affiliate_balance || 0);
@@ -315,9 +370,8 @@
             const tbody = document.getElementById('depositTableBody');
             tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading</td></tr>';
             try {
-                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/admin/deposits');
-                const data = await res.json();
-                if (data.success) {
+                const { ok, data, error } = await apiFetchJson('/admin/deposits');
+                if (ok && data.success) {
                     tbody.innerHTML = '';
                     if(data.deposits.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No pending deposits.</td></tr>'; return; }
                     data.deposits.forEach(dep => {
@@ -339,9 +393,8 @@
             const tbody = document.getElementById('withdrawalTableBody');
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading</td></tr>';
             try {
-                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/admin/withdrawals');
-                const data = await res.json();
-                if (data.success) {
+                const { ok, data, error } = await apiFetchJson('/admin/withdrawals');
+                if (ok && data.success) {
                     tbody.innerHTML = '';
                     if(data.withdrawals.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No pending instant payouts.</td></tr>'; return; }
                     data.withdrawals.forEach(w => {
@@ -361,26 +414,25 @@
         }
 
         async function approveDeposit(id) {
-            if(!confirm("Are you sure you want to approve this deposit?")) return;
+            if(!(await showConfirm("Are you sure you want to approve this deposit?"))) return;
             try {
-                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/admin/approve-deposit', { 
+                const { ok, data, error } = await apiFetchJson('/admin/approve-deposit', { 
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ depositId: id }) 
                 });
-                const data = await res.json();
-                if(data.success) { alert("Deposit Approved!"); loadDeposits(); loadDashboardStats(); } 
-                else alert(data.error);
-            } catch(e) { alert("Server Error."); }
+                if(ok && data.success) { showToast('success', "Deposit Approved!"); loadDeposits(); loadDashboardStats(); } 
+                else showToast('error', data.error || error || 'Unable to approve deposit');
+            } catch(e) { showToast('error', 'Server Error.'); }
         }
 
         async function approveWithdrawal(id) {
-            if(!confirm("Have you successfully transferred the funds to this user's bank account?")) return;
+            if(!(await showConfirm("Have you successfully transferred the funds to this user's bank account?"))) return;
             try {
-                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/admin/approve-withdrawal', { 
+                const { ok, data, error } = await apiFetchJson('/admin/approve-withdrawal', { 
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) 
                 });
-                const data = await res.json();
-                if(data.success) { alert("Payout Marked as Paid!"); loadWithdrawals(); loadDashboardStats(); } 
-            } catch(e) { alert("Server Error."); }
+                if(ok && data.success) { showToast('success', "Payout Marked as Paid!"); loadWithdrawals(); loadDashboardStats(); } 
+                else showToast('error', data.error || error || 'Unable to mark payout');
+            } catch(e) { showToast('error', 'Server Error.'); }
         }
 
         document.getElementById('manualCreditForm').addEventListener('submit', async (e) => {
@@ -393,16 +445,15 @@
             const walletType = document.getElementById('creditWallet').value;
 
             try {
-                const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/admin/manual-credit', {
+                const { ok, data, error } = await apiFetchJson('/admin/manual-credit', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, amount, walletType })
                 });
-                const data = await res.json();
-                if (data.success) { 
-                    alert(data.message); 
+                if (ok && data.success) { 
+                    showToast('success', data.message || 'User credited'); 
                     document.getElementById('manualCreditForm').reset(); 
-                } else alert(data.error); 
-            } catch (err) { alert("Server error."); } 
+                } else showToast('error', data.error || error || 'Unable to credit user'); 
+            } catch (err) { showToast('error', 'Server error.'); } 
             finally { btn.innerText = "Credit User Now"; btn.disabled = false; }
         });
     </script>

@@ -40,10 +40,35 @@
         .chat-input { flex-grow: 1; padding: 15px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); background: var(--bg-body); color: #fff; outline: none; padding-left: 25px;}
         .chat-input:focus { border-color: var(--primary-yellow); }
         .btn-send { background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); color: #0b1421; border: none; width: 50px; height: 50px; border-radius: 50%; font-weight: 600; cursor: pointer; font-size: 18px;}
+
+        .mobile-header { display: none; width: 100%; background: var(--bg-cards); padding: 15px 20px; justify-content: space-between; align-items: center; position: fixed; top: 0; left: 0; z-index: 1200; border-bottom: 1px solid rgba(212,175,55,0.15); }
+        .mobile-header .menu-btn { font-size: 22px; color: var(--primary-yellow); cursor: pointer; }
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1150; }
+        .sidebar.mobile-hidden { left: -280px; }
+        .sidebar.active { left: 0; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow-x: hidden; }
+            .mobile-header { display: flex; }
+            .sidebar { position: fixed; top: 0; left: -280px; width: 260px; height: 100vh; transition: left 0.3s ease; }
+            .main-content { margin-left: 0; width: 100%; padding: 100px 15px 15px 15px; height: auto; }
+            .chat-container { min-height: calc(100vh - 135px); }
+            .chat-box { padding: 15px; }
+            .chat-input-area { flex-direction: column; gap: 10px; padding: 15px; }
+            .chat-input { width: 100%; }
+            .btn-send { width: 100%; height: 50px; }
+            .nav-menu { padding-top: 20px; }
+            .chat-header h3 { font-size: 18px; }
+        }
     </style>
 </head>
 <body>
-    <div class="sidebar">
+    <div class="mobile-header">
+        <div><i class="fa-solid fa-crown"></i> ACCESS WEALTH</div>
+        <i class="fa-solid fa-bars menu-btn" onclick="toggleSidebar()"></i>
+    </div>
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+    <div class="sidebar mobile-hidden" id="sidebar">
         <div class="logo-area"><i class="fa-solid fa-crown"></i> ACCESS WEALTH</div>
         <div class="nav-menu">
             <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-border-all"></i> Dashboard</a>
@@ -71,6 +96,21 @@
 
     <script src="global.js"></script>
     <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('active');
+            sidebar.classList.toggle('mobile-hidden');
+            overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.remove('active');
+            sidebar.classList.add('mobile-hidden');
+            overlay.style.display = 'none';
+        }
         window.addEventListener('DOMContentLoaded', () => {
             setInterval(loadMessages, 3000); 
             setTimeout(loadMessages, 500);
@@ -81,10 +121,8 @@
             if(!username) return;
 
             try {
-                // USING https://accesswealth-backend-production.up.railway.accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-                const res = await fetch(`https://accesswealth-backend-production.up.railway.app:5000/api/chat/history/${username}`);
-                const data = await res.json();
-                if(data.success) {
+                const { ok, data, error } = await apiFetchJson(`/chat/history/${username}`);
+                if(ok && data.success) {
                     const box = document.getElementById('chatBox');
                     box.innerHTML = '<div class="message msg-support">Hello! I am an Access Wealth Customer Representative. How can I assist you with your amount today?</div>';
                     data.messages.forEach(msg => {
@@ -108,11 +146,13 @@
             const text = input.value;
             input.value = '';
 
-            // USING https://accesswealth-backend-production.up.railway.accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-            const res = await fetch('https://accesswealth-backend-production.up.railway.app/api/chat/send', {
+            const { ok, data, error } = await apiFetchJson('/chat/send', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: username, sender: username, message: text })
             });
+            if (!ok || !data.success) {
+                showToast('error', data.error || error || 'Unable to send message.');
+            }
             loadMessages();
         }
     </script>

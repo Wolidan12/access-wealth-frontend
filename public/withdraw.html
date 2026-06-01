@@ -299,16 +299,13 @@
             btn.disabled = true;
 
             try {
-                // USING 'https://accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-                const response = await fetch('https://accesswealth-backend-production.up.railway.app/api/withdraw/affiliate', {
+                const { ok, data, error } = await apiFetchJson('/withdraw/affiliate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: username, amount: amount })
                 });
 
-                const data = await response.json();
-
-                if (data.success) {
+                if (ok && data.success) {
                     succBox.innerText = data.message;
                     succBox.style.display = 'block';
                     document.getElementById('affiliateAmount').value = '';
@@ -317,7 +314,7 @@
                     // Force a global sync to update local storage and the UI instantly
                     globalSync(); 
                 } else {
-                    errBox.innerText = `Error: ${data.error}`;
+                    errBox.innerText = `Error: ${data.error || error}`;
                     errBox.style.display = 'block';
                 }
             } catch (err) {

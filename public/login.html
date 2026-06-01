@@ -55,6 +55,9 @@
             </div>
 
             <button type="submit" class="btn-auth" id="loginBtn">Login to Dashboard</button>
+            <div style="margin-top: 12px; text-align: right; font-size: 13px;">
+                <a href="forgot-password.html" style="color: var(--primary-yellow); text-decoration: none;">Forgot password?</a>
+            </div>
         </form>
 
         <div class="auth-links">
@@ -62,6 +65,7 @@
         </div>
     </div>
 
+    <script src="global.js"></script>
     <script>
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -83,7 +87,8 @@
             
             if (username === 'customer@gmail.com' && password === 'Support@234') {
                 localStorage.setItem('role', 'support');
-                window.location.href = 'admin-support.html';
+                localStorage.setItem('username', 'Support_Agent');
+                window.location.href = 'support-agent.html';
                 return; // Stop here, don't check normal users
             }
 
@@ -91,15 +96,13 @@
             // NORMAL USER LOGIN
             // ==========================================
             try {
-                const response = await fetch('https://accesswealth-backend-production.up.railway.app/api/login', {
+                const { ok, data, error } = await apiFetchJson('/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
 
-                const data = await response.json();
-
-                if (response.ok) {
+                if (ok && data.success) {
                     localStorage.setItem('role', 'user');
                     localStorage.setItem('username', data.username);
                     localStorage.setItem('balance', data.balance);
@@ -110,10 +113,10 @@
                     
                     window.location.href = 'dashboard.html';
                 } else {
-                    alert(data.error || "Invalid username or password.");
+                    showToast('error', data.error || error || "Invalid username or password.");
                 }
             } catch (err) {
-                alert("Server error. Ensure your backend is running.");
+                showToast('error', "Server error. Ensure your backend is running.");
             } finally {
                 btn.innerHTML = 'Login to Dashboard';
                 btn.disabled = false;
