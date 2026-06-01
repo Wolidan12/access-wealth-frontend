@@ -1,12 +1,1 @@
-{
-  "name": "accesswealth-frontend",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Static frontend connected to Railway backend",
-  "scripts": {
-    "start": "serve public"
-  },
-  "dependencies": {
-    "serve": "^14.2.1"
-  }
-}
+
