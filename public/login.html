@@ -81,6 +81,7 @@
             // ==========================================
             if (username === 'admin@gmail.com' && password === 'Admin@234') {
                 localStorage.setItem('role', 'admin');
+                localStorage.setItem('username', 'admin');
                 window.location.href = 'admin.html'; 
                 return; // Stop here, don't check normal users
             }
