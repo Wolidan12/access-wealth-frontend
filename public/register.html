@@ -72,7 +72,6 @@
 
     <script src="global.js"></script>
     <script>
-        // Auto-fill referral code from URL if it exists (e.g., ?ref=AW12345)
         const urlParams = new URLSearchParams(window.location.search);
         if(urlParams.has('ref')) {
             document.getElementById('regReferral').value = urlParams.get('ref');
@@ -96,10 +95,12 @@
                 });
 
                 if (ok && data.success) {
-                    showToast('success', "Account created successfully! Please login.");
-                    window.location.href = 'login.html';
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    showToast('success', "Registration successful! Redirecting...");
+                    window.location.href = 'dashboard.html';
                 } else {
-                    showToast('error', data.error || error || "Registration failed. Username might be taken.");
+                    showToast('error', data.error || error || "Registration failed.");
                 }
             } catch (err) {
                 showToast('error', "Server error. Ensure your backend is running.");
