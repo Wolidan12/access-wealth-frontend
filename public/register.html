@@ -95,8 +95,16 @@
                 });
 
                 if (ok && data.success) {
+                    // SECURE STORE: Ensure token, user, and explicit username are saved.
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    if (data.user) {
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        localStorage.setItem('username', data.user.username || username);
+                    } else {
+                        localStorage.setItem('username', username);
+                    }
+
                     showToast('success', "Registration successful! Redirecting...");
                     window.location.href = 'dashboard.html';
                 } else {

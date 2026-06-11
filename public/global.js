@@ -47,18 +47,50 @@ function isPageAllowedForSync() {
 }
 
 async function globalSync() {
-    const username = localStorage.getItem('username');
+    let username = localStorage.getItem('username');
+    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
     const currentUrl = window.location.href;
+
+    // ==========================================
+    // SELF-HEALING AUTH CHECK
+    // ==========================================
+    if (!username) {
+        // Fallback 1: Extract from stored user object
+        if (storedUser) {
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                if (parsedUser.username) {
+                    username = parsedUser.username;
+                    localStorage.setItem('username', username);
+                }
+            } catch (e) {}
+        }
+        
+        // Fallback 2: Decode JWT Payload directly if token exists
+        if (!username && token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                if (payload.username) {
+                    username = payload.username;
+                    localStorage.setItem('username', username);
+                }
+            } catch (e) {}
+        }
+    }
+
+    const isLoggedIn = Boolean(username || token);
 
     // Skip protected pages that are unrelated to user data sync
     if (!isPageAllowedForSync()) {
-        if (username && (currentUrl.includes('login.html') || currentUrl.includes('register.html'))) {
+        if (isLoggedIn && (currentUrl.includes('login.html') || currentUrl.includes('register.html'))) {
             window.location.href = username === 'Support_Agent' ? 'support-agent.html' : 'dashboard.html';
         }
         return;
     }
 
-    if (!username) {
+    // Redirect to login ONLY if all recovery methods failed
+    if (!isLoggedIn || !username) {
         if (!currentUrl.includes('login.html') && !currentUrl.includes('register.html')) {
             window.location.href = 'login.html';
         }
