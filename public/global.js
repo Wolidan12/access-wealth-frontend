@@ -81,15 +81,13 @@ async function globalSync() {
 
     const isLoggedIn = Boolean(username || token);
 
-    // Skip protected pages that are unrelated to user data sync
+    // Skip data sync for auth/admin pages. 
+    // FIXED: Allows users to always access login/register forms without forced redirects.
     if (!isPageAllowedForSync()) {
-        if (isLoggedIn && (currentUrl.includes('login.html') || currentUrl.includes('register.html'))) {
-            window.location.href = username === 'Support_Agent' ? 'support-agent.html' : 'dashboard.html';
-        }
         return;
     }
 
-    // Redirect to login ONLY if all recovery methods failed
+    // Redirect to login ONLY if all recovery methods failed on protected pages
     if (!isLoggedIn || !username) {
         if (!currentUrl.includes('login.html') && !currentUrl.includes('register.html')) {
             window.location.href = 'login.html';
