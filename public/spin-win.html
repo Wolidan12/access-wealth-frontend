@@ -134,18 +134,18 @@
     <div class="sidebar collapsed" id="sidebar">
         <div class="logo-area"><i class="fa-solid fa-crown"></i><span>ACCESS WEALTH</span></div>
         <div class="nav-menu">
-            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> <span>Dashboard</span></a>
+            <a href="/dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> <span>Dashboard</span></a>
             <div class="nav-item has-dropdown" onclick="toggleDropdown('activityDropdown', this)">
                 <div class="nav-title-group"><i class="fa-solid fa-list-check main-icon"></i> <span>Daily Activity Earning</span></div>
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
             <div class="dropdown-container" id="activityDropdown">
-                <a href="daily-tasks.html" class="nav-item sub-item"><i class="fa-regular fa-clipboard main-icon"></i> Daily Tasks</a>
+                <a href="/daily-tasks.html" class="nav-item sub-item"><i class="fa-regular fa-clipboard main-icon"></i> Daily Tasks</a>
             </div>
-            <a href="activation.html" class="nav-item"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
-            <a href="spin-win.html" class="nav-item active"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
-            <a href="withdraw.html" class="nav-item"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
-            <button onclick="window.location.href='activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
+            <a href="/activation.html" class="nav-item"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
+            <a href="/spin-win.html" class="nav-item active"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
+            <a href="/withdraw.html" class="nav-item"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
+            <button onclick="window.location.href='/activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
             <a href="#" class="nav-item" onclick="logout()" style="color: #ff4d4d; margin-top: 30px;"><i class="fa-solid fa-power-off main-icon" style="color: #ff4d4d;"></i> <span>Logout</span></a>
         </div>
     </div>
@@ -165,7 +165,7 @@
                 <i class="fa-solid fa-lock"></i>
                 <h2>Activation Required</h2>
                 <p>You must activate an Access Wealth plan to unlock the daily Spin & Win wheel.</p>
-                <button onclick="window.location.href='activation.html'">Activate Now</button>
+                <button onclick="window.location.href='/activation.html'">Activate Now</button>
             </div>
             
             <div class="page-header">
@@ -210,7 +210,7 @@
         function toggleDesktopSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
         function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlayMenu').classList.toggle('active'); }
         function toggleDropdown(dropdownId, element) { element.classList.toggle('open'); document.getElementById(dropdownId).classList.toggle('show'); element.classList.toggle('active'); }
-        function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+        function logout() { localStorage.clear(); window.location.href = '/login.html'; }
 
         // --- CORE PLAN LOGIC ---
         // Maps the exact Access Wealth plans to their spin perks
@@ -289,7 +289,7 @@
 
         // --- THE SPIN ANIMATION & LOGIC ---
         async function startSpin() {
-            if (spinsUsedToday >= planData.spins) { showToast('info', "You have used all your spins for today!"); return; }
+            if (spinsUsedToday >= planData.spins) return alert("You have used all your spins for today!");
 
             const spinBtn = document.getElementById('spinBtn');
             const display = document.getElementById('prizeAmount');
@@ -323,10 +323,10 @@
                 let currentEarnings = parseFloat(localStorage.getItem('taskEarnings')) || 0;
                 localStorage.setItem('taskEarnings', currentEarnings + finalAmount);
                 addHistoryItem(`Won ₦${finalAmount.toFixed(2)} (Base: ₦${baseAmount} x${planData.multiplier})`, true);
-                showToast('success', `🎉 Congratulations! You won ₦${finalAmount.toFixed(2)}!`);
+                alert(`🎉 Congratulations! You won ₦${finalAmount.toFixed(2)}!`);
             } else {
                 addHistoryItem(`Better luck next time! (Won ₦0)`, false);
-                showToast('info', `Aww, you won ₦0. Better luck on your next spin!`);
+                alert(`Aww, you won ₦0. Better luck on your next spin!`);
             }
 
             // Reset UI

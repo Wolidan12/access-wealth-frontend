@@ -81,18 +81,17 @@
 
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
 
-        /* BANK DETAILS CARD */
-        .bank-card { background: linear-gradient(135deg, #112A46 0%, #0a192f 100%); border: 1px solid var(--primary-yellow); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(212, 175, 55, 0.1); position: relative; overflow: hidden; }
-        .bank-card::before { content: ''; position: absolute; top: 0; right: 0; width: 150px; height: 150px; background: radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 70%); border-radius: 50%; transform: translate(30%, -30%); }
-        .bank-card h3 { font-size: 20px; color: var(--primary-yellow); margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+        /* SECURE PAYMENT CARD */
+        .secure-card { background: linear-gradient(135deg, #112A46 0%, #0a192f 100%); border: 1px solid var(--primary-yellow); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(212, 175, 55, 0.1); position: relative; overflow: hidden; }
+        .secure-card::before { content: ''; position: absolute; top: 0; right: 0; width: 150px; height: 150px; background: radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 70%); border-radius: 50%; transform: translate(30%, -30%); }
+        .secure-card h3 { font-size: 20px; color: var(--primary-yellow); margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
         
-        .detail-row { margin-bottom: 20px; }
-        .detail-row p { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-        .detail-row h4 { font-size: 18px; font-weight: 600; color: #fff; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.1);}
-        .copy-btn { color: var(--primary-yellow); cursor: pointer; transition: 0.3s; font-size: 16px;}
-        .copy-btn:hover { transform: scale(1.2); }
+        .info-row { margin-bottom: 20px; display: flex; align-items: center; gap: 15px;}
+        .info-row i { font-size: 24px; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 12px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.05); }
+        .info-text p { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+        .info-text h4 { font-size: 16px; font-weight: 600; color: #fff; }
 
-        .warning-text { font-size: 13px; color: #ffeb3b; background: rgba(255, 235, 59, 0.1); padding: 15px; border-radius: 10px; display: flex; gap: 10px; align-items: flex-start; line-height: 1.5;}
+        .success-text { font-size: 13px; color: #4CAF50; background: rgba(76, 175, 80, 0.1); padding: 15px; border-radius: 10px; display: flex; gap: 10px; align-items: flex-start; line-height: 1.5; margin-top: 25px;}
 
         /* FORM CARD */
         .form-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; padding: 30px; }
@@ -130,22 +129,22 @@
     <div class="sidebar collapsed" id="sidebar">
         <div class="logo-area"><i class="fa-solid fa-crown"></i><span>Access Wealth</span></div>
         <div class="nav-menu">
-            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> <span>Dashboard</span></a>
+            <a href="/dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> <span>Dashboard</span></a>
             <div class="nav-item has-dropdown" onclick="toggleDropdown('activityDropdown', this)">
                 <div class="nav-title-group"><i class="fa-solid fa-list-check main-icon"></i> <span>Daily Activity Earning</span></div>
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
             <div class="dropdown-container" id="activityDropdown">
-                <a href="daily-tasks.html" class="nav-item sub-item"><i class="fa-regular fa-clipboard main-icon"></i> Daily Tasks</a>
-                <a href="sponsored-posts.html" class="nav-item sub-item"><i class="fa-solid fa-bullhorn main-icon"></i> Sponsored Posts</a>
+                <a href="/daily-tasks.html" class="nav-item sub-item"><i class="fa-regular fa-clipboard main-icon"></i> Daily Tasks</a>
+                <a href="/sponsored-posts.html" class="nav-item sub-item"><i class="fa-solid fa-bullhorn main-icon"></i> Sponsored Posts</a>
             </div>
-            <a href="activation.html" class="nav-item"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
-            <a href="spin-win.html" class="nav-item"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
+            <a href="/activation.html" class="nav-item"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
+            <a href="/spin-win.html" class="nav-item"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
             
-            <a href="deposit.html" class="nav-item active"><i class="fa-solid fa-money-bill-transfer main-icon"></i> <span>Fund Account</span></a>
-            <a href="withdraw.html" class="nav-item"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
-            <a href="referral.html" class="nav-item"><i class="fa-solid fa-users main-icon"></i> <span>Top Earners</span></a>
-            <button onclick="window.location.href='activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
+            <a href="/deposit.html" class="nav-item active"><i class="fa-solid fa-money-bill-transfer main-icon"></i> <span>Fund Account</span></a>
+            <a href="/withdraw.html" class="nav-item"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
+            <a href="/referral.html" class="nav-item"><i class="fa-solid fa-users main-icon"></i> <span>Top Earners</span></a>
+            <button onclick="window.location.href='/activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
             <a href="#" class="nav-item" onclick="logout()" style="color: #ff4d4d; margin-top: 30px;"><i class="fa-solid fa-power-off main-icon" style="color: #ff4d4d;"></i> <span>Logout</span></a>
         </div>
     </div>
@@ -163,53 +162,62 @@
             
             <div class="page-header">
                 <h1 class="page-title">Fund Your Account</h1>
-                <p class="page-subtitle">Make a transfer to the official account below, then fill out the form to request your deposit.</p>
+                <p class="page-subtitle">Add funds instantly using our automated, secure payment gateway.</p>
             </div>
 
             <div class="grid-container">
-                <div class="bank-card">
-                    <h3><i class="fa-solid fa-building-columns"></i> Official Bank Details</h3>
+                <div class="secure-card">
+                    <h3><i class="fa-solid fa-shield-halved"></i> Secure Payment</h3>
                     
-                    <div class="detail-row">
-                        <p>Bank Name</p>
-                        <h4>Moniepoint Microfinance Bank</h4>
+                    <div class="info-row">
+                        <i class="fa-solid fa-bolt"></i>
+                        <div class="info-text">
+                            <p>Speed</p>
+                            <h4>Instant Auto-Funding</h4>
+                        </div>
                     </div>
 
-                    <div class="detail-row">
-                        <p>Account Number</p>
-                        <h4><i class="fa-regular fa-copy copy-btn" onclick="copyText('')" title="Copy Account Number"></i></h4>
+                    <div class="info-row">
+                        <i class="fa-solid fa-lock"></i>
+                        <div class="info-text">
+                            <p>Security</p>
+                            <h4>256-bit Encryption</h4>
+                        </div>
                     </div>
 
-                    <div class="detail-row">
-                        <p>Account Name</p>
-                        <h4>Access Wealth Enterprise</h4>
+                    <div class="info-row">
+                        <i class="fa-solid fa-credit-card"></i>
+                        <div class="info-text">
+                            <p>Methods Supported</p>
+                            <h4>Cards, USSD, Bank Transfer</h4>
+                        </div>
                     </div>
 
-                    <div class="warning-text">
-                        <i class="fa-solid fa-triangle-exclamation" style="margin-top: 3px;"></i>
-                        <span><strong>IMPORTANT:</strong> Only send funds to this exact account. Keep your payment receipt or sender name handy to fill out the form.</span>
+                    <div class="success-text">
+                        <i class="fa-solid fa-circle-check" style="margin-top: 3px;"></i>
+                        <span><strong>Powered by Paystack:</strong> Your funds will reflect in your Access Wealth dashboard immediately after a successful transaction. No manual waiting required!</span>
                     </div>
                 </div>
 
                 <div class="form-card">
                  <form id="depositForm">
                         <div class="form-group">
-                            <label>Amount Sent (₦)</label>
+                            <label>Amount to Fund (₦)</label>
                             <div class="input-wrapper">
                                 <i class="fa-solid fa-naira-sign"></i>
-                                <input type="number" id="amount" class="form-control" placeholder="E.g. 3000" required min="3000">
+                                <input type="number" id="amount" class="form-control" placeholder="E.g. 3000" required min="1000">
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label>Sender Account Name (Proof of Payment)</label>
+                            <label>Email Address</label>
                             <div class="input-wrapper">
-                                <i class="fa-regular fa-user"></i>
-                                <input type="text" id="senderName" class="form-control" placeholder="E.g. John Doe" required>
+                                <i class="fa-regular fa-envelope"></i>
+                                <input type="email" id="email" class="form-control" placeholder="E.g. john@example.com" required>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn-submit" id="submitBtn">Confirm Payment</button>
+                        <button type="submit" class="btn-submit" id="submitBtn">Proceed to Payment</button>
                     </form>
                 </div>
             </div>
@@ -217,65 +225,69 @@
         </div>
     </div>
 
+    <!-- Ensure global.js is loaded so we can use its standardized apiFetchJson function -->
     <script src="global.js"></script>
     <script>
         // UI Navigation
         function toggleDesktopSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
         function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlayMenu').classList.toggle('active'); }
         function toggleDropdown(dropdownId, element) { element.classList.toggle('open'); document.getElementById(dropdownId).classList.toggle('show'); element.classList.toggle('active'); }
-        function logout() { localStorage.clear(); window.location.href = 'login.html'; }
-        
-        function copyText(text) {
-            navigator.clipboard.writeText(text);
-            showToast('success', "Account number copied!");
-        }
+        function logout() { localStorage.clear(); window.location.href = '/login.html'; }
 
-        window.onload = () => {
+        // Load User Details from global sync
+        window.addEventListener('globalSyncComplete', () => {
             const user = localStorage.getItem('username') || "Guest";
             document.getElementById('displayName').innerText = user.toUpperCase();
             document.getElementById('displayHandle').innerText = "@" + user.toLowerCase().replace(/\s+/g, '');
-            const avatarUrl = `https://ui-avatars.com/api/?name=${user}&background=d4af37&color=112A46&bold=true`;
-            document.getElementById('desktopAvatar').src = avatarUrl;
-            document.getElementById('mobileAvatar').src = avatarUrl;
-        };
+        });
 
-        // HANDLE DEPOSIT SUBMISSION
+        // HANDLE AUTOMATED PAYSTACK DEPOSIT SUBMISSION
         document.getElementById('depositForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const username = localStorage.getItem('username');
             const amount = document.getElementById('amount').value;
-            const senderName = document.getElementById('senderName').value; // Grab sender name
+            const email = document.getElementById('email').value;
             const btn = document.getElementById('submitBtn');
+            const token = localStorage.getItem('token');
 
-            if (!username) { showToast('error', "You must be logged in to fund your account."); return; }
+            if (!token) {
+                if(typeof showToast === 'function') showToast('error', 'You must be logged in to fund your account.');
+                else alert('You must be logged in to fund your account.');
+                window.location.href = '/login.html';
+                return;
+            }
 
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Initializing Secure Gateway...';
             btn.disabled = true;
 
             try {
-                const { ok, data, error } = await apiFetchJson('/deposit', {
+                // Use the globally injected apiFetchJson from your global.js
+                const { ok, data, error } = await window.apiFetchJson('/paystack/initialize', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: username,
-                        amount: amount,
-                        senderName: senderName
-                    })
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({ amount, email })
                 });
 
-                if (ok && data.success) {
-                    showToast('success', `✅ Request Submitted! Your deposit of ₦${amount} is now pending Admin Approval. Please check your dashboard later.`);
-                    window.location.href = 'dashboard.html'; // Send them back to dashboard to wait
+                if (ok && data.success && data.authorization_url) {
+                    // Redirect directly to Paystack's secure checkout
+                    window.location.href = data.authorization_url;
                 } else {
-                    showToast('error', data.error || error || "Deposit failed.");
-                    btn.innerHTML = 'Confirm Payment';
+                    const errorMsg = data.error || error || "Payment initialization failed.";
+                    if(typeof showToast === 'function') showToast('error', errorMsg);
+                    else alert(errorMsg);
+                    
+                    btn.innerHTML = 'Proceed to Payment';
                     btn.disabled = false;
                 }
             } catch (err) {
                 console.error("Deposit Error:", err);
-                showToast('error', "Server error. Please make sure your backend is running.");
-                btn.innerHTML = 'Confirm Payment';
+                if(typeof showToast === 'function') showToast('error', "Network error. Please try again.");
+                else alert("Network error. Please try again.");
+                
+                btn.innerHTML = 'Proceed to Payment';
                 btn.disabled = false;
             }
         });

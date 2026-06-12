@@ -66,12 +66,12 @@
         </form>
 
         <div class="auth-links">
-            Already have an Account? <a href="login.html">Login here</a>
+            Already have an Account? <a href="/login.html">Login here</a>
         </div>
     </div>
 
-    <script src="global.js"></script>
     <script>
+        // Auto-fill referral code from URL if it exists (e.g., ?ref=AW12345)
         const urlParams = new URLSearchParams(window.location.search);
         if(urlParams.has('ref')) {
             document.getElementById('regReferral').value = urlParams.get('ref');
@@ -88,30 +88,22 @@
             const referred_by = document.getElementById('regReferral').value;
 
             try {
-                const { ok, data, error } = await apiFetchJson('/register', {
+                const response = await fetch('https://access-wealth-backend-production.up.railway.app/api/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password, referred_by })
                 });
 
-                if (ok && data.success) {
-                    // SECURE STORE: Ensure token, user, and explicit username are saved.
-                    localStorage.setItem('token', data.token);
-                    
-                    if (data.user) {
-                        localStorage.setItem('user', JSON.stringify(data.user));
-                        localStorage.setItem('username', data.user.username || username);
-                    } else {
-                        localStorage.setItem('username', username);
-                    }
+                const data = await response.json();
 
-                    showToast('success', "Registration successful! Redirecting...");
-                    window.location.href = 'dashboard.html';
+                if (response.ok) {
+                    alert("Account created successfully! Please login.");
+                    window.location.href = '/login.html';
                 } else {
-                    showToast('error', data.error || error || "Registration failed.");
+                    alert(data.error || "Registration failed. Username might be taken.");
                 }
             } catch (err) {
-                showToast('error', "Server error. Ensure your backend is running.");
+                alert("Server error. Ensure your backend is running.");
             } finally {
                 btn.innerHTML = 'Create Account';
                 btn.disabled = false;

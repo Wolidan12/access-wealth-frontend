@@ -36,56 +36,18 @@
         .action-btn { background: transparent; border: 1px solid var(--border-light); color: var(--text-main); padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: 0.3s; font-size: 12px;}
         .action-btn:hover { background: #ff4d4d; border-color: #ff4d4d; color: #fff; }
 
-        .mobile-header { display: none; width: 100%; background: #0b1a2a; padding: 15px 20px; justify-content: space-between; align-items: center; position: fixed; top: 0; left: 0; z-index: 1200; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .mobile-header .menu-btn { font-size: 22px; color: #ff4d4d; cursor: pointer; }
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1150; }
-        .sidebar.mobile-hidden { left: -280px; }
-        .sidebar.active { left: 0; }
-        .card { overflow-x: auto; }
-        table { min-width: 700px; }
-
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            .mobile-header { display: flex; }
-            .sidebar { position: fixed; top: 0; left: -280px; width: 260px; height: 100vh; transition: left 0.3s ease; z-index: 1200; }
-            .main-content { margin-left: 0; width: 100%; padding: 100px 15px 15px 15px; }
-            .page-header { flex-direction: column; align-items: stretch; gap: 15px; }
-            .search-bar { width: 100%; }
-            th, td { padding: 12px 15px; font-size: 12px; }
-        }
     </style>
 </head>
 <body>
-    <div class="mobile-header">
-        <div><i class="fa-solid fa-shield-halved"></i> ADMIN PANEL</div>
-        <i class="fa-solid fa-bars menu-btn" onclick="toggleSidebar()"></i>
-    </div>
-    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
-    <div class="sidebar mobile-hidden" id="sidebar">
+    <div class="sidebar">
         <div class="logo-area"><i class="fa-solid fa-shield-halved"></i> ADMIN PANEL</div>
         <div class="nav-menu">
-            <a href="admin.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Overview</a>
-            <a href="admin-users.html" class="nav-item active"><i class="fa-solid fa-users"></i> Manage Users</a>
-            <a href="support-agent.html" class="nav-item"><i class="fa-solid fa-headset"></i> Support Desk</a>
-            <a href="login.html" class="nav-item" style="margin-top: 50px;"><i class="fa-solid fa-power-off"></i> Logout</a>
+            <a href="/admin.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Overview</a>
+            <a href="/admin-users.html" class="nav-item active"><i class="fa-solid fa-users"></i> Manage Users</a>
+            <a href="/admin-support.html" class="nav-item"><i class="fa-solid fa-headset"></i> Support Desk</a>
+            <a href="/login.html" class="nav-item" style="margin-top: 50px;"><i class="fa-solid fa-power-off"></i> Logout</a>
         </div>
     </div>
-    <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            sidebar.classList.toggle('active');
-            sidebar.classList.toggle('mobile-hidden');
-            overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
-        }
-        function closeSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            sidebar.classList.remove('active');
-            sidebar.classList.add('mobile-hidden');
-            overlay.style.display = 'none';
-        }
-    </script>
 
     <div class="main-content">
         <div class="page-header">

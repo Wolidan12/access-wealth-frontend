@@ -124,17 +124,17 @@
     <div class="sidebar collapsed" id="sidebar">
         <div class="logo-area"><i class="fa-solid fa-crown"></i><span>ACCESS WEALTH</span></div>
         <div class="nav-menu">
-            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> <span>Dashboard</span></a>
+            <a href="/dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> <span>Dashboard</span></a>
             <div class="nav-item has-dropdown open active" onclick="toggleDropdown('activityDropdown', this)">
                 <div class="nav-title-group"><i class="fa-solid fa-list-check main-icon"></i> <span>Daily Activity Earning</span></div>
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
             <div class="dropdown-container show" id="activityDropdown">
-                <a href="daily-tasks.html" class="sub-item active"><i class="fa-regular fa-clipboard main-icon"></i> Daily Tasks</a>
-                <a href="sponsored-posts.html" class="sub-item"><i class="fa-solid fa-bullhorn main-icon"></i> Sponsored Posts</a>
+                <a href="/daily-tasks.html" class="sub-item active"><i class="fa-regular fa-clipboard main-icon"></i> Daily Tasks</a>
+                <a href="/sponsored-posts.html" class="sub-item"><i class="fa-solid fa-bullhorn main-icon"></i> Sponsored Posts</a>
             </div>
-            <a href="activation.html" class="nav-item"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
-            <a href="spin-win.html" class="nav-item"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
+            <a href="/activation.html" class="nav-item"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
+            <a href="/spin-win.html" class="nav-item"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
             <div class="nav-item has-dropdown" onclick="toggleDropdown('marketplaceDropdown', this)">
                 <div class="nav-title-group"><i class="fa-solid fa-shop main-icon"></i> <span>Marketplace</span></div>
                 <i class="fa-solid fa-chevron-down chevron"></i>
@@ -143,9 +143,9 @@
                 <a href="#" class="nav-item sub-item"><i class="fa-solid fa-cart-shopping main-icon"></i> All Markets</a>
                 <a href="#" class="nav-item sub-item"><i class="fa-solid fa-plus main-icon"></i> Add Product</a>
             </div>
-            <a href="withdraw.html" class="nav-item"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
-            <a href="referral.html" class="nav-item"><i class="fa-solid fa-users main-icon"></i> <span>Top Earners</span></a>
-            <button onclick="window.location.href='activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
+            <a href="/withdraw.html" class="nav-item"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
+            <a href="/referral.html" class="nav-item"><i class="fa-solid fa-users main-icon"></i> <span>Top Earners</span></a>
+            <button onclick="window.location.href='/activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
             <a href="#" class="nav-item" onclick="logout()" style="color: #ff4d4d; margin-top: 30px;"><i class="fa-solid fa-power-off main-icon" style="color: #ff4d4d;"></i> <span>Logout</span></a>
         </div>
     </div>
@@ -165,7 +165,7 @@
                 <i class="fa-solid fa-lock"></i>
                 <h2>Activation Required</h2>
                 <p>You must fund your account and activate a premium plan to unlock Daily Tasks and Sponsored Posts.</p>
-                <button onclick="window.location.href='activation.html'">Activate Now</button>
+                <button onclick="window.location.href='/activation.html'">Activate Now</button>
             </div>
             
             <div class="page-header">
@@ -191,7 +191,7 @@
         function toggleDesktopSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
         function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlayMenu').classList.toggle('active'); }
         function toggleDropdown(dropdownId, element) { element.classList.toggle('open'); document.getElementById(dropdownId).classList.toggle('show'); element.classList.toggle('active'); }
-        function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+        function logout() { localStorage.clear(); window.location.href = '/login.html'; }
 
         // --- DYNAMIC PLAN PAYOUTS ---
         const planDailyEarnings = {
@@ -265,7 +265,7 @@
                 // Set the lock time
                 localStorage.setItem('lastTaskClaimTime', Date.now().toString());
 
-                showToast('success', `🎉 Task Completed! ₦${dailyPayout.toLocaleString()} has been added to your Task Earnings.`);
+                alert(`🎉 Task Completed! ₦${dailyPayout.toLocaleString()} has been added to your Task Earnings.`);
                 
                 startTimer(24 * 60 * 60 * 1000); // Start 24hr timer
             }, 1500); // Fake processing delay for realism

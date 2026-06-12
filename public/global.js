@@ -1,5 +1,5 @@
 // global.js - Master Sync Engine (Bypass Active)
-const BACKEND_HOST = 'https://accesswealth-backend-production.up.railway.app';
+const BACKEND_HOST = 'https://access-wealth-backend-production.up.railway.app';
 const API_BASE_URL = `${BACKEND_HOST}/api`;
 const GLOBAL_SYNC_SKIP_PAGES = ['login.html', 'register.html', 'admin.html', 'admin-support.html', 'forgot-password.html', 'reset-password.html'];
 

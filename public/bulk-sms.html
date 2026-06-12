@@ -66,10 +66,10 @@
     <div class="sidebar">
         <div class="logo-area"><i class="fa-solid fa-crown"></i>ACCESS WEALTH</div>
         <div class="nav-menu">
-            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> Dashboard</a>
-            <a href="bulk-sms.html" class="nav-item active"><i class="fa-solid fa-message main-icon"></i> Bulk SMS</a>
-            <a href="support.html" class="nav-item"><i class="fa-solid fa-headset main-icon"></i> Live Support</a>
-            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-arrow-left main-icon"></i> Back</a>
+            <a href="/dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> Dashboard</a>
+            <a href="/bulk-sms.html" class="nav-item active"><i class="fa-solid fa-message main-icon"></i> Bulk SMS</a>
+            <a href="/support.html" class="nav-item"><i class="fa-solid fa-headset main-icon"></i> Live Support</a>
+            <a href="/dashboard.html" class="nav-item"><i class="fa-solid fa-arrow-left main-icon"></i> Back</a>
         </div>
     </div>
 
@@ -127,14 +127,13 @@
         </div>
     </div>
 
-    <script src="global.js"></script>
     <script>
         // STRICT ACTIVATION CHECK
         window.onload = () => {
             const isActivated = localStorage.getItem('planActivated') === 'true';
             if (!isActivated) {
-                showToast('warning', "Premium Feature Locked! Please activate an account package to use Bulk SMS, Airtime, and Business Utilities.");
-                window.location.href = 'activation.html';
+                alert("Premium Feature Locked! Please activate an account package to use Bulk SMS, Airtime, and Business Utilities.");
+                window.location.href = '/activation.html';
             }
         };
 
@@ -166,21 +165,22 @@
         document.getElementById('smsForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = localStorage.getItem('username');
-            if (finalCost <= 0) { showToast('error', "Please add recipients and a message."); return; }
+            if (finalCost <= 0) return alert("Please add recipients and a message.");
 
             const btn = document.getElementById('submitBtn');
             btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
 
             try {
-                const { ok, data, error } = await apiFetchJson('/sms/send', {
+                const response = await fetch('https://access-wealth-backend-production.up.railway.app/api/sms/send', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, senderId: document.getElementById('senderId').value, cost: finalCost, count: finalRecipients })
                 });
-                if (ok && data.success) {
-                    showToast('success', `✅ Bulk SMS Sent Successfully!\n₦${finalCost.toLocaleString()} was deducted.`);
+                const data = await response.json();
+                if (response.ok) {
+                    alert(`✅ Bulk SMS Sent Successfully!\n₦${finalCost.toLocaleString()} was deducted.`);
                     localStorage.setItem('balance', data.newBalance); window.location.reload();
-                } else { showToast('error', data.error || error); }
-            } catch (err) { showToast('error', "Server error."); } 
+                } else { alert(data.error); }
+            } catch (err) { alert("Server error."); } 
             finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Bulk SMS'; }
         });
     </script>

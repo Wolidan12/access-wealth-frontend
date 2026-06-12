@@ -132,7 +132,7 @@
     <div class="sidebar" id="sidebar">
         <div class="logo-area"><i class="fa-solid fa-crown"></i><span>ACCESS WEALTH</span></div>
         <div class="nav-menu">
-            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> <span>Dashboard</span></a>
+            <a href="/dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> <span>Dashboard</span></a>
             
             <div class="nav-label">EARN</div>
             <div class="nav-item has-dropdown" onclick="toggleDropdown('activityDropdown', this)">
@@ -140,10 +140,10 @@
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
             <div class="dropdown-container" id="activityDropdown">
-                <a href="daily-tasks.html" class="nav-item sub-item"><i class="fa-regular fa-clipboard main-icon"></i> Daily Tasks</a>
-                <a href="sponsored-posts.html" class="nav-item sub-item"><i class="fa-solid fa-bullhorn main-icon"></i> Sponsored Posts</a>
+                <a href="/daily-tasks.html" class="nav-item sub-item"><i class="fa-regular fa-clipboard main-icon"></i> Daily Tasks</a>
+                <a href="/sponsored-posts.html" class="nav-item sub-item"><i class="fa-solid fa-bullhorn main-icon"></i> Sponsored Posts</a>
             </div>
-            <a href="spin-win.html" class="nav-item"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
+            <a href="/spin-win.html" class="nav-item"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
             
             <div class="nav-label">BUSINESS & UTILITIES</div>
             <div class="nav-item has-dropdown open active" onclick="toggleDropdown('payBillsDropdown', this)">
@@ -151,14 +151,14 @@
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
             <div class="dropdown-container show" id="payBillsDropdown">
-                <a href="airtime.html" class="nav-item sub-item active"><i class="fa-solid fa-mobile-screen-button main-icon"></i> Airtime</a>
-                <a href="data.html" class="nav-item sub-item"><i class="fa-solid fa-wifi main-icon"></i> Data</a>
+                <a href="/airtime.html" class="nav-item sub-item active"><i class="fa-solid fa-mobile-screen-button main-icon"></i> Airtime</a>
+                <a href="/data.html" class="nav-item sub-item"><i class="fa-solid fa-wifi main-icon"></i> Data</a>
             </div>
             
-            <a href="payment-links.html" class="nav-item"><i class="fa-solid fa-link main-icon"></i> <span>Payment Links</span></a>
-            <a href="invoice.html" class="nav-item"><i class="fa-solid fa-file-lines main-icon"></i> <span>Invoice</span></a>
-            <a href="bulk-sms.html" class="nav-item"><i class="fa-solid fa-message main-icon"></i> <span>Bulk SMS</span></a>
-            <a href="banner-ads.html" class="nav-item"><i class="fa-solid fa-desktop main-icon"></i> <span>Banner Ads</span></a>
+            <a href="/payment-links.html" class="nav-item"><i class="fa-solid fa-link main-icon"></i> <span>Payment Links</span></a>
+            <a href="/invoice.html" class="nav-item"><i class="fa-solid fa-file-lines main-icon"></i> <span>Invoice</span></a>
+            <a href="/bulk-sms.html" class="nav-item"><i class="fa-solid fa-message main-icon"></i> <span>Bulk SMS</span></a>
+            <a href="/banner-ads.html" class="nav-item"><i class="fa-solid fa-desktop main-icon"></i> <span>Banner Ads</span></a>
             
             <div class="nav-label">MARKETPLACE</div>
             <div class="nav-item has-dropdown" onclick="toggleDropdown('marketplaceDropdown', this)">
@@ -171,16 +171,16 @@
             </div>
             
             <div class="nav-label">WALLET & ACCOUNT</div>
-            <a href="deposit.html" class="nav-item"><i class="fa-solid fa-money-bill-transfer main-icon"></i> <span>Fund Account</span></a>
-            <a href="withdraw.html" class="nav-item"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
-            <a href="activation.html" class="nav-item"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
-            <a href="referral.html" class="nav-item"><i class="fa-solid fa-users main-icon"></i> <span>Top Earners</span></a>
+            <a href="/deposit.html" class="nav-item"><i class="fa-solid fa-money-bill-transfer main-icon"></i> <span>Fund Account</span></a>
+            <a href="/withdraw.html" class="nav-item"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
+            <a href="/activation.html" class="nav-item"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
+            <a href="/referral.html" class="nav-item"><i class="fa-solid fa-users main-icon"></i> <span>Top Earners</span></a>
             
-            <a href="https://t.me/accesswealthofficial" target="_blank" rel="noopener noreferrer" class="nav-item" style="color: #0088cc; margin-top: 15px;">
+            <a href="wealthofficial" target="_blank" class="nav-item" style="color: #0088cc; margin-top: 15px;">
                 <i class="fa-brands fa-telegram main-icon" style="color: #0088cc;"></i> <span>Telegram Community</span>
             </a>
             
-            <button onclick="window.location.href='activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
+            <button onclick="window.location.href='/activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
             <a href="#" class="nav-item" onclick="logout()" style="color: #ff4d4d; margin-top: 20px;"><i class="fa-solid fa-power-off main-icon" style="color: #ff4d4d;"></i> <span>Logout</span></a>
         </div>
     </div>
@@ -254,7 +254,7 @@
     <script>
         function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); }
         function toggleDropdown(dropdownId, element) { element.classList.toggle('open'); document.getElementById(dropdownId).classList.toggle('show'); element.classList.toggle('active'); }
-        function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+        function logout() { localStorage.clear(); window.location.href = '/login.html'; }
 
         let selectedNetwork = "MTN"; // Default
         let currentBalance = 0;
@@ -293,16 +293,18 @@
             const amount = parseFloat(document.getElementById('amount').value);
             const btn = document.getElementById('submitBtn');
 
-                if (!username) { showToast('error', "You must be logged in."); return; }
-                if (phone.length < 11) { showToast('error', "Please enter a valid 11-digit phone number."); return; }
-                if (amount > currentBalance) { showToast('error', "Insufficient Balance! Please fund your Account to buy this airtime."); return; }
+            if (!username) return alert("You must be logged in.");
+            if (phone.length < 11) return alert("Please enter a valid 11-digit phone number.");
+            if (amount > currentBalance) {
+                return alert("Insufficient Balance! Please fund your Account to buy this airtime.");
+            }
 
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
             btn.disabled = true;
 
             try {
                 // Send request to the backend (We will add this route to server.js next)
-                const { ok, data, error } = await apiFetchJson('/bills/airtime', {
+                const response = await bills/airtime', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -313,18 +315,20 @@
                     })
                 });
 
-                if (ok && data.success) {
-                    showToast('success', `✅ Success! ₦${amount} Airtime sent to ${phone} (${selectedNetwork}).`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(`✅ Success! ₦${amount} Airtime has been sent to ${phone} (${selectedNetwork}).`);
                     localStorage.setItem('balance', data.newBalance); // Update local balance
                     window.location.reload(); // Refresh to show new balance
                 } else {
-                    showToast('error', data.error || error || "Failed to process airtime.");
+                    alert(data.error || "Failed to process airtime.");
                     btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Recharge Now';
                     btn.disabled = false;
                 }
             } catch (err) {
                 console.error("Airtime Error:", err);
-                    showToast('error', "Server error. Please ensure your backend server is running.");
+                alert("Server error. Please ensure your backend server is running.");
                 btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Recharge Now';
                 btn.disabled = false;
             }

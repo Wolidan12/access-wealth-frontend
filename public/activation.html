@@ -104,11 +104,11 @@
     <div class="sidebar" id="sidebar">
         <div class="logo-area"><i class="fa-solid fa-crown"></i> ACCESS WEALTH</div>
         <div class="nav-menu">
-            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-border-all"></i> Dashboard</a>
-            <a href="deposit.html" class="nav-item"><i class="fa-solid fa-money-bill-transfer"></i> Fund Account</a>
-            <a href="activation.html" class="nav-item active"><i class="fa-solid fa-bolt"></i> Upgrade Plan</a>
-            <a href="withdraw.html" class="nav-item"><i class="fa-solid fa-wallet"></i> Withdraw</a>
-            <a href="support.html" class="nav-item" style="margin-top:20px;"><i class="fa-solid fa-headset"></i> Support</a>
+            <a href="/dashboard.html" class="nav-item"><i class="fa-solid fa-border-all"></i> Dashboard</a>
+            <a href="/deposit.html" class="nav-item"><i class="fa-solid fa-money-bill-transfer"></i> Fund Account</a>
+            <a href="/activation.html" class="nav-item active"><i class="fa-solid fa-bolt"></i> Upgrade Plan</a>
+            <a href="/withdraw.html" class="nav-item"><i class="fa-solid fa-wallet"></i> Withdraw</a>
+            <a href="/support.html" class="nav-item" style="margin-top:20px;"><i class="fa-solid fa-headset"></i> Support</a>
         </div>
     </div>
 
@@ -309,7 +309,7 @@
             <div class="warning-text" id="modalWarning">
                 <i class="fa-solid fa-circle-exclamation"></i> Insufficient funds in Deposit Wallet. Please fund your Account to proceed.
             </div>
-            <a href="deposit.html" class="btn-fund" id="btnFund" style="display: none;">Fund Account Now</a>
+            <a href="/deposit.html" class="btn-fund" id="btnFund" style="display: none;">Fund Account Now</a>
 
             <div class="modal-btns">
                 <button class="btn-cancel" onclick="closeModal()">Cancel</button>
@@ -371,23 +371,25 @@
             btn.disabled = true;
 
             try {
-                const { ok, data, error } = await apiFetchJson('/activate', {
+                // USING 'https://access-wealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
+                const res = await fetch('https://access-wealth-backend-production.up.railway.app/api/activate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: username, name: activePlan, price: activePrice })
                 });
+                const data = await res.json();
 
-                if(ok && data.success) {
-                    showToast('success', `Success! Your account is now upgraded to ${activePlan}.`);
+                if(data.success) {
+                    alert(`Success! Your account is now upgraded to ${activePlan}.`);
                     localStorage.setItem('balance', data.newBalance); 
-                    window.location.href = 'dashboard.html'; // Redirect back to see the new balances
+                    window.location.href = '/dashboard.html'; // Redirect back to see the new balances
                 } else {
-                    showToast('error', data.error || error || 'Upgrade failed');
+                    alert(data.error);
                     btn.innerText = "Confirm Upgrade";
                     btn.disabled = false;
                 }
             } catch(e) {
-                showToast('error', "Server Connection Error. Please ensure your terminal is running.");
+                alert("Server Connection Error. Please ensure your terminal is running.");
                 btn.innerText = "Confirm Upgrade";
                 btn.disabled = false;
             }
