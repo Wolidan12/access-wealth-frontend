@@ -1,7 +1,7 @@
 // global.js - Master Sync Engine (Bypass Active)
 const BACKEND_HOST = 'https://access-wealth-backend-production.up.railway.app';
 const API_BASE_URL = `${BACKEND_HOST}/api`;
-const GLOBAL_SYNC_SKIP_PAGES = ['login.html', 'register.html', 'admin.html', 'admin-support.html', 'forgot-password.html', 'reset-password.html'];
+const GLOBAL_SYNC_SKIP_PAGES = ['login.html', 'register.html', 'admin.html', 'support-agent.html', 'forgot-password.html', 'reset-password.html'];
 
 async function apiFetch(path, options = {}) {
     const url = path.startsWith('http') ? path : `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
@@ -19,7 +19,17 @@ async function apiFetch(path, options = {}) {
 }
 
 async function apiFetchJson(path, options = {}) {
-    const response = await apiFetch(path, options);
+    const token = localStorage.getItem('token');
+    const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers
+    };
+    
+    if (token && !path.includes('/login') && !path.includes('/register')) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await apiFetch(path, { ...options, headers });
     let data;
     try {
         data = await response.json();
@@ -52,11 +62,7 @@ async function globalSync() {
     const token = localStorage.getItem('token');
     const currentUrl = window.location.href;
 
-    // ==========================================
-    // SELF-HEALING AUTH CHECK
-    // ==========================================
     if (!username) {
-        // Fallback 1: Extract from stored user object
         if (storedUser) {
             try {
                 const parsedUser = JSON.parse(storedUser);
@@ -67,7 +73,6 @@ async function globalSync() {
             } catch (e) {}
         }
         
-        // Fallback 2: Decode JWT Payload directly if token exists
         if (!username && token) {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
@@ -81,13 +86,10 @@ async function globalSync() {
 
     const isLoggedIn = Boolean(username || token);
 
-    // Skip data sync for auth/admin pages. 
-    // FIXED: Allows users to always access login/register forms without forced redirects.
     if (!isPageAllowedForSync()) {
         return;
     }
 
-    // Redirect to login ONLY if all recovery methods failed on protected pages
     if (!isLoggedIn || !username) {
         if (!currentUrl.includes('login.html') && !currentUrl.includes('register.html')) {
             window.location.href = 'login.html';
@@ -95,22 +97,25 @@ async function globalSync() {
         return;
     }
 
-    // 2. SUPPORT AGENT ROUTING: Send the CSR to their specific portal
-    if (username === 'Support_Agent') {
-        if (!window.location.href.includes('support-agent.html')) { 
-            window.location.href = 'support-agent.html'; 
-        }
+    // ✅ FIX: Use role instead of hardcoded username
+    const role = localStorage.getItem('role');
+    if (role === 'support' && !window.location.href.includes('support-agent.html')) { 
+        window.location.href = 'support-agent.html'; 
         return; 
     }
 
+    // Admin check (already correct)
+    if (role === 'admin' && !window.location.href.includes('admin.html')) {
+        window.location.href = 'admin.html';
+        return;
+    }
+
     try {
-        // 3. FETCH: Pull latest data from backend using the shared API host
         const { ok, data, error } = await apiFetchJson(`/user/${username}?t=${Date.now()}`);
         
         if (ok && data.success) {
             const u = data.user;
             
-            // 4. STORE: Keep browser memory perfectly up to date
             localStorage.setItem('balance', u.balance || 0); 
             localStorage.setItem('taskEarnings', u.taskEarnings || 0); 
             localStorage.setItem('daily_earnings', u.daily_earnings || 0); 
@@ -119,27 +124,22 @@ async function globalSync() {
             localStorage.setItem('activePackage', u.activePackage || 'Standard');
             localStorage.setItem('my_referral_id', u.my_referral_id || u.referralId || '');
 
-            // 5. UPDATE UI GLOBALLY
             safeUpdate('sidebarName', username.toUpperCase());
             safeUpdate('cardName', username);
             safeUpdate('displayName', username.toUpperCase());
             safeUpdate('displayHandle', "@" + username.toLowerCase().replace(/\s+/g, ''));
             
-            // Set Avatars globally
             const avatarUrl = `https://ui-avatars.com/api/?name=${username}&background=d4af37&color=112A46&bold=true`;
             if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').src = avatarUrl;
             if (document.getElementById('cardAvatar')) document.getElementById('cardAvatar').src = avatarUrl;
             if (document.getElementById('desktopAvatar')) document.getElementById('desktopAvatar').src = avatarUrl;
             if (document.getElementById('mobileAvatar')) document.getElementById('mobileAvatar').src = avatarUrl;
             
-            // Set Referral Link globally
             const refLinkInput = document.getElementById('refLinkInput');
             if (refLinkInput) refLinkInput.value = `${window.location.origin}/register.html?ref=${u.my_referral_id}`;
 
-            // Update Balances globally
             safeMoneyUpdate('liveBalanceDisplay', u.balance || 0); 
 
-            // Update Premium Status globally
             if(u.planActivated === 'true') {
                 safeUpdate('sidebarStatus', `Premium (${u.activePackage})`);
                 safeUpdate('accountStatusText', `Premium account (${u.activePackage})`);
@@ -151,7 +151,6 @@ async function globalSync() {
                 if(activateBtn) activateBtn.style.display = 'none';
             }
 
-            // Tell the dashboard the sync is complete so it can update the 5-wallet card
             window.dispatchEvent(new Event('globalSyncComplete'));
         }
     } catch (err) { 
@@ -159,20 +158,22 @@ async function globalSync() {
     }
 }
 
-// Helpers
 function safeUpdate(id, text) { const el = document.getElementById(id); if (el) el.innerText = text; }
 function safeMoneyUpdate(id, amount) { const el = document.getElementById(id); if (el) el.innerText = amount.toLocaleString(undefined, {minimumFractionDigits: 2}); }
-function logout() { localStorage.clear(); window.location.href = 'login.html'; }
 
-// Run the engine immediately when ANY page loads
+// FIXED: Proper logout function that clears all storage
+window.logout = function() { 
+    localStorage.clear(); 
+    sessionStorage.clear();
+    window.location.href = '/login.html'; 
+};
+
 document.addEventListener('DOMContentLoaded', globalSync);
 
-// Inject a lightweight shared mobile navigation for pages that load `global.js`
 function injectMobileNav() {
-    if (document.getElementById('mobile-nav-toggle')) return; // already injected
+    if (document.getElementById('mobile-nav-toggle')) return;
 
     const links = [
-        { href: 'index.html', label: 'Home' },
         { href: 'dashboard.html', label: 'Dashboard' },
         { href: 'activation.html', label: 'Activate' },
         { href: 'airtime.html', label: 'Airtime' },
@@ -182,10 +183,9 @@ function injectMobileNav() {
         { href: 'referral.html', label: 'Referral' }
     ];
 
-    // Add admin-only link when role indicates admin
     try {
         if (localStorage.getItem('role') === 'admin') links.push({ href: 'admin.html', label: 'Admin' });
-        if (localStorage.getItem('username') === 'Support_Agent') links.push({ href: 'support-agent.html', label: 'Agent' });
+        if (localStorage.getItem('role') === 'support') links.push({ href: 'support-agent.html', label: 'Agent' });
     } catch (_) {}
 
     const panel = document.createElement('div');
@@ -200,7 +200,6 @@ function injectMobileNav() {
     panel.innerHTML = html.join('');
     document.body.appendChild(panel);
 
-    // CSS
     const style = document.createElement('style');
     style.innerHTML = `
     #mobile-nav-toggle{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--primary-yellow, #d4af37);color:#071022;border:none;padding:12px 16px;border-radius:999px;box-shadow:0 8px 20px rgba(0,0,0,0.35);display:none}
@@ -212,12 +211,10 @@ function injectMobileNav() {
     @media (max-width: 768px){#mobile-nav-toggle{display:block}}`;
     document.head.appendChild(style);
 
-    // Interaction with persistence
     const toggle = document.getElementById('mobile-nav-toggle');
     const navPanel = document.getElementById('mobile-nav-panel');
     let open = localStorage.getItem('mobileNavOpen') === 'true';
 
-    // restore state
     if (open) {
         navPanel.classList.add('open');
         navPanel.setAttribute('aria-hidden', 'false');
@@ -238,7 +235,6 @@ function injectMobileNav() {
         }
     });
 
-    // Close nav when user selects a link
     navPanel.addEventListener('click', (e) => {
         if (e.target && e.target.tagName === 'A') {
             navPanel.classList.remove('open');
@@ -250,9 +246,6 @@ function injectMobileNav() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', injectMobileNav);
-
-// Small professional touches: toast notifications and consistent document title
 function showToast(type, message, timeout = 4000) {
     try {
         let container = document.getElementById('global-toast-container');
@@ -274,7 +267,6 @@ function showToast(type, message, timeout = 4000) {
         toast.style.padding = '10px 14px';
         toast.style.borderRadius = '8px';
         toast.style.color = '#071022';
-        // theme-aware colors
         const bgMap = {
             success: 'var(--success,#2ecc71)',
             error: 'var(--danger,#ff4d4d)',
@@ -287,15 +279,12 @@ function showToast(type, message, timeout = 4000) {
         toast.style.opacity = '0';
         toast.style.transition = 'opacity 200ms ease, transform 200ms ease';
         toast.style.transform = 'translateY(-6px)';
-        // accessibility
         toast.setAttribute('role', 'status');
         toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
 
         container.appendChild(toast);
-        // force layout then animate
         requestAnimationFrame(() => { toast.style.opacity = '1'; toast.style.transform = 'translateY(0)'; });
 
-        // pause-on-hover with remaining time
         let start = Date.now();
         let remaining = timeout;
         let timeoutId = setTimeout(hide, remaining);
@@ -323,7 +312,6 @@ function showToast(type, message, timeout = 4000) {
 
 window.showToast = showToast;
 
-// Promise-based confirm modal replacement for `confirm()` to avoid blocking alerts
 function showConfirm(message, title = 'Please Confirm') {
     return new Promise((resolve) => {
         try {
@@ -343,7 +331,6 @@ function showConfirm(message, title = 'Please Confirm') {
                 document.body.appendChild(container);
             }
 
-            // Overlay
             const overlay = document.createElement('div');
             overlay.className = 'confirm-overlay';
             overlay.style.position = 'absolute';
@@ -417,15 +404,13 @@ function showConfirm(message, title = 'Please Confirm') {
             box.appendChild(msg);
             box.appendChild(actions);
 
-            // container clear and append
-            container.innerHTML = ''; // remove any previous
+            container.innerHTML = '';
             container.appendChild(overlay);
             container.appendChild(box);
 
-            // Accessibility & focus management
             const previousActive = document.activeElement;
             const focusable = [btnNo, btnYes];
-            let focusIndex = 1; // default focus on confirm
+            let focusIndex = 1;
             btnYes.focus();
 
             function cleanUp(val) {
@@ -440,13 +425,11 @@ function showConfirm(message, title = 'Please Confirm') {
             function keyHandler(e) {
                 if (e.key === 'Escape') { e.preventDefault(); cleanUp(false); }
                 if (e.key === 'Tab') {
-                    // simple focus trap between our two buttons
                     e.preventDefault();
                     focusIndex = (focusIndex + (e.shiftKey ? -1 : 1) + focusable.length) % focusable.length;
                     focusable[focusIndex].focus();
                 }
                 if (e.key === 'Enter') {
-                    // Enter should confirm when focused outside inputs
                     if (document.activeElement === btnNo) { cleanUp(false); }
                     else { cleanUp(true); }
                 }
@@ -462,7 +445,6 @@ function showConfirm(message, title = 'Please Confirm') {
 
 window.showConfirm = showConfirm;
 
-// Inject small CSS for toasts and confirm modal for consistent styling
 function injectGlobalUIStyles() {
     if (document.getElementById('global-ui-styles')) return;
     const css = `
@@ -482,10 +464,8 @@ function injectGlobalUIStyles() {
     document.head.appendChild(style);
 }
 
-// Ensure styles are available early
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectGlobalUIStyles); else injectGlobalUIStyles();
 
-// Standardize page titles slightly for a professional touch
 function ensureConsistentTitle() {
     try {
         const base = 'Access Wealth';
@@ -494,3 +474,4 @@ function ensureConsistentTitle() {
 }
 
 document.addEventListener('DOMContentLoaded', ensureConsistentTitle);
+document.addEventListener('DOMContentLoaded', injectMobileNav);

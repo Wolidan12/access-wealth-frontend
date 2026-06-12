@@ -7,18 +7,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { 
-            --bg-body: #070d14; 
-            --bg-cards: #112A46; 
-            --text-main: #ffffff; 
-            --primary-yellow: #d4af37; 
-        }
+        :root { --bg-body: #070d14; --bg-cards: #112A46; --text-main: #ffffff; --primary-yellow: #d4af37; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
         .sidebar { width: 300px; background: var(--bg-cards); border-right: 1px solid rgba(212, 175, 55, 0.15); display: flex; flex-direction: column; }
         .logo-area { padding: 20px; font-size: 18px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--primary-yellow); text-align: center;}
-        
         .user-list { flex-grow: 1; overflow-y: auto; padding: 10px; }
         .user-item { padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.3s; border: 1px solid transparent; }
         .user-item:hover, .user-item.active { background: rgba(212, 175, 55, 0.1); border-color: var(--primary-yellow); }
@@ -26,7 +20,6 @@
         
         .chat-area { flex-grow: 1; display: flex; flex-direction: column; background: var(--bg-body); }
         .chat-header { padding: 20px; background: var(--bg-cards); border-bottom: 1px solid rgba(212, 175, 55, 0.15); display: flex; justify-content: space-between; align-items: center;}
-        
         .chat-box { flex-grow: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
         .message { max-width: 60%; padding: 12px 18px; border-radius: 15px; font-size: 14px; line-height: 1.5; }
         .msg-user { background: rgba(255,255,255,0.05); align-self: flex-start; border-bottom-left-radius: 2px; }
@@ -38,6 +31,7 @@
         .btn-send { background: var(--primary-yellow); color: #0b1421; border: none; padding: 0 25px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; }
         .btn-send:hover:not(:disabled) { transform: scale(1.05); background: #fff; }
         .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
+        .logout-btn { padding: 15px; background: #ff4d4d; color: #fff; border: none; cursor: pointer; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; width: 100%; }
     </style>
 </head>
 <body>
@@ -47,7 +41,7 @@
         <div class="user-list" id="userList">
             <p style="text-align: center; color: #8a99af; font-size: 13px; margin-top: 20px;">Checking Connection</p>
         </div>
-        <button onclick="logout()" style="padding: 15px; background: #ff4d4d; color: #fff; border: none; cursor: pointer; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Logout Agent</button>
+        <button class="logout-btn" onclick="logout()">Logout Agent</button>
     </div>
 
     <div class="chat-area">
@@ -63,32 +57,29 @@
         </div>
     </div>
 
+    <script src="global.js"></script>
     <script>
         let currentUser = null;
 
-        // Security Check: Make sure ONLY the Support Agent is here
         window.onload = () => {
-            if (localStorage.getItem('username') !== 'Support_Agent') {
+            const role = localStorage.getItem('role');
+            if (role !== 'support') {
                 window.location.href = '/login.html';
                 return;
             }
             loadUsers();
-            setInterval(loadUsers, 5000); 
+            setInterval(loadUsers, 5000);
         };
 
         async function loadUsers() {
             try {
-                // USING https://accesswealth-backend-production.up.railway.accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-                const res = await fetch('https://access-wealth-backend-production.up.railway.app/api/support/users');
-                const data = await res.json();
-                
-                if(data.success) {
+                const { ok, data } = await window.apiFetchJson('/api/support/users');
+                if (ok && data.success) {
                     const list = document.getElementById('userList');
-                    if(data.users.length === 0) {
-                        list.innerHTML = '<p style="text-align: center; color: #8a99af; font-size: 13px; margin-top: 20px;">✅ Online. No messages yet.</p>';
+                    if (!data.users.length) {
+                        list.innerHTML = '<p style="text-align: center; color: #8a99af; margin-top: 20px;">✅ Online. No messages yet.</p>';
                         return;
                     }
-                    
                     list.innerHTML = '';
                     data.users.forEach(u => {
                         const div = document.createElement('div');
@@ -99,8 +90,7 @@
                     });
                 }
             } catch(e) {
-                // If it fails to connect to the backend, show a red error
-                document.getElementById('userList').innerHTML = '<p style="text-align: center; color: #ff4d4d; font-size: 14px; margin-top: 20px; font-weight:bold;"><i class="fa-solid fa-triangle-exclamation"></i> Backend Offline.<br>Restart your Terminal!</p>';
+                document.getElementById('userList').innerHTML = '<p style="text-align: center; color: #ff4d4d; margin-top: 20px;"><i class="fa-solid fa-triangle-exclamation"></i> Backend Offline.<br>Restart your Terminal!</p>';
             }
         }
 
@@ -110,22 +100,19 @@
             document.getElementById('msgInput').disabled = false;
             document.getElementById('sendBtn').disabled = false;
             loadMessages();
-            // Start pulling live messages for this specific user
-            setInterval(loadMessages, 3000); 
+            setInterval(loadMessages, 3000);
         }
 
         async function loadMessages() {
-            if(!currentUser) return;
+            if (!currentUser) return;
             try {
-                // USING https://accesswealth-backend-production.up.railway.accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-                const res = await fetch(`https://accesswealth-backend-production.up.railway.accesswealth-backend-production.up.railway.app:5000/api/chat/history/${currentUser}`);
-                const data = await res.json();
-                if(data.success) {
+                const { ok, data } = await window.apiFetchJson(`/api/chat/history/${currentUser}`);
+                if (ok && data.success) {
                     const box = document.getElementById('chatBox');
                     box.innerHTML = '';
                     data.messages.forEach(msg => {
                         const div = document.createElement('div');
-                        div.className = `message ${msg.sender === 'Support_Agent' ? 'msg-support' : 'msg-user'}`;
+                        div.className = `message ${msg.sender === 'support' ? 'msg-support' : 'msg-user'}`;
                         div.innerText = msg.message;
                         box.appendChild(div);
                     });
@@ -136,23 +123,18 @@
 
         async function sendMessage() {
             const input = document.getElementById('msgInput');
-            if(!input.value.trim() || !currentUser) return;
-
+            if (!input.value.trim() || !currentUser) return;
             const text = input.value;
             input.value = '';
-
-            // USING https://accesswealth-backend-production.up.railway.accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-            const res = await fetch('https://access-wealth-backend-production.up.railway.app/api/chat/send', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: currentUser, sender: 'Support_Agent', message: text })
+            await window.apiFetchJson('/api/chat/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: currentUser, message: text })
             });
             loadMessages();
         }
 
-        function logout() { 
-            localStorage.clear(); 
-            window.location.href = '/login.html'; 
-        }
+        function logout() { localStorage.clear(); window.location.href = '/login.html'; }
     </script>
 </body>
 </html>
