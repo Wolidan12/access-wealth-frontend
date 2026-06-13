@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Referrals & Top Earners | access Wealth</title>
+    <title>Referrals & Top Earners | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* (same styles as before – keep unchanged) */
         :root { --bg-body: #070d14; --bg-cards: #112A46; --text-main: #ffffff; --text-muted: #8a99af; --primary-yellow: #d4af37; --card-gradient: linear-gradient(135deg, #112A46 0%, #0b1a2a 100%); --border-light: rgba(212, 175, 55, 0.15); --sidebar-width: 260px; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-body); color: var(--text-main); display: flex; overflow-x: hidden; }
-
-        /* Sidebar & Header (Shared) */
         .sidebar { width: var(--sidebar-width); background: var(--bg-cards); height: 100vh; position: fixed; border-right: 1px solid var(--border-light); display: flex; flex-direction: column; }
         .logo-area { padding: 25px 20px; display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 700; color: var(--text-main); border-bottom: 1px solid var(--border-light); margin-bottom: 10px; }
         .logo-area i { color: var(--primary-yellow); font-size: 26px; }
@@ -25,40 +24,30 @@
         .avatar { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--primary-yellow); }
         .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding-top: 75px; }
         .content-area { padding: 40px; }
-
         .mobile-header { display: none; width: 100%; background: var(--bg-cards); padding: 15px 25px; justify-content: space-between; align-items: center; position: fixed; top: 0; z-index: 1000; border-bottom: 1px solid var(--border-light); }
         .mobile-header i.menu-btn { font-size: 24px; color: var(--primary-yellow); cursor: pointer; }
-
-        /* Page Specific */
         .page-title { font-size: 24px; margin-bottom: 5px; color: var(--text-main); }
         .page-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 30px; }
-
         .top-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
         .stat-card { background: var(--card-gradient); border-radius: 15px; padding: 25px; border: 1px solid var(--border-light); display: flex; align-items: center; gap: 20px;}
         .stat-icon { width: 60px; height: 60px; border-radius: 50%; background: rgba(212, 175, 55, 0.1); color: var(--primary-yellow); display: flex; justify-content: center; align-items: center; font-size: 24px; }
-        
         .link-box { background: var(--bg-cards); border-radius: 15px; padding: 25px; border: 1px dashed var(--primary-yellow); margin-bottom: 40px; }
         .link-box h3 { font-size: 16px; margin-bottom: 15px; }
         .input-group { display: flex; background: rgba(0,0,0,0.2); border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; }
         .input-group input { flex-grow: 1; padding: 15px; background: transparent; border: none; color: var(--primary-yellow); outline: none; font-family: monospace; font-size: 14px; }
         .input-group button { background: var(--primary-yellow); color: #0b1421; border: none; padding: 0 25px; font-weight: 600; cursor: pointer; transition: 0.3s;}
         .input-group button:hover { background: #fff; }
-
-        /* Leaderboard Table */
         .leaderboard-container { background: var(--bg-cards); border-radius: 15px; padding: 30px; border: 1px solid var(--border-light); }
         .leaderboard-container h3 { font-size: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
         .leaderboard-container h3 i { color: var(--primary-yellow); }
-        
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; padding: 15px; color: var(--text-muted); font-size: 13px; text-transform: uppercase; border-bottom: 1px solid var(--border-light); }
         td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 15px; }
         tr:last-child td { border-bottom: none; }
-        
         .rank { font-weight: bold; color: var(--primary-yellow); width: 50px; }
         .user-cell { display: flex; align-items: center; gap: 12px; font-weight: 500; }
         .user-cell img { width: 35px; height: 35px; border-radius: 50%; }
         .amount { font-weight: 600; color: var(--text-main); }
-
         @media (max-width: 768px) {
             .sidebar { left: -260px; }
             .sidebar.active { left: 0; z-index: 1100;}
@@ -67,12 +56,11 @@
             .main-content { margin-left: 0 !important; width: 100% !important; }
             .content-area { padding: 90px 20px 30px; }
             .top-grid { grid-template-columns: 1fr; }
-            th:nth-child(3), td:nth-child(3) { display: none; } /* Hide 'Referrals' column on mobile to save space */
+            th:nth-child(3), td:nth-child(3) { display: none; }
         }
     </style>
 </head>
 <body>
-
     <div class="mobile-header">
         <i class="fa-solid fa-bars-staggered menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('active')"></i>
         <div style="font-weight: 700; font-size: 16px;">Access <span style="color: var(--primary-yellow);">WEALTH</span></div>
@@ -110,11 +98,11 @@
             <div class="top-grid">
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fa-solid fa-users-viewfinder"></i></div>
-                    <div><p style="font-size:12px; color:var(--text-muted);">Total Referrals</p><h2 style="font-size:28px;">0</h2></div>
+                    <div><p style="font-size:12px; color:var(--text-muted);">Total Referrals</p><h2 style="font-size:28px;" id="totalReferrals">0</h2></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fa-solid fa-sack-dollar"></i></div>
-                    <div><p style="font-size:12px; color:var(--text-muted);">Referral Earnings</p><h2 style="font-size:28px;">₦0.00</h2></div>
+                    <div><p style="font-size:12px; color:var(--text-muted);">Referral Earnings</p><h2 style="font-size:28px;" id="referralEarnings">₦0.00</h2></div>
                 </div>
             </div>
 
@@ -128,70 +116,83 @@
 
             <div class="leaderboard-container">
                 <h3><i class="fa-solid fa-trophy"></i> Top Earners This Week</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>User</th>
-                            <th>Referrals</th>
-                            <th>Total Earned</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="rank">#1</td>
-                            <td class="user-cell"><img src="https://ui-avatars.com/api/?name=David+O&background=d4af37&color=112A46"> David O.</td>
-                            <td>142</td>
-                            <td class="amount">₦ 284,000</td>
-                        </tr>
-                        <tr>
-                            <td class="rank">#2</td>
-                            <td class="user-cell"><img src="https://ui-avatars.com/api/?name=Sarah+K&background=d4af37&color=112A46"> Sarah K.</td>
-                            <td>98</td>
-                            <td class="amount">₦ 196,000</td>
-                        </tr>
-                        <tr>
-                            <td class="rank">#3</td>
-                            <td class="user-cell"><img src="https://ui-avatars.com/api/?name=Michael+T&background=d4af37&color=112A46"> Michael T.</td>
-                            <td>75</td>
-                            <td class="amount">₦ 150,000</td>
-                        </tr>
-                        <tr>
-                            <td class="rank" style="color:var(--text-muted);">#4</td>
-                            <td class="user-cell"><img src="https://ui-avatars.com/api/?name=Grace+A&background=222&color=fff"> Grace A.</td>
-                            <td>41</td>
-                            <td class="amount">₦ 82,000</td>
-                        </tr>
-                        <tr>
-                            <td class="rank" style="color:var(--text-muted);">#5</td>
-                            <td class="user-cell"><img src="https://ui-avatars.com/api/?name=Emmanuel+B&background=222&color=fff"> Emmanuel B.</td>
-                            <td>29</td>
-                            <td class="amount">₦ 58,000</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table id="leaderboardTable">
+                        <thead>
+                            <tr><th>Rank</th><th>User</th><th>Referrals</th><th>Total Earned</th></tr>
+                        </thead>
+                        <tbody id="leaderboardBody">
+                            <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-
         </div>
     </div>
 
+    <script src="global.js"></script>
     <script>
-        window.onload = () => {
-            const user = localStorage.getItem('username') || "Guest";
-            const refId = localStorage.getItem('referralId') || "AW1234";
-            
-            document.getElementById('displayName').innerText = user.toUpperCase();
-            document.getElementById('desktopAvatar').src = `https://ui-avatars.com/api/?name=${user}&background=d4af37&color=112A46&bold=true`;
-            
-            document.getElementById('refLinkInput').value = `https://accesswealthhq.com/register?ref=${refId}`;
-        };
+        async function loadReferralData() {
+            const username = localStorage.getItem('username');
+            if (!username) return;
+            try {
+                const { ok, data } = await window.apiFetchJson(`/referral/stats/${username}`);
+                if (ok && data.success) {
+                    document.getElementById('totalReferrals').innerText = data.totalReferrals || 0;
+                    document.getElementById('referralEarnings').innerText = `₦${(data.earnings || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                }
+                const { ok: lbOk, data: lbData } = await window.apiFetchJson('/referral/leaderboard');
+                if (lbOk && lbData.success) {
+                    const tbody = document.getElementById('leaderboardBody');
+                    tbody.innerHTML = '';
+                    if (!lbData.leaderboard || lbData.leaderboard.length === 0) {
+                        tbody.innerHTML = '<td><td colspan="4" style="text-align:center;">No referrals yet.倍<double';
+                    } else {
+                        lbData.leaderboard.forEach((user, idx) => {
+                            const row = `<tr>
+                                <td class="rank">#${idx+1}</td>
+                                <td class="user-cell"><img src="https://ui-avatars.com/api/?name=${user.username}&background=222&color=fff"> ${user.username}</td>
+                                <td>${user.referral_count || 0}</td>
+                                <td class="amount">₦ ${(user.total_earned || 0).toLocaleString()}</td>
+                            </tr>`;
+                            tbody.innerHTML += row;
+                        });
+                    }
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function setReferralLink() {
+            let refId = localStorage.getItem('my_referral_id');
+            if (!refId || refId === 'undefined' || refId === 'null') {
+                // Try to fetch from backend directly
+                const username = localStorage.getItem('username');
+                if (username) {
+                    const { ok, data } = await window.apiFetchJson(`/user/${username}`);
+                    if (ok && data.success && data.user.my_referral_id) {
+                        refId = data.user.my_referral_id;
+                        localStorage.setItem('my_referral_id', refId);
+                    }
+                }
+            }
+            if (refId && refId !== 'undefined' && refId !== 'null') {
+                document.getElementById('refLinkInput').value = `https://accesswealthhq.com/register?ref=${refId}`;
+            } else {
+                document.getElementById('refLinkInput').value = 'https://accesswealthhq.com/register?ref=ERROR_NO_REFERRAL_ID';
+            }
+        }
+
+        function updateUserDisplay() {
+            const username = localStorage.getItem('username') || 'Guest';
+            document.getElementById('displayName').innerText = username.toUpperCase();
+            document.getElementById('desktopAvatar').src = `https://ui-avatars.com/api/?name=${username}&background=d4af37&color=112A46&bold=true`;
+        }
 
         function copyRefLink(event) {
             const copyText = document.getElementById("refLinkInput");
             copyText.select();
-            copyText.setSelectionRange(0, 99999); 
+            copyText.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(copyText.value);
-            
             const btn = event.target;
             const originalText = btn.innerText;
             btn.innerText = "Copied!";
@@ -200,6 +201,17 @@
         }
 
         function logout() { localStorage.clear(); window.location.href = '/login.html'; }
+
+        window.onload = () => {
+            updateUserDisplay();
+            setReferralLink();
+            loadReferralData();
+            window.addEventListener('globalSyncComplete', () => {
+                updateUserDisplay();
+                setReferralLink();
+                loadReferralData();
+            });
+        };
     </script>
 </body>
 </html>

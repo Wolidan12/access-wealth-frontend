@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password | Access Wealth</title>
+    <title>Profile Settings | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Same style as above – reuse */
         :root { --bg-body: #070d14; --bg-cards: #112A46; --text-main: #ffffff; --text-muted: #8a99af; --primary-yellow: #d4af37; --border-light: rgba(212, 175, 55, 0.15); --sidebar-width: 260px; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
@@ -40,89 +39,78 @@
         <div class="logo-area"><i class="fa-solid fa-crown"></i> ACCESS WEALTH</div>
         <div class="nav-menu">
             <a href="/dashboard.html" class="nav-item"><i class="fa-solid fa-border-all"></i> Dashboard</a>
-            <a href="/profile-settings.html" class="nav-item"><i class="fa-regular fa-user"></i> Profile Setting</a>
+            <a href="/profile-settings.html" class="nav-item active"><i class="fa-regular fa-user"></i> Profile Setting</a>
             <a href="/bank-details.html" class="nav-item"><i class="fa-solid fa-building-columns"></i> Set Bank Details</a>
-            <a href="/reset-password.html" class="nav-item active"><i class="fa-solid fa-key"></i> Reset Password</a>
+            <a href="/reset-password.html" class="nav-item"><i class="fa-solid fa-key"></i> Reset Password</a>
             <a href="#" class="nav-item" onclick="logout()" style="margin-top: 30px; color: #ff4d4d;"><i class="fa-solid fa-power-off"></i> Logout</a>
         </div>
     </div>
 
     <div class="main-content">
         <div class="page-header">
-            <h1>Reset Password</h1>
-            <p>Change your account password</p>
+            <h1>Profile Settings</h1>
+            <p>Update your personal information</p>
         </div>
         <div class="form-card">
             <div id="alertMsg" class="alert"></div>
-            <form id="passwordForm">
+            <form id="profileForm">
                 <div class="form-group">
-                    <label>Current Password</label>
-                    <input type="password" id="currentPassword" class="form-control" placeholder="Enter your current password" required>
+                    <label>Full Name</label>
+                    <input type="text" id="fullName" class="form-control" placeholder="Enter your full name">
                 </div>
                 <div class="form-group">
-                    <label>New Password</label>
-                    <input type="password" id="newPassword" class="form-control" placeholder="Minimum 6 characters" required>
+                    <label>Phone Number</label>
+                    <input type="tel" id="phone" class="form-control" placeholder="Enter your phone number">
                 </div>
-                <div class="form-group">
-                    <label>Confirm New Password</label>
-                    <input type="password" id="confirmPassword" class="form-control" placeholder="Re-enter new password" required>
-                </div>
-                <button type="submit" class="btn-submit" id="submitBtn">Change Password</button>
+                <button type="submit" class="btn-submit" id="submitBtn">Save Changes</button>
             </form>
         </div>
     </div>
 
     <script src="global.js"></script>
     <script>
-        document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+        async function loadProfile() {
+            const username = localStorage.getItem('username');
+            if (!username) return;
+            const { ok, data } = await window.apiFetchJson(`/user/profile/${username}`);
+            if (ok && data.success && data.profile) {
+                document.getElementById('fullName').value = data.profile.full_name || '';
+                document.getElementById('phone').value = data.profile.phone || '';
+            }
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const alertDiv = document.getElementById('alertMsg');
             alertDiv.style.display = 'none';
-
-            const current = document.getElementById('currentPassword').value;
-            const newPass = document.getElementById('newPassword').value;
-            const confirm = document.getElementById('confirmPassword').value;
-
-            if (newPass !== confirm) {
-                alertDiv.className = 'alert error';
-                alertDiv.innerText = 'New password and confirmation do not match';
-                alertDiv.style.display = 'block';
-                return;
-            }
-            if (newPass.length < 6) {
-                alertDiv.className = 'alert error';
-                alertDiv.innerText = 'New password must be at least 6 characters';
-                alertDiv.style.display = 'block';
-                return;
-            }
-
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
             btn.disabled = true;
 
-            const { ok, data } = await window.apiFetchJson('/user/change-password', {
+            const full_name = document.getElementById('fullName').value;
+            const phone = document.getElementById('phone').value;
+
+            const { ok, data } = await window.apiFetchJson('/user/update-profile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ current_password: current, new_password: newPass })
+                body: JSON.stringify({ full_name, phone })
             });
 
             if (ok && data.success) {
                 alertDiv.className = 'alert success';
-                alertDiv.innerText = data.message + ' You will be logged out.';
+                alertDiv.innerText = data.message;
                 alertDiv.style.display = 'block';
-                setTimeout(() => {
-                    localStorage.clear();
-                    window.location.href = '/login.html';
-                }, 2000);
+                setTimeout(() => alertDiv.style.display = 'none', 3000);
             } else {
                 alertDiv.className = 'alert error';
-                alertDiv.innerText = data.error || 'Failed to change password';
+                alertDiv.innerText = data.error || 'Failed to update profile';
                 alertDiv.style.display = 'block';
-                btn.innerHTML = 'Change Password';
-                btn.disabled = false;
             }
+            btn.innerHTML = 'Save Changes';
+            btn.disabled = false;
         });
 
+        window.onload = () => { loadProfile(); };
         function logout() { localStorage.clear(); window.location.href = '/login.html'; }
     </script>
 </body>

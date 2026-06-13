@@ -1,5 +1,5 @@
 // global.js - Master Sync Engine (Bypass Active)
-const BACKEND_HOST = 'https://access-wealth-backend-production.up.railway.app';
+const BACKEND_HOST = 'https://access-wealth-backend-production.up.railway.app'; // ← update if different
 const API_BASE_URL = `${BACKEND_HOST}/api`;
 const GLOBAL_SYNC_SKIP_PAGES = ['login.html', 'register.html', 'admin.html', 'support-agent.html', 'forgot-password.html', 'reset-password.html'];
 
@@ -97,14 +97,11 @@ async function globalSync() {
         return;
     }
 
-    // ✅ FIX: Use role instead of hardcoded username
     const role = localStorage.getItem('role');
     if (role === 'support' && !window.location.href.includes('support-agent.html')) { 
         window.location.href = 'support-agent.html'; 
         return; 
     }
-
-    // Admin check (already correct)
     if (role === 'admin' && !window.location.href.includes('admin.html')) {
         window.location.href = 'admin.html';
         return;
@@ -122,7 +119,8 @@ async function globalSync() {
             localStorage.setItem('affiliate_balance', u.affiliate_balance || 0); 
             localStorage.setItem('planActivated', u.planActivated === true || u.planActivated === 'true' ? 'true' : 'false');
             localStorage.setItem('activePackage', u.activePackage || 'Standard');
-            localStorage.setItem('my_referral_id', u.my_referral_id || u.referralId || '');
+            localStorage.setItem('my_referral_id', u.my_referral_id || u.referralId || ''); // ✅ FIX: store referral ID
+            localStorage.setItem('referred_by', u.referred_by || '');
 
             safeUpdate('sidebarName', username.toUpperCase());
             safeUpdate('cardName', username);
@@ -161,7 +159,6 @@ async function globalSync() {
 function safeUpdate(id, text) { const el = document.getElementById(id); if (el) el.innerText = text; }
 function safeMoneyUpdate(id, amount) { const el = document.getElementById(id); if (el) el.innerText = amount.toLocaleString(undefined, {minimumFractionDigits: 2}); }
 
-// FIXED: Proper logout function that clears all storage
 window.logout = function() { 
     localStorage.clear(); 
     sessionStorage.clear();
