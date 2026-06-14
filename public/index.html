@@ -1,12 +1,361 @@
-echo '<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=/login.html">
-    <title>Access Wealth</title>
-    <script>window.location.href = "/login.html";</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Wealth – Africa’s fastest digital earnings platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #070d14;
+            color: #ffffff;
+            line-height: 1.5;
+        }
+
+        /* Navigation */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #d4af37 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #d4af37;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 16px;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d4af37;
+            padding: 8px 20px;
+            border-radius: 40px;
+            color: #d4af37;
+            font-weight: 600;
+            transition: 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-outline:hover {
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+            border: none;
+            padding: 8px 24px;
+            border-radius: 40px;
+            color: #0b1421;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section with Image */
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 0 20px;
+            flex-wrap: wrap;
+        }
+
+        .hero-content {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .hero-content h1 {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #d4af37 80%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero-content p {
+            font-size: 18px;
+            color: #8a99af;
+            margin-bottom: 32px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .hero-image {
+            flex: 1;
+            min-width: 280px;
+            text-align: center;
+        }
+
+        .hero-image img {
+            max-width: 100%;
+            border-radius: 24px;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.5);
+        }
+
+        /* Features Section */
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .section-sub {
+            text-align: center;
+            color: #8a99af;
+            margin-bottom: 48px;
+            font-size: 18px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .feature-card {
+            background: rgba(17, 42, 70, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 32px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            transition: 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: #d4af37;
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .feature-icon i {
+            font-size: 28px;
+            color: #d4af37;
+        }
+
+        .feature-card h3 {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: #8a99af;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 60px;
+            background: rgba(17, 42, 70, 0.4);
+            border-radius: 60px;
+            padding: 40px 20px;
+            margin: 80px auto;
+            max-width: 1000px;
+            text-align: center;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+        }
+
+        .stat-item h2 {
+            font-size: 36px;
+            color: #d4af37;
+        }
+
+        .stat-item p {
+            font-size: 14px;
+            color: #8a99af;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* CTA */
+        .cta {
+            background: linear-gradient(135deg, rgba(17,42,70,0.9), rgba(7,13,20,0.95));
+            margin: 60px 20px 40px;
+            padding: 60px 20px;
+            border-radius: 40px;
+            text-align: center;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .cta h2 {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .cta p {
+            color: #8a99af;
+            margin-bottom: 32px;
+        }
+
+        .footer {
+            border-top: 1px solid rgba(212, 175, 55, 0.1);
+            padding: 40px 20px;
+            text-align: center;
+            color: #8a99af;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                text-align: center;
+            }
+            .hero {
+                flex-direction: column;
+                text-align: center;
+            }
+            .hero-buttons {
+                justify-content: center;
+            }
+            .hero-content h1 {
+                font-size: 36px;
+            }
+            .stats-row {
+                gap: 30px;
+                border-radius: 30px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <p>Redirecting to <a href="/login.html">login page</a>...</p>
+    <nav class="navbar">
+        <div class="logo">ACCESS WEALTH</div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#stats">Stats</a>
+            <a href="#cta">Get Started</a>
+        </div>
+        <div class="auth-buttons">
+            <a href="/login.html" class="btn-outline">Sign In</a>
+            <a href="/register.html" class="btn-primary">Create Free Account</a>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hero with your custom design image -->
+        <div class="hero">
+            <div class="hero-content">
+                <h1>Africa's fastest<br>digital earnings platform</h1>
+                <p>Earn daily, refer friends, and withdraw instantly. Secure. Instant. Reliable.</p>
+                <div class="hero-buttons">
+                    <a href="/register.html" class="btn-primary" style="padding: 12px 32px;">Get Started</a>
+                    <a href="/login.html" class="btn-outline" style="padding: 12px 32px;">Sign In</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <!-- Image is stored in the 'public' folder, Netlify serves it at root level -->
+                <img src="/access-wealth-hero.png" alt="Access Wealth platform design">
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div id="features">
+            <div class="section-title">What we offer</div>
+            <div class="section-sub">Everything you need to grow, all on one platform.</div>
+            <div class="features-grid">
+                <div class="feature-card"><div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div><h3>Daily Task Earnings</h3><p>Complete simple tasks and earn daily. Your earning potential grows with your plan.</p></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fa-solid fa-users"></i></div><h3>50% Referral Commissions</h3><p>Invite friends and earn 50% every time they activate a plan.</p></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fa-solid fa-dharmachakra"></i></div><h3>Spin & Win</h3><p>Daily free spins with multipliers up to 5x. Win real cash every day.</p></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fa-solid fa-bolt"></i></div><h3>Instant Withdrawals</h3><p>Referral earnings are available for instant payout. Task earnings paid twice monthly.</p></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div><h3>Bank‑Grade Security</h3><p>256‑bit encryption and secure payment gateways. Your funds are always safe.</p></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div><h3>Business Tools</h3><p>Bulk SMS, payment links, invoices – all powered by your earnings.</p></div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div id="stats">
+            <div class="stats-row">
+                <div class="stat-item"><h2>150K+</h2><p>Total Users</p></div>
+                <div class="stat-item"><h2>₦80M+</h2><p>Total Payouts</p></div>
+                <div class="stat-item"><h2>99.9%</h2><p>Uptime</p></div>
+                <div class="stat-item"><h2>24/7</h2><p>Support</p></div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div id="cta">
+            <div class="cta">
+                <h2>Ready to start earning?</h2>
+                <p>Create your free account in under 60 seconds. No documents, no waiting.</p>
+                <a href="/register.html" class="btn-primary" style="padding: 14px 40px; font-size: 16px;">Create Free Account</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 Access Wealth. All rights reserved.</p>
+        <p style="margin-top: 8px;">Invest. Grow. Promote.</p>
+    </footer>
 </body>
-</html>' > public/index.html
+</html>
