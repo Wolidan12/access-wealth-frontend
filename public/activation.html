@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upgrade Plan | <title>Upgrade Plan | Access Wealth</title>
+    <title>Upgrade Plan | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -115,11 +115,11 @@
     <div class="main-content">
         <div class="page-header">
             <h1>Select Your Wealth Plan</h1>
-            <p>Upgrade your plan</p> amount to unlock higher daily earnings, instant affiliate payouts, and massive multipliers.</p>
+            <p>Upgrade your plan to unlock higher daily earnings, instant affiliate payouts, and massive multipliers.</p>
         </div>
 
         <div class="plans-grid">
-            
+            <!-- All plan cards – identical to your original (kept intact) -->
             <div class="plan-card">
                 <div class="plan-name">Access Starter</div>
                 <div class="plan-price">₦3,000</div>
@@ -293,7 +293,6 @@
                 </ul>
                 <button class="btn-activate" onclick="openModal('Access Infinity', 500000)">Activate Plan</button>
             </div>
-
         </div>
     </div>
 
@@ -329,7 +328,6 @@
             activePlan = planName;
             activePrice = price;
             
-            // Get live balance from browser memory
             const currentBal = parseFloat(localStorage.getItem('balance') || 0);
             
             document.getElementById('modalPlanName').innerText = planName;
@@ -340,7 +338,6 @@
             const fundBtn = document.getElementById('btnFund');
             const confirmBtn = document.getElementById('confirmBtn');
 
-            // Logic Check: Does the user have enough money?
             if (currentBal < price) {
                 warning.style.display = 'block';
                 fundBtn.style.display = 'block';
@@ -364,32 +361,39 @@
 
         async function processActivation() {
             const username = localStorage.getItem('username');
-            if(!username) return;
+            const token = localStorage.getItem('token');
+            
+            if (!username || !token) {
+                alert("You must be logged in to activate a plan.");
+                window.location.href = '/login.html';
+                return;
+            }
 
             const btn = document.getElementById('confirmBtn');
-            btn.innerText = "Activating";
+            btn.innerText = "Activating...";
             btn.disabled = true;
 
             try {
-                // USING 'https://access-wealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-                const res = await fetch('https://access-wealth-backend-production.up.railway.app/api/activate', {
+                // ✅ Use apiFetchJson which automatically adds the JWT token
+                const { ok, data } = await window.apiFetchJson('/activate', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: username, name: activePlan, price: activePrice })
                 });
-                const data = await res.json();
 
-                if(data.success) {
-                    alert(`Success! Your account is now upgraded to ${activePlan}.`);
-                    localStorage.setItem('balance', data.newBalance); 
-                    window.location.href = '/dashboard.html'; // Redirect back to see the new balances
+                if (ok && data.success) {
+                    alert(`✅ Success! Your account is now upgraded to ${activePlan}.`);
+                    localStorage.setItem('balance', data.newBalance);
+                    // Force a refresh of all wallet data
+                    if (typeof globalSync === 'function') globalSync();
+                    window.location.href = '/dashboard.html';
                 } else {
-                    alert(data.error);
+                    alert(data.error || "Activation failed. Please ensure you have sufficient funds and try again.");
                     btn.innerText = "Confirm Upgrade";
                     btn.disabled = false;
                 }
             } catch(e) {
-                alert("Server Connection Error. Please ensure your terminal is running.");
+                console.error("Activation error:", e);
+                alert("Server error. Please try again later.");
                 btn.innerText = "Confirm Upgrade";
                 btn.disabled = false;
             }
