@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test global.js</title>
+    <script src="global.js"></script>
+</head>
+<body>
+    <h1>Test Page</h1>
+    <p>If you see this page and are NOT redirected to login, global.js loaded correctly.</p>
+    <p>Token: <span id="token"></span></p>
+    <script>
+        const token = localStorage.getItem('token');
+        document.getElementById('token').innerText = token ? token.substring(0,20)+'...' : 'NO TOKEN';
+        console.log('Token exists?', !!token);
+    </script>
+</body>
+</html>
