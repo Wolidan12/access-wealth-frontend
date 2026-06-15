@@ -27,7 +27,6 @@
             position: relative;
         }
 
-        /* Users Sidebar */
         .users-sidebar {
             position: fixed;
             top: 0;
@@ -115,14 +114,6 @@
             font-size: 14px;
         }
 
-        .badge {
-            background: #ff4d4d;
-            color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 10px;
-        }
-
         .last-msg {
             font-size: 11px;
             color: #8a99af;
@@ -132,7 +123,6 @@
             text-overflow: ellipsis;
         }
 
-        /* Chat Area */
         .chat-area {
             flex: 1;
             display: flex;
@@ -289,7 +279,6 @@
 </head>
 <body>
     <div class="agent-container">
-        <!-- Users Sidebar -->
         <div class="users-sidebar" id="usersSidebar">
             <div class="sidebar-header">
                 <h3><i class="fa-solid fa-headset"></i> Support Dashboard</h3>
@@ -304,7 +293,6 @@
             <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-sign-out-alt"></i> Logout</button>
         </div>
 
-        <!-- Chat Area -->
         <div class="chat-area">
             <div class="chat-header">
                 <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
@@ -348,22 +336,17 @@
 
         async function loadAllUsers() {
             try {
-                // Use /admin/users to get ALL registered users
-                const { ok, data } = await window.apiFetchJson('/admin/users');
-                if (ok && data.success) {
+                const { ok, data } = await window.apiFetchJson('/support/all-users');
+                if (ok && data.success && data.users) {
                     allUsers = data.users;
                     renderUsersList(allUsers);
                 } else {
-                    // Fallback to /support/users if admin endpoint fails
-                    const { ok: ok2, data: data2 } = await window.apiFetchJson('/support/users');
-                    if (ok2 && data2.success) {
-                        allUsers = data2.users.map(u => ({ username: u.user_id }));
-                        renderUsersList(allUsers);
-                    }
+                    console.error("Failed to load users:", data);
+                    document.getElementById('usersList').innerHTML = '<div class="empty-state">Unable to load users. Please refresh.</div>';
                 }
             } catch (e) {
                 console.error("Load users error:", e);
-                document.getElementById('usersList').innerHTML = '<div class="empty-state">Failed to load users. Make sure you are logged in as admin.</div>';
+                document.getElementById('usersList').innerHTML = '<div class="empty-state">Error loading users. Check console.</div>';
             }
         }
 
@@ -376,7 +359,7 @@
 
             container.innerHTML = '';
             users.forEach(user => {
-                const username = user.username || user.user_id;
+                const username = user.username;
                 if (!username) return;
                 
                 const div = document.createElement('div');
@@ -395,10 +378,7 @@
 
         function filterUsers() {
             const searchTerm = document.getElementById('searchUsers').value.toLowerCase();
-            const filtered = allUsers.filter(user => {
-                const username = user.username || user.user_id;
-                return username && username.toLowerCase().includes(searchTerm);
-            });
+            const filtered = allUsers.filter(user => user.username.toLowerCase().includes(searchTerm));
             renderUsersList(filtered);
         }
 
@@ -411,7 +391,6 @@
             document.getElementById('messageInput').disabled = false;
             document.getElementById('sendBtn').disabled = false;
             
-            // Update active state
             document.querySelectorAll('.user-item').forEach(item => {
                 if (item.getAttribute('data-username') === username) {
                     item.classList.add('active');
@@ -424,7 +403,6 @@
             await loadMessages();
             messageInterval = setInterval(loadMessages, 5000);
             
-            // Close sidebar on mobile after selection
             if (window.innerWidth < 768) {
                 document.getElementById('usersSidebar').classList.remove('open');
             }
