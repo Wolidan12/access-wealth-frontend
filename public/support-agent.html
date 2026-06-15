@@ -3,66 +3,356 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Support Portal | Access Wealth</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Support Agent Dashboard | Access Wealth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --bg-body: #070d14; --bg-cards: #112A46; --text-main: #ffffff; --primary-yellow: #d4af37; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        .sidebar { width: 300px; background: var(--bg-cards); border-right: 1px solid rgba(212, 175, 55, 0.15); display: flex; flex-direction: column; }
-        .logo-area { padding: 20px; font-size: 18px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--primary-yellow); text-align: center;}
-        .user-list { flex-grow: 1; overflow-y: auto; padding: 10px; }
-        .user-item { padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.3s; border: 1px solid transparent; }
-        .user-item:hover, .user-item.active { background: rgba(212, 175, 55, 0.1); border-color: var(--primary-yellow); }
-        .user-item h4 { font-size: 14px; margin-bottom: 5px; }
-        .user-item .badge { background: #ff4d4d; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: 8px; }
-        
-        .chat-area { flex-grow: 1; display: flex; flex-direction: column; background: var(--bg-body); }
-        .chat-header { padding: 20px; background: var(--bg-cards); border-bottom: 1px solid rgba(212, 175, 55, 0.15); display: flex; justify-content: space-between; align-items: center;}
-        .chat-header h3 { font-size: 16px; }
-        .chat-box { flex-grow: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .message { max-width: 60%; padding: 12px 18px; border-radius: 15px; font-size: 14px; line-height: 1.5; }
-        .msg-user { background: rgba(255,255,255,0.05); align-self: flex-start; border-bottom-left-radius: 2px; }
-        .msg-support { background: rgba(212, 175, 55, 0.2); align-self: flex-end; border-bottom-right-radius: 2px; border: 1px solid var(--primary-yellow); }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #070d14;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-        .chat-input-area { padding: 20px; background: var(--bg-cards); display: flex; gap: 15px; border-top: 1px solid rgba(212, 175, 55, 0.15); }
-        .chat-input { flex-grow: 1; padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #fff; outline: none; }
-        .chat-input:focus { border-color: var(--primary-yellow); }
-        .btn-send { background: var(--primary-yellow); color: #0b1421; border: none; padding: 0 25px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; }
-        .btn-send:hover:not(:disabled) { transform: scale(1.05); background: #fff; }
-        .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
-        .logout-btn { padding: 15px; background: #ff4d4d; color: #fff; border: none; cursor: pointer; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; width: 100%; }
-        .status-indicator { font-size: 12px; color: #2ecc71; margin-left: 10px; }
+        /* Main Layout */
+        .agent-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar - Users List */
+        .users-sidebar {
+            width: 320px;
+            background: #0a1622;
+            border-right: 1px solid rgba(212, 175, 55, 0.15);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            color: #8a99af;
+        }
+
+        .search-box {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: #d4af37;
+        }
+
+        .search-box .search-icon {
+            position: relative;
+        }
+
+        .search-box .search-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8a99af;
+        }
+
+        .users-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .user-card {
+            background: rgba(17, 42, 70, 0.4);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .user-card:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: rgba(212, 175, 55, 0.3);
+        }
+
+        .user-card.active {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: #d4af37;
+        }
+
+        .user-card .user-name {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .user-card .user-name h4 {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .user-card .user-name .badge {
+            background: #ff4d4d;
+            color: white;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .user-card .last-message {
+            font-size: 12px;
+            color: #8a99af;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-card .time {
+            font-size: 10px;
+            color: #6c7a8a;
+            margin-top: 5px;
+        }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #070d14;
+        }
+
+        .chat-header {
+            padding: 20px 30px;
+            background: #0a1622;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header .user-info h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .chat-header .user-info p {
+            font-size: 12px;
+            color: #2ecc71;
+        }
+
+        .chat-header .status i {
+            color: #2ecc71;
+            font-size: 12px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message.user {
+            background: rgba(255, 255, 255, 0.05);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.agent {
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message .sender {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-bottom: 4px;
+        }
+
+        .message .time {
+            font-size: 10px;
+            opacity: 0.5;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .chat-input-area {
+            padding: 20px 30px;
+            background: #0a1622;
+            border-top: 1px solid rgba(212, 175, 55, 0.15);
+            display: flex;
+            gap: 15px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 14px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 30px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .chat-input-area input:focus {
+            border-color: #d4af37;
+        }
+
+        .chat-input-area button {
+            background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            color: #0b1421;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .chat-input-area button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        .chat-input-area button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #8a99af;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+        .logout-btn {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 12px;
+            margin: 15px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #e04343;
+        }
+
+        @media (max-width: 768px) {
+            .users-sidebar {
+                width: 280px;
+                position: absolute;
+                left: -280px;
+                z-index: 1000;
+                transition: left 0.3s;
+            }
+            .users-sidebar.open {
+                left: 0;
+            }
+            .message {
+                max-width: 85%;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="agent-container">
+        <!-- Users Sidebar -->
+        <div class="users-sidebar" id="usersSidebar">
+            <div class="sidebar-header">
+                <h2><i class="fa-solid fa-headset"></i> Support Dashboard</h2>
+                <p>Manage all user conversations</p>
+            </div>
+            <div class="search-box">
+                <div class="search-icon">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="searchUsers" placeholder="Search users by name...">
+                </div>
+            </div>
+            <div class="users-list" id="usersList">
+                <div style="text-align: center; padding: 20px;">Loading users...</div>
+            </div>
+            <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-sign-out-alt"></i> Logout</button>
+        </div>
 
-    <div class="sidebar">
-        <div class="logo-area"><i class="fa-solid fa-headset"></i> Support Portal</div>
-        <div class="user-list" id="userList">
-            <p style="text-align: center; color: #8a99af; font-size: 13px; margin-top: 20px;">Loading users...</p>
-        </div>
-        <button class="logout-btn" onclick="logout()">Logout Agent</button>
-    </div>
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <div class="user-info">
+                    <h3 id="activeUserName">Select a user</h3>
+                    <p id="activeUserStatus"><i class="fa-solid fa-circle"></i> Select a conversation to start</p>
+                </div>
+                <div class="status">
+                    <i class="fa-solid fa-circle"></i> Online
+                </div>
+            </div>
 
-    <div class="chat-area">
-        <div class="chat-header">
-            <h3 id="activeChatUser">Select a user to start chatting</h3>
-        </div>
-        <div class="chat-box" id="chatBox">
-            <p style="text-align: center; color: #8a99af; margin-top: auto; margin-bottom: auto;">Waiting for selection</p>
-        </div>
-        <div class="chat-input-area">
-            <input type="text" id="msgInput" class="chat-input" placeholder="Type a response to the user" disabled>
-            <button class="btn-send" id="sendBtn" onclick="sendMessage()" disabled><i class="fa-solid fa-paper-plane"></i></button>
+            <div class="chat-messages" id="chatMessages">
+                <div class="empty-state">
+                    <i class="fa-solid fa-comments" style="font-size: 48px; opacity: 0.3; margin-bottom: 15px; display: block;"></i>
+                    <p>Select a user from the left panel to start chatting</p>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" id="messageInput" placeholder="Type your response here..." disabled>
+                <button id="sendBtn" onclick="sendMessage()" disabled><i class="fa-solid fa-paper-plane"></i> Send</button>
+            </div>
         </div>
     </div>
 
     <script src="global.js"></script>
     <script>
         let currentUser = null;
+        let allUsers = [];
         let messageInterval = null;
 
         window.onload = () => {
@@ -71,106 +361,180 @@
                 window.location.href = '/login.html';
                 return;
             }
-            loadUsers();
-            // Refresh user list every 10 seconds
-            setInterval(loadUsers, 10000);
+            loadAllUsers();
+            setInterval(loadAllUsers, 10000);
         };
 
-        async function loadUsers() {
+        async function loadAllUsers() {
             try {
-                const { ok, data } = await window.apiFetchJson('/support/users');
+                // Get all users from admin endpoint
+                const { ok, data } = await window.apiFetchJson('/admin/users');
                 if (ok && data.success) {
-                    const list = document.getElementById('userList');
-                    if (!data.users || data.users.length === 0) {
-                        list.innerHTML = '<p style="text-align: center; color: #8a99af; margin-top: 20px;">✅ No active chats yet.</p>';
-                        return;
-                    }
-                    list.innerHTML = '';
-                    data.users.forEach(u => {
-                        const div = document.createElement('div');
-                        div.className = `user-item ${currentUser === u.user_id ? 'active' : ''}`;
-                        div.innerHTML = `<h4><i class="fa-solid fa-user"></i> ${u.user_id}</h4>`;
-                        div.onclick = () => selectUser(u.user_id);
-                        list.appendChild(div);
-                    });
+                    allUsers = data.users;
+                    renderUsersList(allUsers);
                 }
-            } catch(e) {
+            } catch (e) {
                 console.error("Load users error:", e);
-                document.getElementById('userList').innerHTML = '<p style="text-align: center; color: #ff4d4d; margin-top: 20px;"><i class="fa-solid fa-triangle-exclamation"></i> Backend Offline. Please check your server.</p>';
+                document.getElementById('usersList').innerHTML = '<div style="text-align: center; padding: 20px; color: #ff4d4d;">Failed to load users</div>';
             }
         }
 
-        function selectUser(username) {
+        function renderUsersList(users) {
+            const container = document.getElementById('usersList');
+            if (!users || users.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 20px;">No users found</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            users.forEach(user => {
+                const userCard = document.createElement('div');
+                userCard.className = `user-card ${currentUser === user.username ? 'active' : ''}`;
+                userCard.setAttribute('data-username', user.username);
+                userCard.innerHTML = `
+                    <div class="user-name">
+                        <h4><i class="fa-solid fa-user-circle"></i> ${user.username}</h4>
+                        <span class="badge" id="badge-${user.username}" style="display: none;">New</span>
+                    </div>
+                    <div class="last-message" id="lastMsg-${user.username}">Click to start conversation</div>
+                    <div class="time" id="lastTime-${user.username}"></div>
+                `;
+                userCard.onclick = () => selectUser(user.username);
+                container.appendChild(userCard);
+            });
+        }
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchUsers').value.toLowerCase();
+            const filtered = allUsers.filter(user => user.username.toLowerCase().includes(searchTerm));
+            renderUsersList(filtered);
+        }
+
+        document.getElementById('searchUsers').addEventListener('input', filterUsers);
+
+        async function selectUser(username) {
             currentUser = username;
-            document.getElementById('activeChatUser').innerText = `Chatting with: ${username}`;
-            document.getElementById('msgInput').disabled = false;
+            
+            // Update active state in sidebar
+            document.querySelectorAll('.user-card').forEach(card => {
+                if (card.getAttribute('data-username') === username) {
+                    card.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+
+            // Update header
+            document.getElementById('activeUserName').innerText = username;
+            document.getElementById('activeUserStatus').innerHTML = '<i class="fa-solid fa-circle"></i> Active conversation';
+            
+            // Enable input
+            document.getElementById('messageInput').disabled = false;
             document.getElementById('sendBtn').disabled = false;
             
             // Clear previous interval
             if (messageInterval) clearInterval(messageInterval);
             
-            loadMessages();
+            // Load messages
+            await loadMessages();
             messageInterval = setInterval(loadMessages, 5000);
         }
 
         async function loadMessages() {
             if (!currentUser) return;
+            
             try {
                 const { ok, data } = await window.apiFetchJson(`/chat/history/${currentUser}`);
                 if (ok && data.success) {
-                    const box = document.getElementById('chatBox');
-                    box.innerHTML = '';
+                    const container = document.getElementById('chatMessages');
+                    container.innerHTML = '';
+                    
+                    if (!data.messages || data.messages.length === 0) {
+                        // Send auto welcome message when first time
+                        await sendAutoWelcome();
+                        return;
+                    }
                     
                     data.messages.forEach(msg => {
-                        const div = document.createElement('div');
-                        // Messages from 'support' or from the agent's username are support messages
-                        const isSupport = (msg.sender === 'support' || msg.sender === 'Support_Agent');
-                        div.className = `message ${isSupport ? 'msg-support' : 'msg-user'}`;
-                        const senderName = isSupport ? 'Support Agent' : currentUser;
-                        div.innerHTML = `<strong style="font-size: 11px; opacity: 0.7;">${senderName}:</strong><br>${msg.message}`;
-                        box.appendChild(div);
+                        const messageDiv = document.createElement('div');
+                        const isAgent = (msg.sender === 'support' || msg.sender === 'Support_Agent');
+                        messageDiv.className = `message ${isAgent ? 'agent' : 'user'}`;
+                        messageDiv.innerHTML = `
+                            <div class="sender">${isAgent ? 'Support Agent' : currentUser}</div>
+                            <div class="text">${escapeHtml(msg.message)}</div>
+                            <div class="time">${new Date(msg.created_at).toLocaleTimeString()}</div>
+                        `;
+                        container.appendChild(messageDiv);
                     });
-                    box.scrollTop = box.scrollHeight;
+                    container.scrollTop = container.scrollHeight;
+                    
+                    // Remove badge if exists
+                    const badge = document.getElementById(`badge-${currentUser}`);
+                    if (badge) badge.style.display = 'none';
                 }
-            } catch(e) {
+            } catch (e) {
                 console.error("Load messages error:", e);
             }
         }
 
-        async function sendMessage() {
-            const input = document.getElementById('msgInput');
-            if (!input.value.trim() || !currentUser) return;
+        async function sendAutoWelcome() {
+            const welcomeMessage = "👋 Hello! I'm an Access Wealth support agent. How may I help you today?";
             
-            const text = input.value.trim();
-            input.value = '';
-            const sendBtn = document.getElementById('sendBtn');
-            sendBtn.disabled = true;
-
             try {
                 const { ok, data } = await window.apiFetchJson('/chat/send', {
                     method: 'POST',
-                    body: JSON.stringify({ user_id: currentUser, message: text })
+                    body: JSON.stringify({ user_id: currentUser, message: welcomeMessage })
                 });
-
+                
                 if (ok && data.success) {
-                    loadMessages();
+                    await loadMessages();
+                }
+            } catch (e) {
+                console.error("Auto welcome error:", e);
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message || !currentUser) return;
+            
+            input.value = '';
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            
+            try {
+                const { ok, data } = await window.apiFetchJson('/chat/send', {
+                    method: 'POST',
+                    body: JSON.stringify({ user_id: currentUser, message: message })
+                });
+                
+                if (ok && data.success) {
+                    await loadMessages();
                 } else {
                     alert(data.error || "Failed to send message");
-                    input.value = text;
+                    input.value = message;
                 }
             } catch (err) {
-                console.error("Send message error:", err);
-                alert("Failed to send message. Please try again.");
-                input.value = text;
+                console.error("Send error:", err);
+                alert("Failed to send message");
+                input.value = message;
             } finally {
                 sendBtn.disabled = false;
                 input.focus();
             }
         }
 
-        function logout() { 
-            localStorage.clear(); 
-            window.location.href = '/login.html'; 
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
         }
     </script>
 </body>

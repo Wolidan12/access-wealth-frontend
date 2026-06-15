@@ -42,9 +42,60 @@
         .btn-send { background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); color: #0b1421; border: none; width: 50px; height: 50px; border-radius: 50%; font-weight: 600; cursor: pointer; font-size: 18px; }
         .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
 
+        /* Welcome Popup Modal */
+        .welcome-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .welcome-modal-content {
+            background: var(--bg-cards);
+            border: 1px solid var(--primary-yellow);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .welcome-modal-content i {
+            font-size: 50px;
+            color: var(--primary-yellow);
+            margin-bottom: 15px;
+        }
+        .welcome-modal-content h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .welcome-modal-content p {
+            color: #8a99af;
+            margin-bottom: 20px;
+        }
+        .welcome-modal-content button {
+            background: var(--primary-yellow);
+            color: #0b1421;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
         @media (max-width: 768px) {
             .sidebar { display: none; }
             .main-content { margin-left: 0; width: 100%; padding: 20px; }
+            .message { max-width: 85%; }
         }
     </style>
 </head>
@@ -75,20 +126,41 @@
         </div>
     </div>
 
+    <!-- Welcome Popup Modal -->
+    <div class="welcome-modal" id="welcomeModal">
+        <div class="welcome-modal-content">
+            <i class="fa-solid fa-headset"></i>
+            <h3>Welcome to Support!</h3>
+            <p>Hi, I'm an Access Wealth support agent. How may I help you today?</p>
+            <button onclick="closeWelcomeModal()">Start Chatting</button>
+        </div>
+    </div>
+
     <script src="global.js"></script>
     <script>
         let chatInterval = null;
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Check if user is logged in
             const username = localStorage.getItem('username');
             if (!username) {
                 window.location.href = '/login.html';
                 return;
             }
+            
+            // Show welcome popup (only once per session)
+            const hasSeenWelcome = sessionStorage.getItem('hasSeenWelcome');
+            if (!hasSeenWelcome) {
+                document.getElementById('welcomeModal').style.display = 'flex';
+                sessionStorage.setItem('hasSeenWelcome', 'true');
+            }
+            
             loadMessages();
             chatInterval = setInterval(loadMessages, 5000);
         });
+
+        function closeWelcomeModal() {
+            document.getElementById('welcomeModal').style.display = 'none';
+        }
 
         async function loadMessages() {
             const username = localStorage.getItem('username');
@@ -100,18 +172,16 @@
                     const box = document.getElementById('chatBox');
                     box.innerHTML = '';
                     
-                    // Add welcome message if no messages
                     if (data.messages.length === 0) {
                         const welcomeDiv = document.createElement('div');
                         welcomeDiv.className = 'message msg-support';
-                        welcomeDiv.innerText = 'Hello! I am an Access Wealth Customer Representative. How can I assist you today?';
+                        welcomeDiv.innerText = '👋 Hi! I\'m an Access Wealth support agent. How can I help you today?';
                         box.appendChild(welcomeDiv);
                     }
                     
                     data.messages.forEach(msg => {
                         const div = document.createElement('div');
-                        // If sender is 'support' OR sender is not the current user, show as support message
-                        const isSupport = (msg.sender === 'support' || (msg.sender !== username && msg.sender !== 'user'));
+                        const isSupport = (msg.sender === 'support' || msg.sender !== username);
                         div.className = `message ${isSupport ? 'msg-support' : 'msg-user'}`;
                         div.innerText = msg.message;
                         box.appendChild(div);
@@ -120,10 +190,6 @@
                 }
             } catch(e) {
                 console.error("Load messages error:", e);
-                const box = document.getElementById('chatBox');
-                if (box.children.length === 0) {
-                    box.innerHTML = '<p style="text-align: center; color: #ff4d4d; font-weight:bold; margin-top:auto; margin-bottom:auto;"><i class="fa-solid fa-triangle-exclamation"></i> Cannot connect to Support Server. Please try again later.</p>';
-                }
             }
         }
 
@@ -148,7 +214,7 @@
                     loadMessages();
                 } else {
                     alert(data.error || "Failed to send message");
-                    input.value = text; // restore text
+                    input.value = text;
                 }
             } catch (err) {
                 console.error("Send message error:", err);
