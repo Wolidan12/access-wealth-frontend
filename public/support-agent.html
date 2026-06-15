@@ -17,9 +17,11 @@
         .user-item { padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.3s; border: 1px solid transparent; }
         .user-item:hover, .user-item.active { background: rgba(212, 175, 55, 0.1); border-color: var(--primary-yellow); }
         .user-item h4 { font-size: 14px; margin-bottom: 5px; }
+        .user-item .badge { background: #ff4d4d; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: 8px; }
         
         .chat-area { flex-grow: 1; display: flex; flex-direction: column; background: var(--bg-body); }
         .chat-header { padding: 20px; background: var(--bg-cards); border-bottom: 1px solid rgba(212, 175, 55, 0.15); display: flex; justify-content: space-between; align-items: center;}
+        .chat-header h3 { font-size: 16px; }
         .chat-box { flex-grow: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
         .message { max-width: 60%; padding: 12px 18px; border-radius: 15px; font-size: 14px; line-height: 1.5; }
         .msg-user { background: rgba(255,255,255,0.05); align-self: flex-start; border-bottom-left-radius: 2px; }
@@ -32,6 +34,7 @@
         .btn-send:hover:not(:disabled) { transform: scale(1.05); background: #fff; }
         .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
         .logout-btn { padding: 15px; background: #ff4d4d; color: #fff; border: none; cursor: pointer; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; width: 100%; }
+        .status-indicator { font-size: 12px; color: #2ecc71; margin-left: 10px; }
     </style>
 </head>
 <body>
@@ -39,7 +42,7 @@
     <div class="sidebar">
         <div class="logo-area"><i class="fa-solid fa-headset"></i> Support Portal</div>
         <div class="user-list" id="userList">
-            <p style="text-align: center; color: #8a99af; font-size: 13px; margin-top: 20px;">Checking Connection</p>
+            <p style="text-align: center; color: #8a99af; font-size: 13px; margin-top: 20px;">Loading users...</p>
         </div>
         <button class="logout-btn" onclick="logout()">Logout Agent</button>
     </div>
@@ -60,6 +63,7 @@
     <script src="global.js"></script>
     <script>
         let currentUser = null;
+        let messageInterval = null;
 
         window.onload = () => {
             const role = localStorage.getItem('role');
@@ -68,16 +72,17 @@
                 return;
             }
             loadUsers();
-            setInterval(loadUsers, 5000);
+            // Refresh user list every 10 seconds
+            setInterval(loadUsers, 10000);
         };
 
         async function loadUsers() {
             try {
-                const { ok, data } = await window.apiFetchJson('/api/support/users');
+                const { ok, data } = await window.apiFetchJson('/support/users');
                 if (ok && data.success) {
                     const list = document.getElementById('userList');
-                    if (!data.users.length) {
-                        list.innerHTML = '<p style="text-align: center; color: #8a99af; margin-top: 20px;">✅ Online. No messages yet.</p>';
+                    if (!data.users || data.users.length === 0) {
+                        list.innerHTML = '<p style="text-align: center; color: #8a99af; margin-top: 20px;">✅ No active chats yet.</p>';
                         return;
                     }
                     list.innerHTML = '';
@@ -90,7 +95,8 @@
                     });
                 }
             } catch(e) {
-                document.getElementById('userList').innerHTML = '<p style="text-align: center; color: #ff4d4d; margin-top: 20px;"><i class="fa-solid fa-triangle-exclamation"></i> Backend Offline.<br>Restart your Terminal!</p>';
+                console.error("Load users error:", e);
+                document.getElementById('userList').innerHTML = '<p style="text-align: center; color: #ff4d4d; margin-top: 20px;"><i class="fa-solid fa-triangle-exclamation"></i> Backend Offline. Please check your server.</p>';
             }
         }
 
@@ -99,42 +105,73 @@
             document.getElementById('activeChatUser').innerText = `Chatting with: ${username}`;
             document.getElementById('msgInput').disabled = false;
             document.getElementById('sendBtn').disabled = false;
+            
+            // Clear previous interval
+            if (messageInterval) clearInterval(messageInterval);
+            
             loadMessages();
-            setInterval(loadMessages, 3000);
+            messageInterval = setInterval(loadMessages, 5000);
         }
 
         async function loadMessages() {
             if (!currentUser) return;
             try {
-                const { ok, data } = await window.apiFetchJson(`/api/chat/history/${currentUser}`);
+                const { ok, data } = await window.apiFetchJson(`/chat/history/${currentUser}`);
                 if (ok && data.success) {
                     const box = document.getElementById('chatBox');
                     box.innerHTML = '';
+                    
                     data.messages.forEach(msg => {
                         const div = document.createElement('div');
-                        div.className = `message ${msg.sender === 'support' ? 'msg-support' : 'msg-user'}`;
-                        div.innerText = msg.message;
+                        // Messages from 'support' or from the agent's username are support messages
+                        const isSupport = (msg.sender === 'support' || msg.sender === 'Support_Agent');
+                        div.className = `message ${isSupport ? 'msg-support' : 'msg-user'}`;
+                        const senderName = isSupport ? 'Support Agent' : currentUser;
+                        div.innerHTML = `<strong style="font-size: 11px; opacity: 0.7;">${senderName}:</strong><br>${msg.message}`;
                         box.appendChild(div);
                     });
                     box.scrollTop = box.scrollHeight;
                 }
-            } catch(e) {}
+            } catch(e) {
+                console.error("Load messages error:", e);
+            }
         }
 
         async function sendMessage() {
             const input = document.getElementById('msgInput');
             if (!input.value.trim() || !currentUser) return;
-            const text = input.value;
+            
+            const text = input.value.trim();
             input.value = '';
-            await window.apiFetchJson('/api/chat/send', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: currentUser, message: text })
-            });
-            loadMessages();
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+
+            try {
+                const { ok, data } = await window.apiFetchJson('/chat/send', {
+                    method: 'POST',
+                    body: JSON.stringify({ user_id: currentUser, message: text })
+                });
+
+                if (ok && data.success) {
+                    loadMessages();
+                } else {
+                    alert(data.error || "Failed to send message");
+                    input.value = text;
+                }
+            } catch (err) {
+                console.error("Send message error:", err);
+                alert("Failed to send message. Please try again.");
+                input.value = text;
+            } finally {
+                sendBtn.disabled = false;
+                input.focus();
+            }
         }
 
-        function logout() { localStorage.clear(); window.location.href = '/login.html'; }
+        function logout() { 
+            localStorage.clear(); 
+            window.location.href = '/login.html'; 
+        }
     </script>
 </body>
 </html>

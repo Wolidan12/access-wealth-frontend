@@ -39,7 +39,13 @@
         .chat-input-area { padding: 20px; background: rgba(0,0,0,0.2); display: flex; gap: 15px; border-top: 1px solid rgba(212, 175, 55, 0.15); }
         .chat-input { flex-grow: 1; padding: 15px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); background: var(--bg-body); color: #fff; outline: none; padding-left: 25px;}
         .chat-input:focus { border-color: var(--primary-yellow); }
-        .btn-send { background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); color: #0b1421; border: none; width: 50px; height: 50px; border-radius: 50%; font-weight: 600; cursor: pointer; font-size: 18px;}
+        .btn-send { background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); color: #0b1421; border: none; width: 50px; height: 50px; border-radius: 50%; font-weight: 600; cursor: pointer; font-size: 18px; }
+        .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; width: 100%; padding: 20px; }
+        }
     </style>
 </head>
 <body>
@@ -59,61 +65,99 @@
             </div>
             
             <div class="chat-box" id="chatBox">
-                <div class="message msg-support">Connecting to secure server</div>
+                <div class="message msg-support">Connecting to secure server...</div>
             </div>
 
             <div class="chat-input-area">
                 <input type="text" id="msgInput" class="chat-input" placeholder="Type your message here">
-                <button class="btn-send" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                <button class="btn-send" id="sendBtn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
 
     <script src="global.js"></script>
     <script>
+        let chatInterval = null;
+
         window.addEventListener('DOMContentLoaded', () => {
-            setInterval(loadMessages, 3000); 
-            setTimeout(loadMessages, 500);
+            // Check if user is logged in
+            const username = localStorage.getItem('username');
+            if (!username) {
+                window.location.href = '/login.html';
+                return;
+            }
+            loadMessages();
+            chatInterval = setInterval(loadMessages, 5000);
         });
 
         async function loadMessages() {
             const username = localStorage.getItem('username');
-            if(!username) return;
+            if (!username) return;
 
             try {
-                // USING https://accesswealth-backend-production.up.railway.accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-                const res = await fetch(`https://access-wealth-backend-production.up.railway.app:5000/api/chat/history/${username}`);
-                const data = await res.json();
-                if(data.success) {
+                const { ok, data } = await window.apiFetchJson(`/chat/history/${username}`);
+                if (ok && data.success) {
                     const box = document.getElementById('chatBox');
-                    box.innerHTML = '<div class="message msg-support">Hello! I am an Access Wealth Customer Representative. How can I assist you with your amount today?</div>';
+                    box.innerHTML = '';
+                    
+                    // Add welcome message if no messages
+                    if (data.messages.length === 0) {
+                        const welcomeDiv = document.createElement('div');
+                        welcomeDiv.className = 'message msg-support';
+                        welcomeDiv.innerText = 'Hello! I am an Access Wealth Customer Representative. How can I assist you today?';
+                        box.appendChild(welcomeDiv);
+                    }
+                    
                     data.messages.forEach(msg => {
                         const div = document.createElement('div');
-                        div.className = `message ${msg.sender === username ? 'msg-user' : 'msg-support'}`;
+                        // If sender is 'support' OR sender is not the current user, show as support message
+                        const isSupport = (msg.sender === 'support' || (msg.sender !== username && msg.sender !== 'user'));
+                        div.className = `message ${isSupport ? 'msg-support' : 'msg-user'}`;
                         div.innerText = msg.message;
                         box.appendChild(div);
                     });
                     box.scrollTop = box.scrollHeight;
                 }
             } catch(e) {
-                 document.getElementById('chatBox').innerHTML = '<p style="text-align: center; color: #ff4d4d; font-weight:bold; margin-top:auto; margin-bottom:auto;"><i class="fa-solid fa-triangle-exclamation"></i> Cannot connect to Support Server.</p>';
+                console.error("Load messages error:", e);
+                const box = document.getElementById('chatBox');
+                if (box.children.length === 0) {
+                    box.innerHTML = '<p style="text-align: center; color: #ff4d4d; font-weight:bold; margin-top:auto; margin-bottom:auto;"><i class="fa-solid fa-triangle-exclamation"></i> Cannot connect to Support Server. Please try again later.</p>';
+                }
             }
         }
 
         async function sendMessage() {
             const input = document.getElementById('msgInput');
+            const sendBtn = document.getElementById('sendBtn');
             const username = localStorage.getItem('username');
-            if(!input.value.trim() || !username) return;
+            
+            if (!input.value.trim() || !username) return;
 
-            const text = input.value;
+            const text = input.value.trim();
             input.value = '';
+            sendBtn.disabled = true;
 
-            // USING https://accesswealth-backend-production.up.railway.accesswealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-            const res = await fetch('https://access-wealth-backend-production.up.railway.app/api/chat/send', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: username, sender: username, message: text })
-            });
-            loadMessages();
+            try {
+                const { ok, data } = await window.apiFetchJson('/chat/send', {
+                    method: 'POST',
+                    body: JSON.stringify({ user_id: username, message: text })
+                });
+
+                if (ok && data.success) {
+                    loadMessages();
+                } else {
+                    alert(data.error || "Failed to send message");
+                    input.value = text; // restore text
+                }
+            } catch (err) {
+                console.error("Send message error:", err);
+                alert("Failed to send message. Please try again.");
+                input.value = text;
+            } finally {
+                sendBtn.disabled = false;
+                input.focus();
+            }
         }
     </script>
 </body>
