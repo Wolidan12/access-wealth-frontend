@@ -57,28 +57,86 @@
             </div>
             <div class="search-bar">
                 <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
-                <input type="text" placeholder="Search username">
+                <input type="text" id="searchInput" placeholder="Search username">
             </div>
         </div>
 
         <div class="card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Deposit Bal</th>
-                        <th>Earnings</th>
-                        <th>Plan Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="usersTable">
-                    <tr>
-                        <td colspan="5" style="text-align: center; color: var(--text-muted);">Loading users</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</body>
-</html>
+            <div class="table-responsive">
+                <table id="usersTable">
+                    <thead>
+                        <tr><th>Username</th><th>Deposit Bal</th><th>Task Earnings</th><th>Affiliate Bal</th><th>Plan Status</th><th>Joined</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading users...<\/td><\/tr>
+                    </tbody>
+                <\/table>
+            <\/div>
+        <\/div>
+    <\/div>
+
+    <script src="global.js"><\/script>
+    <script>
+        let allUsers = [];
+
+        async function loadUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading users...<\/td><\/tr>';
+            try {
+                const { ok, data } = await window.apiFetchJson('/admin/users');
+                if (ok && data.success) {
+                    allUsers = data.users;
+                    displayUsers(allUsers);
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Error loading users<\/td><\/tr>';
+                }
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Connection Error<\/td><\/tr>';
+            }
+        }
+
+        function displayUsers(users) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No users found<\/td><\/tr>';
+                return;
+            }
+            users.forEach(user => {
+                const total = (user.balance || 0) + (user.taskEarnings || 0) + (user.daily_earnings || 0) + (user.affiliate_balance || 0);
+                const statusBadge = user.planActivated === 'true' ? `<span class="badge active">${user.activePackage || 'Active'}</span>` : '<span class="badge inactive">No Plan</span>';
+                const joinedDate = new Date(user.created_at).toLocaleDateString();
+                tbody.innerHTML += `<tr>
+                    <td><strong>${user.username}</strong><\/td>
+                    <td>₦${(user.balance || 0).toLocaleString()}<\/td>
+                    <td>₦${(user.taskEarnings || 0).toLocaleString()}<\/td>
+                    <td>₦${(user.affiliate_balance || 0).toLocaleString()}<\/td>
+                    <td>${statusBadge}<\/td>
+                    <td>${joinedDate}<\/td>
+                    <td><button class="action-btn" onclick="editUser('${user.username}')">Edit Balance</button><\/td>
+                <\/tr>`;
+            });
+        }
+
+        function editUser(username) {
+            const newBalance = prompt(`Enter new deposit balance for ${username}:`);
+            if (newBalance && !isNaN(newBalance)) {
+                // This would call a backend endpoint to update balance
+                alert('Balance update feature - implement endpoint as needed');
+            }
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = allUsers.filter(user => user.username.toLowerCase().includes(searchTerm));
+            displayUsers(filtered);
+        });
+
+        window.onload = () => {
+            const role = localStorage.getItem('role');
+            if (role !== 'admin') { window.location.href = '/login.html'; return; }
+            loadUsers();
+        };
+    <\/script>
+<\/body>
+<\/html>

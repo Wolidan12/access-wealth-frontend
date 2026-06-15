@@ -23,7 +23,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
 
-        /* --- MOBILE HEADER & OVERLAY --- */
         .mobile-header { display: none; width: 100%; background: var(--bg-cards); padding: 15px 25px; justify-content: space-between; align-items: center; position: fixed; top: 0; z-index: 1000; border-bottom: 1px solid var(--border-light); }
         .mobile-header i.menu-btn { font-size: 24px; color: var(--primary-yellow); cursor: pointer; }
         .mobile-header .logo-text { font-weight: 700; font-size: 16px; letter-spacing: 1px; color: var(--text-main); }
@@ -32,7 +31,6 @@
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 900; backdrop-filter: blur(3px); }
         .overlay.active { display: block; }
 
-        /* --- SIDEBAR --- */
         .sidebar { width: var(--sidebar-width); background: var(--bg-cards); height: 100vh; position: fixed; border-right: 1px solid var(--border-light); z-index: 1100; transition: left 0.3s ease; }
         .logo-area { padding: 25px 20px; font-size: 18px; font-weight: 700; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: 10px; }
         .logo-area i { color: var(--primary-yellow); font-size: 24px; }
@@ -43,20 +41,17 @@
         .nav-item.active { background: var(--yellow-gradient); color: #0b1421; font-weight: 600; }
         .nav-item.active i { color: #0b1421; }
 
-        /* --- MAIN CONTENT --- */
         .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 40px; display: flex; flex-direction: column; }
         .page-header { margin-bottom: 40px; }
         .page-header h1 { font-size: 28px; color: var(--text-main); margin-bottom: 5px; }
         .page-header p { color: var(--text-muted); font-size: 14px; }
 
-        /* --- BALANCES OVERVIEW --- */
         .balances-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; }
         .bal-card { background: var(--card-gradient); border-radius: 15px; padding: 25px; border: 1px solid var(--border-light); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         .bal-card h3 { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
         .bal-card h2 { font-size: 32px; color: var(--primary-yellow); }
         .bal-card p { font-size: 12px; color: var(--success); margin-top: 10px; font-weight: 500; }
 
-        /* --- WITHDRAWAL GRID (2 COLUMNS) --- */
         .withdraw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         
         .withdraw-box { background: var(--bg-cards); border-radius: 20px; padding: 30px; border: 1px solid var(--border-light); position: relative; overflow: hidden; }
@@ -65,7 +60,6 @@
         .box-title h2 { font-size: 18px; color: var(--text-main); }
         .box-title p { font-size: 12px; color: var(--text-muted); }
 
-        /* Form Elements */
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
         .input-wrap { position: relative; }
@@ -73,7 +67,6 @@
         .form-control { width: 100%; padding: 15px 15px 15px 45px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px; outline: none; transition: 0.3s; }
         .form-control:focus { border-color: var(--primary-yellow); background: rgba(0,0,0,0.4); }
         
-        /* Fee Calculator Display */
         .fee-calc { background: rgba(0,0,0,0.3); border-radius: 8px; padding: 15px; margin-bottom: 20px; border: 1px dashed var(--border-light); }
         .fee-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; color: var(--text-muted); }
         .fee-row.total { color: var(--success); font-size: 15px; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px; margin-bottom: 0; }
@@ -83,20 +76,16 @@
         .btn-instant:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2); }
         .btn-locked { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); cursor: not-allowed; }
 
-        /* Lock Overlay for Task Box */
         .lock-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 26, 42, 0.85); backdrop-filter: blur(4px); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 30px; z-index: 10; }
         .lock-icon { width: 60px; height: 60px; background: rgba(255, 77, 77, 0.1); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; color: var(--danger); margin-bottom: 15px; }
         .lock-overlay h3 { font-size: 18px; margin-bottom: 10px; color: #fff; }
         .lock-overlay p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
 
-        /* Alerts */
         .alert { padding: 15px; border-radius: 8px; font-size: 13px; margin-bottom: 20px; display: none; }
         .alert.error { background: rgba(255, 77, 77, 0.1); color: var(--danger); border: 1px solid var(--danger); }
         .alert.success { background: rgba(46, 204, 113, 0.1); color: var(--success); border: 1px solid var(--success); }
 
-        @media (max-width: 992px) {
-            .withdraw-grid { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 992px) { .withdraw-grid { grid-template-columns: 1fr; } }
         @media (max-width: 768px) {
             .sidebar { left: -260px; }
             .sidebar.active { left: 0; }
@@ -129,7 +118,7 @@
     <div class="main-content">
         <div class="page-header">
             <h1>Withdraw Funds</h1>
-            <p>access your earnings. Please note the different rules for Tasks vs Affiliate withdrawals.</p>
+            <p>Access your earnings. Please note the different rules for Tasks vs Affiliate withdrawals.</p>
         </div>
 
         <div class="balances-wrapper">
@@ -152,42 +141,58 @@
                     <div class="box-icon"><i class="fa-solid fa-bolt"></i></div>
                     <div class="box-title">
                         <h2>Instant Referral Payout</h2>
-                        <p>Receive your affiliate money in 2-12 hours.</p>
+                        <p>Request withdrawal from your affiliate earnings</p>
                     </div>
                 </div>
 
-                <div class="alert error" id="affiliateError"></div>
-                <div class="alert success" id="affiliateSuccess"></div>
+                <div class="alert error" id="withdrawError"></div>
+                <div class="alert success" id="withdrawSuccess"></div>
 
                 <div class="form-group">
                     <label>Amount to Withdraw (Min: ₦3,000)</label>
                     <div class="input-wrap">
                         <i class="fa-solid fa-naira-sign"></i>
-                        <input type="number" id="affiliateAmount" class="form-control" placeholder="0.00" oninput="calculateFee()">
+                        <input type="number" id="withdrawAmount" class="form-control" placeholder="0.00">
                     </div>
                 </div>
 
-                <div class="fee-calc">
-                    <div class="fee-row">
-                        <span>Withdrawal Amount:</span>
-                        <span id="calcGross">₦0.00</span>
-                    </div>
-                    <div class="fee-row" style="color: var(--danger);">
-                        <span>Processing Fee (5%):</span>
-                        <span id="calcFee">-₦0.00</span>
-                    </div>
-                    <div class="fee-row total">
-                        <span>You Receive:</span>
-                        <span id="calcNet">₦0.00</span>
+                <div class="form-group">
+                    <label>Select Wallet</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-wallet"></i>
+                        <select id="walletType" class="form-control">
+                            <option value="affiliate">Affiliate Earnings</option>
+                            <option value="task">Task Earnings</option>
+                        </select>
                     </div>
                 </div>
 
-                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px; text-align: center;">
-                    *Funds will be sent to the bank details saved in your Profile Settings.
-                </p>
+                <div class="form-group">
+                    <label>Bank Name</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-building-columns"></i>
+                        <input type="text" id="bankName" class="form-control" placeholder="e.g., GTBank">
+                    </div>
+                </div>
 
-                <button class="btn-withdraw btn-instant" id="btnInstantWithdraw" onclick="processInstantWithdrawal()">
-                    <i class="fa-solid fa-money-bill-transfer"></i> Request Instant Payout
+                <div class="form-group">
+                    <label>Account Number</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-credit-card"></i>
+                        <input type="text" id="accountNumber" class="form-control" placeholder="10-digit account number">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Account Holder Name</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="accountHolder" class="form-control" placeholder="Name on account">
+                    </div>
+                </div>
+
+                <button class="btn-withdraw btn-instant" id="withdrawBtn" onclick="requestWithdrawal()">
+                    <i class="fa-solid fa-money-bill-transfer"></i> Request Withdrawal
                 </button>
             </div>
 
@@ -224,18 +229,14 @@
     </div>
 
     <script src="global.js"></script>
-
     <script>
         function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); }
 
-        // --- Balance Syncing ---
         function updateDisplayBalances() {
             const task = parseFloat(localStorage.getItem('taskEarnings') || 0);
             const daily = parseFloat(localStorage.getItem('daily_earnings') || 0);
             const totalTask = task + daily;
-            
             const aff = parseFloat(localStorage.getItem('affiliate_balance') || 0);
-
             document.getElementById('dispTaskBal').innerText = `₦${totalTask.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
             document.getElementById('dispAffiliateBal').innerText = `₦${aff.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
         }
@@ -243,104 +244,82 @@
         window.addEventListener('globalSyncComplete', updateDisplayBalances);
         document.addEventListener('DOMContentLoaded', updateDisplayBalances);
 
-        // --- Live Fee Calculator ---
-        function calculateFee() {
-            const input = document.getElementById('affiliateAmount').value;
-            const amount = parseFloat(input);
+        // ✅ FIXED: Use apiFetchJson to avoid token error
+        async function requestWithdrawal() {
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const wallet_type = document.getElementById('walletType').value;
+            const bank_details = {
+                bank_name: document.getElementById('bankName').value,
+                account_number: document.getElementById('accountNumber').value,
+                account_holder: document.getElementById('accountHolder').value
+            };
 
-            if (!input || isNaN(amount) || amount <= 0) {
-                document.getElementById('calcGross').innerText = "₦0.00";
-                document.getElementById('calcFee').innerText = "-₦0.00";
-                document.getElementById('calcNet').innerText = "₦0.00";
-                return;
-            }
-
-            const fee = amount * 0.05; // 5% Fee
-            const net = amount - fee;
-
-            document.getElementById('calcGross').innerText = `₦${amount.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-            document.getElementById('calcFee').innerText = `-₦${fee.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-            document.getElementById('calcNet').innerText = `₦${net.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-        }
-
-        // --- Process Instant Affiliate Withdrawal ---
-        async function processInstantWithdrawal() {
-            const username = localStorage.getItem('username');
-            const inputAmount = document.getElementById('affiliateAmount').value;
-            const amount = parseFloat(inputAmount);
-
-            const errBox = document.getElementById('affiliateError');
-            const succBox = document.getElementById('affiliateSuccess');
-            const btn = document.getElementById('btnInstantWithdraw');
+            const errBox = document.getElementById('withdrawError');
+            const succBox = document.getElementById('withdrawSuccess');
+            const btn = document.getElementById('withdrawBtn');
 
             errBox.style.display = 'none';
             succBox.style.display = 'none';
 
-            if (!username) {
-                window.location.href = '/login.html';
-                return;
-            }
-
             if (isNaN(amount) || amount < 3000) {
-                errBox.innerText = "Error: Minimum referral withdrawal is ₦3,000.";
+                errBox.innerText = "Minimum withdrawal amount is ₦3,000";
                 errBox.style.display = 'block';
                 return;
             }
 
-            const affBalance = parseFloat(localStorage.getItem('affiliate_balance') || 0);
-            if (amount > affBalance) {
-                errBox.innerText = "Error: You do not have enough funds in your Affiliate Wallet.";
+            if (!bank_details.bank_name || !bank_details.account_number || !bank_details.account_holder) {
+                errBox.innerText = "Please fill in all bank details";
                 errBox.style.display = 'block';
                 return;
             }
 
-            // Lock Button
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
+            let currentBalance = 0;
+            if (wallet_type === 'affiliate') {
+                currentBalance = parseFloat(localStorage.getItem('affiliate_balance') || 0);
+            } else {
+                currentBalance = parseFloat(localStorage.getItem('taskEarnings') || 0) + parseFloat(localStorage.getItem('daily_earnings') || 0);
+            }
+
+            if (amount > currentBalance) {
+                errBox.innerText = `Insufficient balance. You have ₦${currentBalance.toLocaleString()}`;
+                errBox.style.display = 'block';
+                return;
+            }
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
             btn.disabled = true;
 
             try {
-                // USING 'https://access-wealth-backend-production.up.railway.app TO BYPASS BROWSER SHIELD
-                const response = await fetch('https://access-wealth-backend-production.up.railway.app/api/withdraw/affiliate', {
+                const { ok, data } = await window.apiFetchJson('/request-withdrawal', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: username, amount: amount })
+                    body: JSON.stringify({ amount, wallet_type, bank_details })
                 });
 
-                const data = await response.json();
-
-                if (data.success) {
+                if (ok && data.success) {
                     succBox.innerText = data.message;
                     succBox.style.display = 'block';
-                    document.getElementById('affiliateAmount').value = '';
-                    calculateFee(); // Reset calculator
-                    
-                    // Force a global sync to update local storage and the UI instantly
-                    globalSync(); 
+                    document.getElementById('withdrawAmount').value = '';
+                    if (typeof globalSync === 'function') globalSync();
                 } else {
-                    errBox.innerText = `Error: ${data.error}`;
+                    errBox.innerText = data.error || "Withdrawal request failed";
                     errBox.style.display = 'block';
                 }
             } catch (err) {
-                errBox.innerText = "Connection Error. Ensure server is running.";
+                console.error("Withdrawal error:", err);
+                errBox.innerText = "Server error. Please try again.";
                 errBox.style.display = 'block';
             } finally {
-                btn.innerHTML = '<i class="fa-solid fa-money-bill-transfer"></i> Request Instant Payout';
+                btn.innerHTML = '<i class="fa-solid fa-money-bill-transfer"></i> Request Withdrawal';
                 btn.disabled = false;
             }
         }
 
-        // --- Task Withdrawal Date Checker ---
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date();
             const day = today.getDate();
-            
-            // If today is the 15th or 29th, remove the lock overlay!
             if (day === 15 || day === 29) {
                 const lockOverlay = document.getElementById('taskLockOverlay');
-                if (lockOverlay) {
-                    lockOverlay.style.display = 'none';
-                    // Optional: Enable the inputs and button underneath if you add a backend route for it later
-                }
+                if (lockOverlay) lockOverlay.style.display = 'none';
             }
         });
     </script>

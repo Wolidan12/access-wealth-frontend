@@ -8,13 +8,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-body: #070d14;         
-            --bg-cards: #112A46;        
-            --text-main: #ffffff;       
-            --text-muted: #8a99af;      
-            --primary-yellow: #d4af37;  
+            --bg-body: #070d14;
+            --bg-cards: #112A46;
+            --text-main: #ffffff;
+            --text-muted: #8a99af;
+            --primary-yellow: #d4af37;
             --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
-            --border-light: rgba(212, 175, 55, 0.15); 
+            --border-light: rgba(212, 175, 55, 0.15);
             --sidebar-width: 260px;
             --sidebar-collapsed-width: 80px;
         }
@@ -181,6 +181,7 @@
         </div>
     </div>
 
+    <script src="global.js"></script>
     <script>
         // UI Navigation
         function toggleDesktopSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
@@ -188,7 +189,7 @@
         function toggleDropdown(dropdownId, element) { element.classList.toggle('open'); document.getElementById(dropdownId).classList.toggle('show'); element.classList.toggle('active'); }
         function logout() { localStorage.clear(); window.location.href = '/login.html'; }
 
-        // --- DYNAMIC PLAN PAYOUTS (FIXED SYNTAX) ---
+        // --- DYNAMIC PLAN PAYOUTS ---
         const planDailyEarnings = {
             'Access Starter': 500,
             'Access Basic': 900,
@@ -210,7 +211,6 @@
         let timerInterval;
 
         window.onload = () => {
-            // Setup User Info
             const user = localStorage.getItem('username') || "Guest";
             document.getElementById('displayName').innerText = user.toUpperCase();
             document.getElementById('displayHandle').innerText = "@" + user.toLowerCase().replace(/\s+/g, '');
@@ -218,7 +218,6 @@
             document.getElementById('desktopAvatar').src = avatarUrl;
             document.getElementById('mobileAvatar').src = avatarUrl;
 
-            // THE GATEKEEPER: Check if Activated
             const isActivated = localStorage.getItem('planActivated') === 'true';
             userPlan = localStorage.getItem('activePackage');
             
@@ -227,7 +226,6 @@
                 return;
             }
 
-            // Set the dynamic payout based on their plan
             dailyPayout = planDailyEarnings[userPlan];
             document.getElementById('planNameDisplay').innerText = `${userPlan} Package`;
             document.getElementById('taskPayoutDisplay').innerText = `₦${dailyPayout.toLocaleString()}`;
@@ -240,27 +238,44 @@
             if (lastClaimTime) {
                 const timePassed = Date.now() - parseInt(lastClaimTime);
                 const twentyFourHours = 24 * 60 * 60 * 1000;
-
                 if (timePassed < twentyFourHours) {
                     startTimer(twentyFourHours - timePassed);
                 }
             }
         }
 
-        function claimTask() {
+        // ✅ FIXED: Use backend API to claim task
+        async function claimTask() {
             const btn = document.getElementById('taskBtn');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
             btn.disabled = true;
 
-            setTimeout(() => {
-                let currentEarnings = parseFloat(localStorage.getItem('taskEarnings')) || 0;
-                localStorage.setItem('taskEarnings', currentEarnings + dailyPayout);
-                localStorage.setItem('lastTaskClaimTime', Date.now().toString());
+            try {
+                const { ok, data } = await window.apiFetchJson('/claim-daily-task', {
+                    method: 'POST',
+                    body: JSON.stringify({ amount: dailyPayout })
+                });
 
-                alert(`🎉 Task Completed! ₦${dailyPayout.toLocaleString()} has been added to your Task Earnings.`);
-                
-                startTimer(24 * 60 * 60 * 1000);
-            }, 1500);
+                if (ok && data.success) {
+                    alert(`🎉 Task Completed! ₦${dailyPayout.toLocaleString()} has been added to your Task Earnings.`);
+                    localStorage.setItem('taskEarnings', data.newBalance);
+                    localStorage.setItem('lastTaskClaimTime', Date.now().toString());
+                    
+                    // Trigger global sync to update dashboard
+                    if (typeof globalSync === 'function') globalSync();
+                    
+                    startTimer(24 * 60 * 60 * 1000);
+                } else {
+                    alert(data.error || "Failed to claim task. Please try again.");
+                    btn.innerHTML = 'Claim Earnings';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error("Task claim error:", err);
+                alert("Server error. Please try again.");
+                btn.innerHTML = 'Claim Earnings';
+                btn.disabled = false;
+            }
         }
 
         function startTimer(durationMs) {

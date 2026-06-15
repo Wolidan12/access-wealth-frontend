@@ -74,6 +74,7 @@
         
         .btn-submit { padding: 12px 25px; border-radius: 8px; background: var(--primary-yellow); color: #0b1421; font-weight: 600; border: none; cursor: pointer; transition: 0.3s; width: 100%; }
         .btn-submit:hover { background: #fff; }
+        textarea.form-control { resize: vertical; }
 
         @media (max-width: 992px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
         @media (max-width: 768px) {
@@ -103,15 +104,19 @@
             <a class="nav-item" onclick="switchTab('users', this); loadUsers(); toggleSidebarMobileOnly();"><i class="fa-solid fa-users"></i> User Management</a>
             
             <div class="nav-label">Finance & Payouts</div>
-            <a class="nav-item" onclick="switchTab('instant-payouts', this); loadWithdrawals(); toggleSidebarMobileOnly();" style="position:relative;">
-                <i class="fa-solid fa-bolt"></i> Instant Withdrawals 
-                <span class="badge danger" style="position:absolute; right:15px;" id="badgeInstant">0</span>
-            </a>
-            <a class="nav-item" onclick="switchTab('payouts', this); loadDeposits(); toggleSidebarMobileOnly();" style="position:relative;">
+            <a class="nav-item" onclick="switchTab('deposits', this); loadDeposits(); toggleSidebarMobileOnly();" style="position:relative;">
                 <i class="fa-solid fa-money-bill-transfer"></i> Deposit Approvals
                 <span class="badge warning" style="position:absolute; right:15px;" id="badgeDeposits">0</span>
             </a>
+            <a class="nav-item" onclick="switchTab('withdrawals', this); loadWithdrawals(); toggleSidebarMobileOnly();" style="position:relative;">
+                <i class="fa-solid fa-bolt"></i> Withdrawal Requests
+                <span class="badge danger" style="position:absolute; right:15px;" id="badgeWithdrawals">0</span>
+            </a>
             <a class="nav-item" onclick="switchTab('financials', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-wallet"></i> Manual Credit</a>
+            
+            <div class="nav-label">Communication</div>
+            <a class="nav-item" onclick="switchTab('broadcast', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-bullhorn"></i> Broadcast</a>
+            <a class="nav-item" onclick="switchTab('sponsored', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-ad"></i> Sponsored Posts</a>
             
             <div class="nav-label">Support</div>
             <a href="/support-agent.html" class="nav-item" target="_blank"><i class="fa-solid fa-headset"></i> Support Portal</a>
@@ -128,8 +133,8 @@
                 <div class="stat-card"><h3>Total Users</h3><h2 id="statTotalUsers">0</h2></div>
                 <div class="stat-card"><h3>Active Plans</h3><h2 id="statActivePlans">0</h2></div>
                 <div class="stat-card"><h3>Total Revenue</h3><h2 id="statRevenue">₦0.00</h2></div>
-                <div class="stat-card" style="border-color: #f39c12;"><h3>Pending Deposits</h3><h2 id="statPending" style="color: #f39c12;">0</h2></div>
-                <div class="stat-card" style="border-color: var(--danger);"><h3>Instant Payouts</h3><h2 id="statPendingWithdrawals" style="color: var(--danger);">0</h2></div>
+                <div class="stat-card" style="border-color: #f39c12;"><h3>Pending Deposits</h3><h2 id="statPendingDeposits" style="color: #f39c12;">0</h2></div>
+                <div class="stat-card" style="border-color: var(--danger);"><h3>Pending Withdrawals</h3><h2 id="statPendingWithdrawals" style="color: var(--danger);">0</h2></div>
             </div>
         </div>
 
@@ -138,34 +143,32 @@
             <div class="card">
                 <div class="table-responsive">
                     <table>
-                        <thead>
-                            <tr><th>Username</th><th>Total Bal</th><th>Deposit</th><th>Engage</th><th>Daily</th><th>Affiliate</th><th>Plan Status</th></tr>
-                        </thead>
+                        <thead><tr><th>Username</th><th>Total Bal</th><th>Deposit</th><th>Engage</th><th>Daily</th><th>Affiliate</th><th>Plan Status</th></tr></thead>
                         <tbody id="userTableBody"><tr><td colspan="7" style="text-align:center;">Loading users</td></tr></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <div id="instant-payouts" class="admin-section">
-            <div class="page-header"><div><h1>Instant Affiliate Payouts</h1><p>Process the 5% fee instant referral withdrawals here.</p></div></div>
+        <div id="deposits" class="admin-section">
+            <div class="page-header"><div><h1>Deposit Approvals</h1><p>Approve user deposit requests</p></div></div>
             <div class="card">
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th>Date requested</th><th>Username</th><th>Gross (₦)</th><th>Fee (5%)</th><th>Net to Pay (₦)</th><th>Action</th></tr></thead>
-                        <tbody id="withdrawalTableBody"><tr><td colspan="6" style="text-align:center;">Loading instant requests</td></tr></tbody>
+                        <thead><tr><th>Date</th><th>User</th><th>Amount</th><th>Payment Method</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody id="depositTableBody"><tr><td colspan="6" style="text-align:center;">Loading deposits</td></tr></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <div id="payouts" class="admin-section">
-            <div class="page-header"><div><h1>Deposit Approvals</h1><p>Approve funds sent to company Accounts.</p></div></div>
+        <div id="withdrawals" class="admin-section">
+            <div class="page-header"><div><h1>Withdrawal Requests</h1><p>Approve user withdrawal requests</p></div></div>
             <div class="card">
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th>Date</th><th>User</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
-                        <tbody id="depositTableBody"><tr><td colspan="5" style="text-align:center;">Loading deposits</td></tr></tbody>
+                        <thead><tr><th>Date</th><th>User</th><th>Amount</th><th>Wallet</th><th>Bank Details</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody id="withdrawalTableBody"><tr><td colspan="7" style="text-align:center;">Loading withdrawals</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -177,26 +180,38 @@
                 <div class="card">
                     <div class="card-title"><i class="fa-solid fa-bolt"></i> Force Credit Account</div>
                     <form id="manualCreditForm">
-                        <div class="form-group">
-                            <label>Username</label>
-                            <input type="text" id="creditUsername" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Wallet to Credit</label>
-                            <select id="creditWallet" class="form-control" required>
-                                <option value="balance">Deposit Wallet</option>
-                                <option value="taskEarnings">Engagements Wallet</option>
-                                <option value="daily_earnings">Daily Earnings Wallet</option>
-                                <option value="affiliate_balance">Affiliates Wallet</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Amount to Add (₦)</label>
-                            <input type="number" id="creditAmount" class="form-control" required>
-                        </div>
+                        <div class="form-group"><label>Username</label><input type="text" id="creditUsername" class="form-control" required></div>
+                        <div class="form-group"><label>Wallet to Credit</label><select id="creditWallet" class="form-control"><option value="balance">Deposit Wallet</option><option value="taskEarnings">Engagements Wallet</option><option value="daily_earnings">Daily Earnings Wallet</option><option value="affiliate_balance">Affiliates Wallet</option></select></div>
+                        <div class="form-group"><label>Amount to Add (₦)</label><input type="number" id="creditAmount" class="form-control" required></div>
                         <button type="submit" class="btn-submit" style="background: var(--success); color:#fff;" id="btnCredit">Credit User Now</button>
                     </form>
                 </div>
+            </div>
+        </div>
+
+        <div id="broadcast" class="admin-section">
+            <div class="page-header"><div><h1>Broadcast Message</h1><p>Send announcement to all users</p></div></div>
+            <div class="card">
+                <form id="broadcastForm">
+                    <div class="form-group"><label>Title</label><input type="text" id="broadcastTitle" class="form-control" placeholder="Announcement Title"></div>
+                    <div class="form-group"><label>Message</label><textarea id="broadcastMessage" class="form-control" rows="5" placeholder="Enter your message here..." required></textarea></div>
+                    <button type="submit" class="btn-submit" style="background: var(--primary-yellow);">Send Broadcast</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="sponsored" class="admin-section">
+            <div class="page-header"><div><h1>Sponsored Posts</h1><p>Create tasks for users to earn rewards</p></div></div>
+            <div class="card">
+                <form id="sponsoredPostForm">
+                    <div class="form-group"><label>Post Title</label><input type="text" id="postTitle" class="form-control" required></div>
+                    <div class="form-group"><label>Description / Instructions</label><textarea id="postDescription" class="form-control" rows="4" required></textarea></div>
+                    <div class="form-group"><label>Reward Amount (₦)</label><input type="number" id="postReward" class="form-control" required></div>
+                    <div class="form-group"><label>Required Plan (all / specific plan name)</label><input type="text" id="postRequiredPlan" class="form-control" placeholder="all" value="all"></div>
+                    <div class="form-group"><label>Image URL (optional)</label><input type="url" id="postImage" class="form-control" placeholder="https://example.com/image.jpg"></div>
+                    <div class="form-group"><label>Link URL (optional)</label><input type="url" id="postLink" class="form-control" placeholder="https://example.com"></div>
+                    <button type="submit" class="btn-submit" style="background: #2ecc71;">Create Sponsored Post</button>
+                </form>
             </div>
         </div>
 
@@ -215,11 +230,13 @@
         }
         function logout() { localStorage.clear(); window.location.href = '/login.html'; }
 
-        // Role check
         window.onload = () => {
             const role = localStorage.getItem('role');
             if (role !== 'admin') { window.location.href = '/login.html'; return; }
             loadDashboardStats();
+            loadUsers();
+            loadDeposits();
+            loadWithdrawals();
         };
 
         async function loadDashboardStats() {
@@ -229,10 +246,10 @@
                     document.getElementById('statTotalUsers').innerText = data.stats.totalUsers || 0;
                     document.getElementById('statActivePlans').innerText = data.stats.activePlans || 0;
                     document.getElementById('statRevenue').innerText = `₦${(data.stats.revenue || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                    document.getElementById('statPending').innerText = data.stats.pendingDeposits || 0;
+                    document.getElementById('statPendingDeposits').innerText = data.stats.pendingDeposits || 0;
                     document.getElementById('badgeDeposits').innerText = data.stats.pendingDeposits || 0;
                     document.getElementById('statPendingWithdrawals').innerText = data.stats.pendingWithdrawals || 0;
-                    document.getElementById('badgeInstant').innerText = data.stats.pendingWithdrawals || 0;
+                    document.getElementById('badgeWithdrawals').innerText = data.stats.pendingWithdrawals || 0;
                 }
             } catch (error) { console.error("Stats Error:", error); }
         }
@@ -247,17 +264,15 @@
                     data.users.forEach(user => {
                         const total = (user.balance || 0) + (user.taskEarnings || 0) + (user.daily_earnings || 0) + (user.affiliate_balance || 0);
                         const statusBadge = user.planActivated === 'true' ? `<span class="badge success">${user.activePackage || 'Premium'}</span>` : '<span class="badge warning">No Plan</span>';
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
+                        tbody.innerHTML += `<tr>
                             <td><strong>${user.username}</strong></td>
-                            <td style="color:var(--primary-yellow); font-weight:bold;">₦${total.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                            <td>₦${(user.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                            <td>₦${(user.taskEarnings || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                            <td>₦${(user.daily_earnings || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                            <td>₦${(user.affiliate_balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                            <td style="color:var(--primary-yellow); font-weight:bold;">₦${total.toLocaleString()}</td>
+                            <td>₦${(user.balance || 0).toLocaleString()}</td>
+                            <td>₦${(user.taskEarnings || 0).toLocaleString()}</td>
+                            <td>₦${(user.daily_earnings || 0).toLocaleString()}</td>
+                            <td>₦${(user.affiliate_balance || 0).toLocaleString()}</td>
                             <td>${statusBadge}</td>
-                        `;
-                        tbody.appendChild(tr);
+                        </tr>`;
                     });
                 }
             } catch (error) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Connection Error.</td></tr>'; }
@@ -265,64 +280,67 @@
 
         async function loadDeposits() {
             const tbody = document.getElementById('depositTableBody');
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading deposits</td></tr>';
             try {
                 const { ok, data } = await window.apiFetchJson('/admin/deposits');
                 if (ok && data.success) {
                     tbody.innerHTML = '';
-                    if(data.deposits.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No pending deposits.</td></tr>'; return; }
+                    if(data.deposits.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No pending deposits.</td></tr>'; return; }
                     data.deposits.forEach(dep => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
+                        tbody.innerHTML += `<tr>
                             <td>${new Date(dep.created_at).toLocaleDateString()}</td>
                             <td><strong>${dep.username}</strong></td>
-                            <td style="font-weight:bold;">₦${dep.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                            <td style="font-weight:bold;">₦${dep.amount.toLocaleString()}</td>
+                            <td>${dep.payment_method || 'Bank Transfer'}</td>
                             <td><span class="badge warning">Pending</span></td>
                             <td><button class="action-btn" style="color:var(--success); border-color:var(--success);" onclick="approveDeposit(${dep.id})">Approve</button></td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
-            } catch (error) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Connection Error.</td></tr>'; }
-        }
-
-        async function loadWithdrawals() {
-            const tbody = document.getElementById('withdrawalTableBody');
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading</td></tr>';
-            try {
-                const { ok, data } = await window.apiFetchJson('/admin/withdrawals');
-                if (ok && data.success) {
-                    tbody.innerHTML = '';
-                    if(data.withdrawals.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No pending instant payouts.</td></tr>'; return; }
-                    data.withdrawals.forEach(w => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>${new Date(w.created_at).toLocaleString()}</td>
-                            <td><strong>${w.username}</strong></td>
-                            <td>₦${w.total_deducted.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                            <td style="color:#ff4d4d;">-₦${w.fee.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                            <td style="color:#2ecc71; font-weight:bold; font-size:14px;">₦${w.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                            <td><button class="action-btn" style="color:var(--success); border-color:var(--success); background: rgba(46, 204, 113, 0.1);" onclick="approveWithdrawal(${w.id})">Mark as Paid</button></td>
-                        `;
-                        tbody.appendChild(tr);
+                        </tr>`;
                     });
                 }
             } catch (error) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Connection Error.</td></tr>'; }
         }
 
-        async function approveDeposit(id) {
-            if(!confirm("Are you sure you want to approve this deposit?")) return;
+        async function loadWithdrawals() {
+            const tbody = document.getElementById('withdrawalTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading withdrawals</td></tr>';
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/approve-deposit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ depositId: id }) });
-                if(ok && data.success) { showToast('success', "Deposit Approved!"); loadDeposits(); loadDashboardStats(); } else alert(data.error);
+                const { ok, data } = await window.apiFetchJson('/admin/withdrawals');
+                if (ok && data.success) {
+                    tbody.innerHTML = '';
+                    if(data.withdrawals.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No pending withdrawals.倍的情况下'; return; }
+                    data.withdrawals.forEach(w => {
+                        let bankInfo = '';
+                        try {
+                            const bank = JSON.parse(w.bank_details || '{}');
+                            bankInfo = `${bank.bank_name || ''} ${bank.account_number || ''}`;
+                        } catch(e) { bankInfo = w.bank_details || ''; }
+                        tbody.innerHTML += `<tr>
+                            <td>${new Date(w.created_at).toLocaleString()}</td>
+                            <td><strong>${w.username}</strong></td>
+                            <td style="font-weight:bold;">₦${w.amount.toLocaleString()}</td>
+                            <td>${w.wallet_type || 'affiliate'}</td>
+                            <td>${bankInfo}</td>
+                            <td><span class="badge warning">Pending</span></td>
+                            <td><button class="action-btn" style="color:var(--success); border-color:var(--success);" onclick="approveWithdrawal(${w.id})">Approve</button></td>
+                        </tr>`;
+                    });
+                }
+            } catch (error) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Connection Error.倍的情况下'; }
+        }
+
+        async function approveDeposit(id) {
+            if(!confirm("Approve this deposit?")) return;
+            try {
+                const { ok, data } = await window.apiFetchJson('/admin/approve-deposit', { method: 'POST', body: JSON.stringify({ depositId: id }) });
+                if(ok && data.success) { showToast('success', "Deposit Approved!"); loadDeposits(); loadDashboardStats(); loadUsers(); } else alert(data.error);
             } catch(e) { alert("Server Error."); }
         }
 
         async function approveWithdrawal(id) {
-            if(!confirm("Have you successfully transferred the funds to this user's bank account?")) return;
+            if(!confirm("Approve this withdrawal? Funds will be marked as paid.")) return;
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/approve-withdrawal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
-                if(ok && data.success) { showToast('success', "Payout Marked as Paid!"); loadWithdrawals(); loadDashboardStats(); } else alert(data.error);
+                const { ok, data } = await window.apiFetchJson('/admin/approve-withdrawal', { method: 'POST', body: JSON.stringify({ id: id }) });
+                if(ok && data.success) { showToast('success', "Withdrawal Approved!"); loadWithdrawals(); loadDashboardStats(); loadUsers(); } else alert(data.error);
             } catch(e) { alert("Server Error."); }
         }
 
@@ -334,10 +352,44 @@
             const amount = document.getElementById('creditAmount').value;
             const walletType = document.getElementById('creditWallet').value;
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/manual-credit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, amount, walletType }) });
-                if (ok && data.success) { showToast('success', data.message || "Credit successful!"); document.getElementById('manualCreditForm').reset(); } else alert(data.error);
+                const { ok, data } = await window.apiFetchJson('/admin/manual-credit', { method: 'POST', body: JSON.stringify({ username, amount, walletType }) });
+                if (ok && data.success) { showToast('success', data.message || "Credit successful!"); document.getElementById('manualCreditForm').reset(); loadUsers(); loadDashboardStats(); } else alert(data.error);
             } catch (err) { alert("Server error."); } finally { btn.innerText = "Credit User Now"; btn.disabled = false; }
+        });
+
+        // Broadcast message
+        document.getElementById('broadcastForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('broadcastTitle').value;
+            const message = document.getElementById('broadcastMessage').value;
+            const btn = e.target.querySelector('button');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+            btn.disabled = true;
+            const { ok, data } = await window.apiFetchJson('/admin/broadcast', { method: 'POST', body: JSON.stringify({ title, message }) });
+            if (ok && data.success) { showToast('success', 'Broadcast sent!'); document.getElementById('broadcastForm').reset(); } else alert(data.error || 'Failed');
+            btn.innerHTML = 'Send Broadcast';
+            btn.disabled = false;
+        });
+
+        // Sponsored post
+        document.getElementById('sponsoredPostForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const postData = {
+                title: document.getElementById('postTitle').value,
+                description: document.getElementById('postDescription').value,
+                reward_amount: document.getElementById('postReward').value,
+                required_plan: document.getElementById('postRequiredPlan').value,
+                image_url: document.getElementById('postImage').value,
+                link: document.getElementById('postLink').value
+            };
+            const btn = e.target.querySelector('button');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
+            btn.disabled = true;
+            const { ok, data } = await window.apiFetchJson('/admin/sponsored-post', { method: 'POST', body: JSON.stringify(postData) });
+            if (ok && data.success) { showToast('success', 'Sponsored post created!'); document.getElementById('sponsoredPostForm').reset(); } else alert(data.error || 'Failed');
+            btn.innerHTML = 'Create Sponsored Post';
+            btn.disabled = false;
         });
     </script>
 </body>
-</html>s
+</html>
