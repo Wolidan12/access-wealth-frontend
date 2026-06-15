@@ -2,165 +2,276 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Help & Support | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { 
-            --bg-body: #070d14; 
-            --bg-cards: #112A46; 
-            --text-main: #ffffff; 
-            --primary-yellow: #d4af37; 
-            --sidebar-width: 260px; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
 
-        .sidebar { width: var(--sidebar-width); background: var(--bg-cards); height: 100vh; position: fixed; border-right: 1px solid rgba(212, 175, 55, 0.15); z-index: 1100; }
-        .logo-area { padding: 25px 20px; font-size: 18px; font-weight: 700; border-bottom: 1px solid rgba(212, 175, 55, 0.15); display: flex; align-items: center; gap: 10px; }
-        .logo-area i { color: var(--primary-yellow); font-size: 24px; }
-        .nav-menu { padding: 20px 15px; }
-        .nav-item { display: flex; align-items: center; padding: 12px 15px; color: #8a99af; text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 14px; }
-        .nav-item i { margin-right: 15px; width: 20px; text-align: center; }
-        .nav-item.active { background: var(--primary-yellow); color: #0b1421; font-weight: 600; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #070d14;
+            color: #ffffff;
+            min-height: 100vh;
+        }
 
-        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 40px; display: flex; flex-direction: column; height: 100vh; }
-        
-        .chat-container { flex-grow: 1; background: var(--bg-cards); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; }
-        .chat-header { padding: 20px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(212, 175, 55, 0.15); text-align: center;}
-        .chat-header h3 { color: var(--primary-yellow); }
-        
-        .chat-box { flex-grow: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .message { max-width: 60%; padding: 12px 18px; border-radius: 15px; font-size: 14px; line-height: 1.5; }
-        .msg-support { background: rgba(212, 175, 55, 0.2); align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid var(--primary-yellow); }
-        .msg-user { background: rgba(255,255,255,0.05); align-self: flex-end; border-bottom-right-radius: 2px; }
+        /* Mobile first design */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 600px;
+            margin: 0 auto;
+            background: #0a1622;
+        }
 
-        .chat-input-area { padding: 20px; background: rgba(0,0,0,0.2); display: flex; gap: 15px; border-top: 1px solid rgba(212, 175, 55, 0.15); }
-        .chat-input { flex-grow: 1; padding: 15px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); background: var(--bg-body); color: #fff; outline: none; padding-left: 25px;}
-        .chat-input:focus { border-color: var(--primary-yellow); }
-        .btn-send { background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); color: #0b1421; border: none; width: 50px; height: 50px; border-radius: 50%; font-weight: 600; cursor: pointer; font-size: 18px; }
-        .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        /* Welcome Popup Modal */
-        .welcome-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 2000;
-            justify-content: center;
+        /* Header */
+        .chat-header {
+            background: #112A46;
+            padding: 16px 20px;
+            display: flex;
             align-items: center;
-            backdrop-filter: blur(5px);
+            gap: 12px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
-        .welcome-modal-content {
-            background: var(--bg-cards);
-            border: 1px solid var(--primary-yellow);
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 400px;
-            text-align: center;
-            animation: fadeIn 0.3s ease;
-        }
-        .welcome-modal-content i {
-            font-size: 50px;
-            color: var(--primary-yellow);
-            margin-bottom: 15px;
-        }
-        .welcome-modal-content h3 {
+
+        .chat-header i {
             font-size: 24px;
-            margin-bottom: 10px;
+            color: #d4af37;
         }
-        .welcome-modal-content p {
+
+        .chat-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .chat-header p {
+            font-size: 11px;
             color: #8a99af;
-            margin-bottom: 20px;
+            margin-top: 2px;
         }
-        .welcome-modal-content button {
-            background: var(--primary-yellow);
-            color: #0b1421;
+
+        /* Messages area */
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .message.support {
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user {
+            background: #1a2a4a;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message .sender {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-bottom: 4px;
+        }
+
+        .message .time {
+            font-size: 9px;
+            opacity: 0.5;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        /* Input area */
+        .input-area {
+            background: #112A46;
+            padding: 12px 16px;
+            display: flex;
+            gap: 12px;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 25px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .input-area input:focus {
+            border-color: #d4af37;
+        }
+
+        .input-area button {
+            background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
             border: none;
-            padding: 10px 25px;
-            border-radius: 30px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            color: #0b1421;
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.2s;
+        }
+
+        .input-area button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Welcome popup */
+        .welcome-popup {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: #112A46;
+            border: 1px solid #d4af37;
+            border-radius: 16px;
+            padding: 16px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 100;
+            animation: slideUp 0.3s ease;
+            max-width: 350px;
+        }
+
+        .welcome-popup i {
+            font-size: 32px;
+            color: #d4af37;
+        }
+
+        .welcome-popup .content {
+            flex: 1;
+        }
+
+        .welcome-popup h4 {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .welcome-popup p {
+            font-size: 12px;
+            color: #8a99af;
+        }
+
+        .welcome-popup button {
+            background: #d4af37;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 20px;
+            color: #0b1421;
             font-weight: 600;
             cursor: pointer;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
-        @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .main-content { margin-left: 0; width: 100%; padding: 20px; }
-            .message { max-width: 85%; }
+        /* Back button for mobile */
+        .back-btn {
+            background: transparent;
+            border: none;
+            color: #d4af37;
+            font-size: 20px;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+
+        @media (min-width: 768px) {
+            .chat-container {
+                margin: 20px auto;
+                height: calc(100vh - 40px);
+                border-radius: 20px;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            }
         }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="logo-area"><i class="fa-solid fa-crown"></i> ACCESS WEALTH</div>
-        <div class="nav-menu">
-            <a href="/dashboard.html" class="nav-item"><i class="fa-solid fa-border-all"></i> Dashboard</a>
-            <a href="/support.html" class="nav-item active"><i class="fa-solid fa-headset"></i> Live Support</a>
+    <div class="chat-container">
+        <div class="chat-header">
+            <button class="back-btn" onclick="window.location.href='/dashboard.html'"><i class="fa-solid fa-arrow-left"></i></button>
+            <div>
+                <h2><i class="fa-solid fa-headset"></i> Live Support</h2>
+                <p>We typically reply within a few minutes</p>
+            </div>
+        </div>
+
+        <div class="messages-area" id="messagesArea">
+            <div style="text-align: center; color: #8a99af; padding: 40px;">
+                <i class="fa-solid fa-comments" style="font-size: 40px; opacity: 0.3; margin-bottom: 10px; display: block;"></i>
+                Loading messages...
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Type your message here...">
+            <button id="sendBtn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
 
-    <div class="main-content">
-        <div class="chat-container">
-            <div class="chat-header">
-                <h3><i class="fa-solid fa-headset"></i> Access Wealth Live Support</h3>
-                <p style="font-size: 12px; color: #8a99af;">We typically reply within a few minutes.</p>
-            </div>
-            
-            <div class="chat-box" id="chatBox">
-                <div class="message msg-support">Connecting to secure server...</div>
-            </div>
-
-            <div class="chat-input-area">
-                <input type="text" id="msgInput" class="chat-input" placeholder="Type your message here">
-                <button class="btn-send" id="sendBtn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
-            </div>
+    <!-- Welcome popup -->
+    <div class="welcome-popup" id="welcomePopup">
+        <i class="fa-solid fa-headset"></i>
+        <div class="content">
+            <h4>Welcome to Support!</h4>
+            <p>How may I help you today?</p>
         </div>
-    </div>
-
-    <!-- Welcome Popup Modal -->
-    <div class="welcome-modal" id="welcomeModal">
-        <div class="welcome-modal-content">
-            <i class="fa-solid fa-headset"></i>
-            <h3>Welcome to Support!</h3>
-            <p>Hi, I'm an Access Wealth support agent. How may I help you today?</p>
-            <button onclick="closeWelcomeModal()">Start Chatting</button>
-        </div>
+        <button onclick="closeWelcomePopup()">Got it</button>
     </div>
 
     <script src="global.js"></script>
     <script>
-        let chatInterval = null;
+        let messageInterval = null;
+        let welcomeShown = false;
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.onload = () => {
             const username = localStorage.getItem('username');
             if (!username) {
                 window.location.href = '/login.html';
                 return;
             }
-            
-            // Show welcome popup (only once per session)
-            const hasSeenWelcome = sessionStorage.getItem('hasSeenWelcome');
-            if (!hasSeenWelcome) {
-                document.getElementById('welcomeModal').style.display = 'flex';
-                sessionStorage.setItem('hasSeenWelcome', 'true');
-            }
-            
             loadMessages();
-            chatInterval = setInterval(loadMessages, 5000);
-        });
-
-        function closeWelcomeModal() {
-            document.getElementById('welcomeModal').style.display = 'none';
-        }
+            messageInterval = setInterval(loadMessages, 5000);
+            showWelcomePopup();
+        };
 
         async function loadMessages() {
             const username = localStorage.getItem('username');
@@ -169,61 +280,92 @@
             try {
                 const { ok, data } = await window.apiFetchJson(`/chat/history/${username}`);
                 if (ok && data.success) {
-                    const box = document.getElementById('chatBox');
-                    box.innerHTML = '';
+                    const container = document.getElementById('messagesArea');
+                    container.innerHTML = '';
                     
                     if (data.messages.length === 0) {
-                        const welcomeDiv = document.createElement('div');
-                        welcomeDiv.className = 'message msg-support';
-                        welcomeDiv.innerText = '👋 Hi! I\'m an Access Wealth support agent. How can I help you today?';
-                        box.appendChild(welcomeDiv);
+                        container.innerHTML = '<div style="text-align: center; color: #8a99af; padding: 40px;"><i class="fa-solid fa-comments" style="font-size: 40px; opacity: 0.3; margin-bottom: 10px; display: block;"></i>No messages yet. Start a conversation!</div>';
+                    } else {
+                        data.messages.forEach(msg => {
+                            const isSupport = (msg.sender === 'support' || msg.sender !== username);
+                            const div = document.createElement('div');
+                            div.className = `message ${isSupport ? 'support' : 'user'}`;
+                            div.innerHTML = `
+                                <div class="sender">${isSupport ? 'Support Agent' : 'You'}</div>
+                                <div>${escapeHtml(msg.message)}</div>
+                                <div class="time">${new Date(msg.created_at).toLocaleTimeString()}</div>
+                            `;
+                            container.appendChild(div);
+                        });
+                        container.scrollTop = container.scrollHeight;
                     }
-                    
-                    data.messages.forEach(msg => {
-                        const div = document.createElement('div');
-                        const isSupport = (msg.sender === 'support' || msg.sender !== username);
-                        div.className = `message ${isSupport ? 'msg-support' : 'msg-user'}`;
-                        div.innerText = msg.message;
-                        box.appendChild(div);
-                    });
-                    box.scrollTop = box.scrollHeight;
                 }
-            } catch(e) {
-                console.error("Load messages error:", e);
+            } catch (err) {
+                console.error("Load messages error:", err);
             }
         }
 
         async function sendMessage() {
-            const input = document.getElementById('msgInput');
-            const sendBtn = document.getElementById('sendBtn');
+            const input = document.getElementById('messageInput');
             const username = localStorage.getItem('username');
+            const message = input.value.trim();
             
-            if (!input.value.trim() || !username) return;
+            if (!message || !username) return;
 
-            const text = input.value.trim();
             input.value = '';
+            const sendBtn = document.getElementById('sendBtn');
             sendBtn.disabled = true;
 
             try {
                 const { ok, data } = await window.apiFetchJson('/chat/send', {
                     method: 'POST',
-                    body: JSON.stringify({ user_id: username, message: text })
+                    body: JSON.stringify({ user_id: username, message: message })
                 });
 
                 if (ok && data.success) {
-                    loadMessages();
+                    await loadMessages();
                 } else {
                     alert(data.error || "Failed to send message");
-                    input.value = text;
+                    input.value = message;
                 }
             } catch (err) {
-                console.error("Send message error:", err);
-                alert("Failed to send message. Please try again.");
-                input.value = text;
+                console.error("Send error:", err);
+                alert("Failed to send message");
+                input.value = message;
             } finally {
                 sendBtn.disabled = false;
                 input.focus();
             }
+        }
+
+        async function showWelcomePopup() {
+            if (welcomeShown) return;
+            const hasSeen = sessionStorage.getItem('chatWelcomeSeen');
+            if (hasSeen) return;
+            
+            // Send welcome message to backend
+            try {
+                await window.apiFetchJson('/chat/welcome', { method: 'POST' });
+            } catch(e) {}
+            
+            document.getElementById('welcomePopup').style.display = 'flex';
+            welcomeShown = true;
+            sessionStorage.setItem('chatWelcomeSeen', 'true');
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                document.getElementById('welcomePopup').style.display = 'none';
+            }, 5000);
+        }
+
+        function closeWelcomePopup() {
+            document.getElementById('welcomePopup').style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
     </script>
 </body>

@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Support Agent Dashboard | Access Wealth</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Support Agent | Access Wealth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -14,57 +14,66 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Poppins', sans-serif;
             background: #070d14;
             color: #ffffff;
             height: 100vh;
             overflow: hidden;
         }
 
-        /* Main Layout */
+        /* Mobile first - users sidebar hidden by default */
         .agent-container {
             display: flex;
-            height: 100vh;
+            height: 100%;
+            position: relative;
         }
 
-        /* Sidebar - Users List */
+        /* Users Sidebar */
         .users-sidebar {
-            width: 320px;
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
             background: #0a1622;
-            border-right: 1px solid rgba(212, 175, 55, 0.15);
+            z-index: 100;
+            transition: left 0.3s ease;
             display: flex;
             flex-direction: column;
+            border-right: 1px solid rgba(212, 175, 55, 0.15);
+        }
+
+        .users-sidebar.open {
+            left: 0;
         }
 
         .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        .sidebar-header h2 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 5px;
+        .sidebar-header h3 {
+            font-size: 16px;
         }
 
         .sidebar-header p {
-            font-size: 12px;
+            font-size: 11px;
             color: #8a99af;
         }
 
         .search-box {
-            padding: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
         .search-box input {
             width: 100%;
-            padding: 12px 15px 12px 40px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 12px;
+            padding: 10px 12px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 25px;
             color: #fff;
-            font-size: 14px;
+            font-size: 13px;
             outline: none;
         }
 
@@ -72,77 +81,56 @@
             border-color: #d4af37;
         }
 
-        .search-box .search-icon {
-            position: relative;
-        }
-
-        .search-box .search-icon i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #8a99af;
-        }
-
         .users-list {
             flex: 1;
             overflow-y: auto;
-            padding: 10px;
+            padding: 8px;
         }
 
-        .user-card {
-            background: rgba(17, 42, 70, 0.4);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 8px;
+        .user-item {
+            padding: 12px;
+            background: rgba(17,42,70,0.4);
+            border-radius: 10px;
+            margin-bottom: 6px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: 0.2s;
             border: 1px solid transparent;
         }
 
-        .user-card:hover {
-            background: rgba(212, 175, 55, 0.1);
-            border-color: rgba(212, 175, 55, 0.3);
+        .user-item:hover {
+            background: rgba(212,175,55,0.1);
         }
 
-        .user-card.active {
-            background: rgba(212, 175, 55, 0.15);
+        .user-item.active {
+            background: rgba(212,175,55,0.15);
             border-color: #d4af37;
         }
 
-        .user-card .user-name {
+        .user-name {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            margin-bottom: 8px;
+            align-items: center;
         }
 
-        .user-card .user-name h4 {
-            font-size: 15px;
-            font-weight: 600;
+        .user-name h4 {
+            font-size: 14px;
         }
 
-        .user-card .user-name .badge {
+        .badge {
             background: #ff4d4d;
             color: white;
             font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 10px;
         }
 
-        .user-card .last-message {
-            font-size: 12px;
+        .last-msg {
+            font-size: 11px;
             color: #8a99af;
+            margin-top: 4px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-        }
-
-        .user-card .time {
-            font-size: 10px;
-            color: #6c7a8a;
-            margin-top: 5px;
         }
 
         /* Chat Area */
@@ -154,151 +142,149 @@
         }
 
         .chat-header {
-            padding: 20px 30px;
             background: #0a1622;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+            padding: 12px 16px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(212,175,55,0.15);
         }
 
-        .chat-header .user-info h3 {
-            font-size: 18px;
-            font-weight: 600;
+        .menu-btn {
+            background: transparent;
+            border: none;
+            color: #d4af37;
+            font-size: 20px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .chat-header .user-info p {
-            font-size: 12px;
+        .menu-btn:hover {
+            background: rgba(212,175,55,0.1);
+        }
+
+        .chat-header h3 {
+            font-size: 16px;
+            flex: 1;
+        }
+
+        .chat-header span {
+            font-size: 11px;
             color: #2ecc71;
         }
 
-        .chat-header .status i {
-            color: #2ecc71;
-            font-size: 12px;
-        }
-
-        .chat-messages {
+        .messages-area {
             flex: 1;
             overflow-y: auto;
-            padding: 30px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
 
         .message {
-            max-width: 70%;
-            padding: 12px 18px;
+            max-width: 80%;
+            padding: 10px 14px;
             border-radius: 18px;
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 13px;
+            line-height: 1.4;
         }
 
         .message.user {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255,255,255,0.05);
             align-self: flex-start;
             border-bottom-left-radius: 4px;
         }
 
         .message.agent {
-            background: rgba(212, 175, 55, 0.15);
-            border: 1px solid rgba(212, 175, 55, 0.3);
+            background: rgba(212,175,55,0.15);
+            border: 1px solid rgba(212,175,55,0.3);
             align-self: flex-end;
             border-bottom-right-radius: 4px;
         }
 
         .message .sender {
-            font-size: 11px;
+            font-size: 10px;
             opacity: 0.7;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .message .time {
-            font-size: 10px;
+            font-size: 9px;
             opacity: 0.5;
-            margin-top: 5px;
+            margin-top: 4px;
             text-align: right;
         }
 
-        .chat-input-area {
-            padding: 20px 30px;
+        .input-area {
             background: #0a1622;
-            border-top: 1px solid rgba(212, 175, 55, 0.15);
+            padding: 12px 16px;
             display: flex;
-            gap: 15px;
+            gap: 12px;
+            border-top: 1px solid rgba(212,175,55,0.15);
         }
 
-        .chat-input-area input {
+        .input-area input {
             flex: 1;
-            padding: 14px 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 30px;
+            padding: 10px 16px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 25px;
             color: #fff;
-            font-size: 14px;
+            font-size: 13px;
             outline: none;
         }
 
-        .chat-input-area input:focus {
+        .input-area input:focus {
             border-color: #d4af37;
         }
 
-        .chat-input-area button {
+        .input-area button {
             background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
             border: none;
-            padding: 12px 30px;
-            border-radius: 30px;
+            padding: 0 20px;
+            border-radius: 25px;
             color: #0b1421;
             font-weight: 600;
             cursor: pointer;
-            transition: 0.2s;
         }
 
-        .chat-input-area button:hover:not(:disabled) {
-            transform: translateY(-2px);
-        }
-
-        .chat-input-area button:disabled {
+        .input-area button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: #8a99af;
-            margin-top: auto;
-            margin-bottom: auto;
         }
 
         .logout-btn {
             background: #ff4d4d;
             color: white;
             border: none;
-            padding: 12px;
-            margin: 15px;
-            border-radius: 10px;
+            padding: 10px;
+            margin: 12px;
+            border-radius: 25px;
             font-weight: 600;
             cursor: pointer;
-            transition: 0.2s;
         }
 
-        .logout-btn:hover {
-            background: #e04343;
+        .empty-state {
+            text-align: center;
+            color: #8a99af;
+            padding: 40px;
         }
 
-        @media (max-width: 768px) {
+        /* Desktop styles */
+        @media (min-width: 768px) {
             .users-sidebar {
-                width: 280px;
-                position: absolute;
-                left: -280px;
-                z-index: 1000;
-                transition: left 0.3s;
-            }
-            .users-sidebar.open {
+                position: relative;
                 left: 0;
+                width: 300px;
             }
-            .message {
-                max-width: 85%;
+            .menu-btn {
+                display: none;
             }
         }
     </style>
@@ -308,17 +294,14 @@
         <!-- Users Sidebar -->
         <div class="users-sidebar" id="usersSidebar">
             <div class="sidebar-header">
-                <h2><i class="fa-solid fa-headset"></i> Support Dashboard</h2>
-                <p>Manage all user conversations</p>
+                <h3><i class="fa-solid fa-headset"></i> Support Dashboard</h3>
+                <p>Manage all conversations</p>
             </div>
             <div class="search-box">
-                <div class="search-icon">
-                    <i class="fa-solid fa-search"></i>
-                    <input type="text" id="searchUsers" placeholder="Search users by name...">
-                </div>
+                <input type="text" id="searchUsers" placeholder="Search users...">
             </div>
             <div class="users-list" id="usersList">
-                <div style="text-align: center; padding: 20px;">Loading users...</div>
+                <div class="empty-state">Loading users...</div>
             </div>
             <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-sign-out-alt"></i> Logout</button>
         </div>
@@ -326,25 +309,21 @@
         <!-- Chat Area -->
         <div class="chat-area">
             <div class="chat-header">
-                <div class="user-info">
-                    <h3 id="activeUserName">Select a user</h3>
-                    <p id="activeUserStatus"><i class="fa-solid fa-circle"></i> Select a conversation to start</p>
-                </div>
-                <div class="status">
-                    <i class="fa-solid fa-circle"></i> Online
-                </div>
+                <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+                <h3 id="activeUserTitle">Select a user</h3>
+                <span id="activeUserStatus"><i class="fa-solid fa-circle"></i></span>
             </div>
 
-            <div class="chat-messages" id="chatMessages">
+            <div class="messages-area" id="messagesArea">
                 <div class="empty-state">
-                    <i class="fa-solid fa-comments" style="font-size: 48px; opacity: 0.3; margin-bottom: 15px; display: block;"></i>
-                    <p>Select a user from the left panel to start chatting</p>
+                    <i class="fa-solid fa-comments" style="font-size: 40px; opacity: 0.3; margin-bottom: 10px; display: block;"></i>
+                    Select a user from the left panel to start chatting
                 </div>
             </div>
 
-            <div class="chat-input-area">
-                <input type="text" id="messageInput" placeholder="Type your response here..." disabled>
-                <button id="sendBtn" onclick="sendMessage()" disabled><i class="fa-solid fa-paper-plane"></i> Send</button>
+            <div class="input-area">
+                <input type="text" id="messageInput" placeholder="Type your response..." disabled>
+                <button id="sendBtn" onclick="sendMessage()" disabled>Send</button>
             </div>
         </div>
     </div>
@@ -365,9 +344,12 @@
             setInterval(loadAllUsers, 10000);
         };
 
+        function toggleSidebar() {
+            document.getElementById('usersSidebar').classList.toggle('open');
+        }
+
         async function loadAllUsers() {
             try {
-                // Get all users from admin endpoint
                 const { ok, data } = await window.apiFetchJson('/admin/users');
                 if (ok && data.success) {
                     allUsers = data.users;
@@ -375,32 +357,30 @@
                 }
             } catch (e) {
                 console.error("Load users error:", e);
-                document.getElementById('usersList').innerHTML = '<div style="text-align: center; padding: 20px; color: #ff4d4d;">Failed to load users</div>';
+                document.getElementById('usersList').innerHTML = '<div class="empty-state">Failed to load users</div>';
             }
         }
 
         function renderUsersList(users) {
             const container = document.getElementById('usersList');
             if (!users || users.length === 0) {
-                container.innerHTML = '<div style="text-align: center; padding: 20px;">No users found</div>';
+                container.innerHTML = '<div class="empty-state">No users found</div>';
                 return;
             }
 
             container.innerHTML = '';
             users.forEach(user => {
-                const userCard = document.createElement('div');
-                userCard.className = `user-card ${currentUser === user.username ? 'active' : ''}`;
-                userCard.setAttribute('data-username', user.username);
-                userCard.innerHTML = `
+                const div = document.createElement('div');
+                div.className = `user-item ${currentUser === user.username ? 'active' : ''}`;
+                div.setAttribute('data-username', user.username);
+                div.innerHTML = `
                     <div class="user-name">
-                        <h4><i class="fa-solid fa-user-circle"></i> ${user.username}</h4>
-                        <span class="badge" id="badge-${user.username}" style="display: none;">New</span>
+                        <h4><i class="fa-solid fa-user"></i> ${user.username}</h4>
                     </div>
-                    <div class="last-message" id="lastMsg-${user.username}">Click to start conversation</div>
-                    <div class="time" id="lastTime-${user.username}"></div>
+                    <div class="last-msg" id="lastMsg_${user.username}">Click to chat</div>
                 `;
-                userCard.onclick = () => selectUser(user.username);
-                container.appendChild(userCard);
+                div.onclick = () => selectUser(user.username);
+                container.appendChild(div);
             });
         }
 
@@ -414,30 +394,28 @@
 
         async function selectUser(username) {
             currentUser = username;
-            
-            // Update active state in sidebar
-            document.querySelectorAll('.user-card').forEach(card => {
-                if (card.getAttribute('data-username') === username) {
-                    card.classList.add('active');
-                } else {
-                    card.classList.remove('active');
-                }
-            });
-
-            // Update header
-            document.getElementById('activeUserName').innerText = username;
-            document.getElementById('activeUserStatus').innerHTML = '<i class="fa-solid fa-circle"></i> Active conversation';
-            
-            // Enable input
+            document.getElementById('activeUserTitle').innerText = username;
+            document.getElementById('activeUserStatus').innerHTML = '<i class="fa-solid fa-circle"></i> Online';
             document.getElementById('messageInput').disabled = false;
             document.getElementById('sendBtn').disabled = false;
             
-            // Clear previous interval
-            if (messageInterval) clearInterval(messageInterval);
+            // Update active state
+            document.querySelectorAll('.user-item').forEach(item => {
+                if (item.getAttribute('data-username') === username) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
             
-            // Load messages
+            if (messageInterval) clearInterval(messageInterval);
             await loadMessages();
             messageInterval = setInterval(loadMessages, 5000);
+            
+            // Close sidebar on mobile after selection
+            if (window.innerWidth < 768) {
+                document.getElementById('usersSidebar').classList.remove('open');
+            }
         }
 
         async function loadMessages() {
@@ -446,58 +424,34 @@
             try {
                 const { ok, data } = await window.apiFetchJson(`/chat/history/${currentUser}`);
                 if (ok && data.success) {
-                    const container = document.getElementById('chatMessages');
+                    const container = document.getElementById('messagesArea');
                     container.innerHTML = '';
                     
-                    if (!data.messages || data.messages.length === 0) {
-                        // Send auto welcome message when first time
-                        await sendAutoWelcome();
-                        return;
+                    if (data.messages.length === 0) {
+                        container.innerHTML = '<div class="empty-state">No messages yet. Send a welcome message!</div>';
+                    } else {
+                        data.messages.forEach(msg => {
+                            const isAgent = (msg.sender === 'support' || msg.sender === 'Support_Agent');
+                            const div = document.createElement('div');
+                            div.className = `message ${isAgent ? 'agent' : 'user'}`;
+                            div.innerHTML = `
+                                <div class="sender">${isAgent ? 'Support Agent' : currentUser}</div>
+                                <div>${escapeHtml(msg.message)}</div>
+                                <div class="time">${new Date(msg.created_at).toLocaleTimeString()}</div>
+                            `;
+                            container.appendChild(div);
+                        });
+                        container.scrollTop = container.scrollHeight;
                     }
-                    
-                    data.messages.forEach(msg => {
-                        const messageDiv = document.createElement('div');
-                        const isAgent = (msg.sender === 'support' || msg.sender === 'Support_Agent');
-                        messageDiv.className = `message ${isAgent ? 'agent' : 'user'}`;
-                        messageDiv.innerHTML = `
-                            <div class="sender">${isAgent ? 'Support Agent' : currentUser}</div>
-                            <div class="text">${escapeHtml(msg.message)}</div>
-                            <div class="time">${new Date(msg.created_at).toLocaleTimeString()}</div>
-                        `;
-                        container.appendChild(messageDiv);
-                    });
-                    container.scrollTop = container.scrollHeight;
-                    
-                    // Remove badge if exists
-                    const badge = document.getElementById(`badge-${currentUser}`);
-                    if (badge) badge.style.display = 'none';
                 }
-            } catch (e) {
-                console.error("Load messages error:", e);
-            }
-        }
-
-        async function sendAutoWelcome() {
-            const welcomeMessage = "👋 Hello! I'm an Access Wealth support agent. How may I help you today?";
-            
-            try {
-                const { ok, data } = await window.apiFetchJson('/chat/send', {
-                    method: 'POST',
-                    body: JSON.stringify({ user_id: currentUser, message: welcomeMessage })
-                });
-                
-                if (ok && data.success) {
-                    await loadMessages();
-                }
-            } catch (e) {
-                console.error("Auto welcome error:", e);
+            } catch (err) {
+                console.error("Load messages error:", err);
             }
         }
 
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
-            
             if (!message || !currentUser) return;
             
             input.value = '';
