@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Help & Support | Access Wealth</title>
+    <title>Live Support | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -17,17 +17,9 @@
             font-family: 'Poppins', sans-serif;
             background: #070d14;
             color: #ffffff;
-            min-height: 100vh;
-        }
-
-        /* Mobile first design */
-        .chat-container {
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            max-width: 600px;
-            margin: 0 auto;
-            background: #0a1622;
         }
 
         /* Header */
@@ -38,9 +30,6 @@
             align-items: center;
             gap: 12px;
             border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-            position: sticky;
-            top: 0;
-            z-index: 10;
         }
 
         .chat-header i {
@@ -57,6 +46,20 @@
             font-size: 11px;
             color: #8a99af;
             margin-top: 2px;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: none;
+            color: #d4af37;
+            font-size: 20px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* Messages area */
@@ -145,122 +148,45 @@
             cursor: not-allowed;
         }
 
-        /* Welcome popup */
-        .welcome-popup {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: #112A46;
-            border: 1px solid #d4af37;
-            border-radius: 16px;
-            padding: 16px;
-            display: none;
-            align-items: center;
-            gap: 12px;
-            z-index: 100;
-            animation: slideUp 0.3s ease;
-            max-width: 350px;
-        }
-
-        .welcome-popup i {
-            font-size: 32px;
-            color: #d4af37;
-        }
-
-        .welcome-popup .content {
-            flex: 1;
-        }
-
-        .welcome-popup h4 {
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-
-        .welcome-popup p {
-            font-size: 12px;
+        .empty-state {
+            text-align: center;
             color: #8a99af;
-        }
-
-        .welcome-popup button {
-            background: #d4af37;
-            border: none;
-            padding: 6px 16px;
-            border-radius: 20px;
-            color: #0b1421;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        /* Back button for mobile */
-        .back-btn {
-            background: transparent;
-            border: none;
-            color: #d4af37;
-            font-size: 20px;
-            cursor: pointer;
-            margin-right: 8px;
+            padding: 40px;
         }
 
         @media (min-width: 768px) {
-            .chat-container {
-                margin: 20px auto;
-                height: calc(100vh - 40px);
-                border-radius: 20px;
-                overflow: hidden;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            body {
+                max-width: 600px;
+                margin: 0 auto;
+                box-shadow: 0 0 20px rgba(0,0,0,0.3);
             }
         }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <button class="back-btn" onclick="window.location.href='/dashboard.html'"><i class="fa-solid fa-arrow-left"></i></button>
-            <div>
-                <h2><i class="fa-solid fa-headset"></i> Live Support</h2>
-                <p>We typically reply within a few minutes</p>
-            </div>
-        </div>
-
-        <div class="messages-area" id="messagesArea">
-            <div style="text-align: center; color: #8a99af; padding: 40px;">
-                <i class="fa-solid fa-comments" style="font-size: 40px; opacity: 0.3; margin-bottom: 10px; display: block;"></i>
-                Loading messages...
-            </div>
-        </div>
-
-        <div class="input-area">
-            <input type="text" id="messageInput" placeholder="Type your message here...">
-            <button id="sendBtn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+    <div class="chat-header">
+        <button class="back-btn" onclick="window.location.href='/dashboard.html'"><i class="fa-solid fa-arrow-left"></i></button>
+        <div>
+            <h2><i class="fa-solid fa-headset"></i> Live Support</h2>
+            <p>We typically reply within a few minutes</p>
         </div>
     </div>
 
-    <!-- Welcome popup -->
-    <div class="welcome-popup" id="welcomePopup">
-        <i class="fa-solid fa-headset"></i>
-        <div class="content">
-            <h4>Welcome to Support!</h4>
-            <p>How may I help you today?</p>
+    <div class="messages-area" id="messagesArea">
+        <div class="empty-state">
+            <i class="fa-solid fa-comments" style="font-size: 40px; opacity: 0.3; margin-bottom: 10px; display: block;"></i>
+            Loading messages...
         </div>
-        <button onclick="closeWelcomePopup()">Got it</button>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="messageInput" placeholder="Type your message here...">
+        <button id="sendBtn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
     </div>
 
     <script src="global.js"></script>
     <script>
         let messageInterval = null;
-        let welcomeShown = false;
 
         window.onload = () => {
             const username = localStorage.getItem('username');
@@ -270,8 +196,15 @@
             }
             loadMessages();
             messageInterval = setInterval(loadMessages, 5000);
-            showWelcomePopup();
+            // Send welcome message on first load
+            sendWelcomeMessage();
         };
+
+        async function sendWelcomeMessage() {
+            try {
+                await window.apiFetchJson('/chat/welcome', { method: 'POST' });
+            } catch(e) {}
+        }
 
         async function loadMessages() {
             const username = localStorage.getItem('username');
@@ -283,8 +216,8 @@
                     const container = document.getElementById('messagesArea');
                     container.innerHTML = '';
                     
-                    if (data.messages.length === 0) {
-                        container.innerHTML = '<div style="text-align: center; color: #8a99af; padding: 40px;"><i class="fa-solid fa-comments" style="font-size: 40px; opacity: 0.3; margin-bottom: 10px; display: block;"></i>No messages yet. Start a conversation!</div>';
+                    if (!data.messages || data.messages.length === 0) {
+                        container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-comments" style="font-size: 40px; opacity: 0.3; margin-bottom: 10px; display: block;"></i>No messages yet. Send a message to start the conversation!</div>';
                     } else {
                         data.messages.forEach(msg => {
                             const isSupport = (msg.sender === 'support' || msg.sender !== username);
@@ -330,36 +263,12 @@
                 }
             } catch (err) {
                 console.error("Send error:", err);
-                alert("Failed to send message");
+                alert("Failed to send message. Please try again.");
                 input.value = message;
             } finally {
                 sendBtn.disabled = false;
                 input.focus();
             }
-        }
-
-        async function showWelcomePopup() {
-            if (welcomeShown) return;
-            const hasSeen = sessionStorage.getItem('chatWelcomeSeen');
-            if (hasSeen) return;
-            
-            // Send welcome message to backend
-            try {
-                await window.apiFetchJson('/chat/welcome', { method: 'POST' });
-            } catch(e) {}
-            
-            document.getElementById('welcomePopup').style.display = 'flex';
-            welcomeShown = true;
-            sessionStorage.setItem('chatWelcomeSeen', 'true');
-            
-            // Hide after 5 seconds
-            setTimeout(() => {
-                document.getElementById('welcomePopup').style.display = 'none';
-            }, 5000);
-        }
-
-        function closeWelcomePopup() {
-            document.getElementById('welcomePopup').style.display = 'none';
         }
 
         function escapeHtml(text) {

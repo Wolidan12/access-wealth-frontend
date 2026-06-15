@@ -21,7 +21,6 @@
             overflow: hidden;
         }
 
-        /* Mobile first - users sidebar hidden by default */
         .agent-container {
             display: flex;
             height: 100%;
@@ -276,7 +275,6 @@
             padding: 40px;
         }
 
-        /* Desktop styles */
         @media (min-width: 768px) {
             .users-sidebar {
                 position: relative;
@@ -341,7 +339,7 @@
                 return;
             }
             loadAllUsers();
-            setInterval(loadAllUsers, 10000);
+            setInterval(loadAllUsers, 15000);
         };
 
         function toggleSidebar() {
@@ -350,43 +348,57 @@
 
         async function loadAllUsers() {
             try {
+                // Use /admin/users to get ALL registered users
                 const { ok, data } = await window.apiFetchJson('/admin/users');
                 if (ok && data.success) {
                     allUsers = data.users;
                     renderUsersList(allUsers);
+                } else {
+                    // Fallback to /support/users if admin endpoint fails
+                    const { ok: ok2, data: data2 } = await window.apiFetchJson('/support/users');
+                    if (ok2 && data2.success) {
+                        allUsers = data2.users.map(u => ({ username: u.user_id }));
+                        renderUsersList(allUsers);
+                    }
                 }
             } catch (e) {
                 console.error("Load users error:", e);
-                document.getElementById('usersList').innerHTML = '<div class="empty-state">Failed to load users</div>';
+                document.getElementById('usersList').innerHTML = '<div class="empty-state">Failed to load users. Make sure you are logged in as admin.</div>';
             }
         }
 
         function renderUsersList(users) {
             const container = document.getElementById('usersList');
             if (!users || users.length === 0) {
-                container.innerHTML = '<div class="empty-state">No users found</div>';
+                container.innerHTML = '<div class="empty-state">No users found. Users will appear here when they register.</div>';
                 return;
             }
 
             container.innerHTML = '';
             users.forEach(user => {
+                const username = user.username || user.user_id;
+                if (!username) return;
+                
                 const div = document.createElement('div');
-                div.className = `user-item ${currentUser === user.username ? 'active' : ''}`;
-                div.setAttribute('data-username', user.username);
+                div.className = `user-item ${currentUser === username ? 'active' : ''}`;
+                div.setAttribute('data-username', username);
                 div.innerHTML = `
                     <div class="user-name">
-                        <h4><i class="fa-solid fa-user"></i> ${user.username}</h4>
+                        <h4><i class="fa-solid fa-user"></i> ${username}</h4>
                     </div>
-                    <div class="last-msg" id="lastMsg_${user.username}">Click to chat</div>
+                    <div class="last-msg" id="lastMsg_${username.replace(/[^a-zA-Z0-9]/g, '_')}">Click to chat</div>
                 `;
-                div.onclick = () => selectUser(user.username);
+                div.onclick = () => selectUser(username);
                 container.appendChild(div);
             });
         }
 
         function filterUsers() {
             const searchTerm = document.getElementById('searchUsers').value.toLowerCase();
-            const filtered = allUsers.filter(user => user.username.toLowerCase().includes(searchTerm));
+            const filtered = allUsers.filter(user => {
+                const username = user.username || user.user_id;
+                return username && username.toLowerCase().includes(searchTerm);
+            });
             renderUsersList(filtered);
         }
 
@@ -427,11 +439,11 @@
                     const container = document.getElementById('messagesArea');
                     container.innerHTML = '';
                     
-                    if (data.messages.length === 0) {
-                        container.innerHTML = '<div class="empty-state">No messages yet. Send a welcome message!</div>';
+                    if (!data.messages || data.messages.length === 0) {
+                        container.innerHTML = '<div class="empty-state">No messages yet. Send a message to start the conversation!</div>';
                     } else {
                         data.messages.forEach(msg => {
-                            const isAgent = (msg.sender === 'support' || msg.sender === 'Support_Agent');
+                            const isAgent = (msg.sender === 'support' || msg.sender === 'Support_Agent' || msg.sender === 'admin');
                             const div = document.createElement('div');
                             div.className = `message ${isAgent ? 'agent' : 'user'}`;
                             div.innerHTML = `
@@ -443,6 +455,8 @@
                         });
                         container.scrollTop = container.scrollHeight;
                     }
+                } else {
+                    console.error("Failed to load messages:", data?.error);
                 }
             } catch (err) {
                 console.error("Load messages error:", err);
@@ -472,7 +486,7 @@
                 }
             } catch (err) {
                 console.error("Send error:", err);
-                alert("Failed to send message");
+                alert("Failed to send message. Check your connection.");
                 input.value = message;
             } finally {
                 sendBtn.disabled = false;
