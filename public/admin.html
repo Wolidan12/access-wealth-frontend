@@ -108,7 +108,7 @@
                 <i class="fa-solid fa-money-bill-transfer"></i> Deposit Approvals
                 <span class="badge warning" style="position:absolute; right:15px;" id="badgeDeposits">0</span>
             </a>
-            <a class="nav-item" onclick="switchTab('withdrawals', this); loadWithdrawals(); toggleSidebarMobileOnly();" style="position:relative;">
+            <a class="nav-item" onclick="switchTab('withdrawals', this); loadAllWithdrawals('pending'); toggleSidebarMobileOnly();" style="position:relative;">
                 <i class="fa-solid fa-bolt"></i> Withdrawal Requests
                 <span class="badge danger" style="position:absolute; right:15px;" id="badgeWithdrawals">0</span>
             </a>
@@ -166,12 +166,18 @@
         </div>
 
         <div id="withdrawals" class="admin-section">
-            <div class="page-header"><div><h1>Withdrawal Requests</h1><p>Approve user withdrawal requests with bank details</p></div></div>
+            <div class="page-header"><div><h1>Withdrawal Requests</h1><p>Approve or decline user withdrawal requests</p></div></div>
             <div class="card">
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <button class="action-btn" style="background: var(--primary-yellow); color: #0b1421; padding: 8px 20px;" onclick="loadAllWithdrawals('pending')">Pending</button>
+                    <button class="action-btn" style="background: #2ecc71; color: #fff; padding: 8px 20px;" onclick="loadAllWithdrawals('approved')">Approved</button>
+                    <button class="action-btn" style="background: #ff4d4d; color: #fff; padding: 8px 20px;" onclick="loadAllWithdrawals('declined')">Declined</button>
+                    <button class="action-btn" style="background: #3498db; color: #fff; padding: 8px 20px;" onclick="loadAllWithdrawals('all')">All</button>
+                </div>
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th>Date</th><th>User</th><th>Amount</th><th>Wallet</th><th>Bank Details</th><th>Status</th><th>Action</th></tr></thead>
-                        <tbody id="withdrawalTableBody"><tr><td colspan="7" style="text-align:center;">Loading withdrawals</td></tr></tbody>
+                        <thead><tr><th>Date</th><th>User</th><th>Amount</th><th>Wallet</th><th>Bank Details</th><th>Status</th><th>Note</th><th>Action</th></tr></thead>
+                        <tbody id="withdrawalTableBody"><tr><td colspan="8" style="text-align:center;">Loading withdrawals...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -196,8 +202,8 @@
                         <div class="form-group"><label>Wallet to Adjust</label><select id="adjustWallet" class="form-control"><option value="balance">Deposit Wallet</option><option value="taskEarnings">Engagements Wallet</option><option value="daily_earnings">Daily Earnings Wallet</option><option value="affiliate_balance">Affiliates Wallet</option></select></div>
                         <div class="form-group"><label>Amount (₦)</label><input type="number" id="adjustAmount" class="form-control" required></div>
                         <div style="display: flex; gap: 10px;">
-                            <button type="submit" id="btnAdd" class="btn-submit" style="background: var(--success); color:#fff; flex:1;" onclick="adjustBalance('add')">Add Funds</button>
-                            <button type="submit" id="btnSubtract" class="btn-submit" style="background: var(--danger); color:#fff; flex:1;" onclick="adjustBalance('subtract')">Subtract Funds</button>
+                            <button type="button" id="btnAdd" class="btn-submit" style="background: var(--success); color:#fff; flex:1;" onclick="adjustBalance('add')">Add Funds</button>
+                            <button type="button" id="btnSubtract" class="btn-submit" style="background: var(--danger); color:#fff; flex:1;" onclick="adjustBalance('subtract')">Subtract Funds</button>
                         </div>
                     </form>
                 </div>
@@ -263,7 +269,7 @@
             loadDashboardStats();
             loadUsers();
             loadDeposits();
-            loadWithdrawals();
+            loadAllWithdrawals('pending');
             loadTaskSubmissions();
         };
 
@@ -352,42 +358,119 @@
         }
 
         // ==========================================
-        // WITHDRAWALS
+        // WITHDRAWALS MANAGEMENT (NEW)
         // ==========================================
-        async function loadWithdrawals() {
+        let currentWithdrawalsFilter = 'pending';
+
+        async function loadAllWithdrawals(status = 'pending') {
+            currentWithdrawalsFilter = status;
             const tbody = document.getElementById('withdrawalTableBody');
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading withdrawals</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Loading withdrawals...</td></tr>';
+            
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/withdrawals');
+                let url = '/admin/withdrawals';
+                if (status === 'all') {
+                    url = '/admin/all-withdrawals';
+                } else {
+                    url = `/admin/withdrawals?status=${status}`;
+                }
+                
+                const { ok, data } = await window.apiFetchJson(url);
                 if (ok && data.success) {
                     tbody.innerHTML = '';
-                    if(data.withdrawals.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No pending withdrawals.</td></tr>'; return; }
+                    if (data.withdrawals.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">No ${status} withdrawals.</td></tr>`;
+                        return;
+                    }
+                    
                     data.withdrawals.forEach(w => {
                         let bankInfo = '';
                         try {
                             const bank = JSON.parse(w.bank_details || '{}');
-                            bankInfo = `${bank.bank_name || ''} - ${bank.account_number || ''} (${bank.account_holder || ''})`;
+                            bankInfo = `${bank.bank_name || ''} - ${bank.account_number || ''}<br><small>${bank.account_holder || ''}</small>`;
                         } catch(e) { bankInfo = w.bank_details || ''; }
+                        
+                        let statusBadge = '';
+                        if (w.status === 'pending') statusBadge = '<span class="badge warning">Pending</span>';
+                        else if (w.status === 'approved') statusBadge = '<span class="badge success">Approved</span>';
+                        else if (w.status === 'declined') statusBadge = '<span class="badge danger">Declined</span>';
+                        
+                        let actions = '';
+                        if (w.status === 'pending') {
+                            actions = `
+                                <button class="action-btn" style="color:var(--success); border-color:var(--success);" onclick="openWithdrawalAction(${w.id}, 'approve')">Approve</button>
+                                <button class="action-btn" style="color:var(--danger); border-color:var(--danger);" onclick="openWithdrawalAction(${w.id}, 'decline')">Decline</button>
+                            `;
+                        } else {
+                            actions = `<span style="color:var(--text-muted); font-size:11px;">Reviewed by ${w.reviewed_by || 'Admin'}</span>`;
+                        }
+                        
+                        const note = w.admin_note || '-';
+                        
                         tbody.innerHTML += `<tr>
                             <td>${new Date(w.created_at).toLocaleString()}</td>
                             <td><strong>${w.username}</strong></td>
                             <td style="font-weight:bold;">₦${w.amount.toLocaleString()}</td>
                             <td>${w.wallet_type || 'affiliate'}</td>
                             <td style="font-size:12px;">${bankInfo}</td>
-                            <td><span class="badge warning">Pending</span></td>
-                            <td><button class="action-btn" style="color:var(--success); border-color:var(--success);" onclick="approveWithdrawal(${w.id})">Approve</button></td>
+                            <td>${statusBadge}</td>
+                            <td style="font-size:12px; max-width:150px; word-wrap:break-word;">${note}</td>
+                            <td>${actions}</td>
                         </tr>`;
                     });
                 }
-            } catch (error) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Connection Error.</td></tr>'; }
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">Connection Error.</td></tr>';
+            }
         }
 
-        async function approveWithdrawal(id) {
-            if(!confirm("Approve this withdrawal? Funds will be marked as paid.")) return;
+        function openWithdrawalAction(id, action) {
+            const note = prompt(`Enter a note for ${action === 'approve' ? 'approval' : 'declination'}:\n\n${action === 'approve' ? 'Default: Your withdrawal has been approved. Money is on the way!' : 'Default: Your withdrawal was declined. Please contact support.'}`);
+            if (note === null) return; // cancelled
+            
+            const finalNote = note || (action === 'approve' ? 'Your withdrawal has been approved. Money is on the way!' : 'Your withdrawal was declined. Please contact support for assistance.');
+            
+            if (action === 'approve') {
+                approveWithdrawalWithNote(id, finalNote);
+            } else {
+                declineWithdrawalWithNote(id, finalNote);
+            }
+        }
+
+        async function approveWithdrawalWithNote(id, note) {
+            if(!confirm("Approve this withdrawal?")) return;
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/approve-withdrawal', { method: 'POST', body: JSON.stringify({ id: id }) });
-                if(ok && data.success) { showToast('success', "Withdrawal Approved!"); loadWithdrawals(); loadDashboardStats(); loadUsers(); } else alert(data.error);
+                const { ok, data } = await window.apiFetchJson('/admin/approve-withdrawal', { 
+                    method: 'POST', 
+                    body: JSON.stringify({ id, note }) 
+                });
+                if(ok && data.success) { 
+                    showToast('success', 'Withdrawal Approved!'); 
+                    loadAllWithdrawals(currentWithdrawalsFilter); 
+                    loadDashboardStats(); 
+                    loadUsers(); 
+                } else alert(data.error);
             } catch(e) { alert("Server Error."); }
+        }
+
+        async function declineWithdrawalWithNote(id, note) {
+            if(!confirm("Decline this withdrawal? User will be refunded.")) return;
+            try {
+                const { ok, data } = await window.apiFetchJson('/admin/decline-withdrawal', { 
+                    method: 'POST', 
+                    body: JSON.stringify({ id, note }) 
+                });
+                if(ok && data.success) { 
+                    showToast('warning', 'Withdrawal Declined. User refunded.'); 
+                    loadAllWithdrawals(currentWithdrawalsFilter); 
+                    loadDashboardStats(); 
+                    loadUsers(); 
+                } else alert(data.error);
+            } catch(e) { alert("Server Error."); }
+        }
+
+        async function loadWithdrawals() {
+            loadAllWithdrawals('pending');
         }
 
         // ==========================================
@@ -471,7 +554,7 @@
         });
 
         // ==========================================
-        // TASK SUBMISSIONS (NEW)
+        // TASK SUBMISSIONS
         // ==========================================
         async function loadTaskSubmissions() {
             const tbody = document.getElementById('taskSubmissionsTable');
