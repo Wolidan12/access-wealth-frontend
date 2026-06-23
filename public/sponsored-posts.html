@@ -22,7 +22,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
 
-        /* --- HEADER & SIDEBAR --- */
         .mobile-header { display: none; width: 100%; background: var(--bg-cards); padding: 15px 25px; justify-content: space-between; align-items: center; position: fixed; top: 0; z-index: 1000; border-bottom: 1px solid var(--border-light); }
         .mobile-header i.menu-btn { font-size: 24px; color: var(--primary-yellow); cursor: pointer; }
         .mobile-header .logo-text { font-weight: 700; font-size: 16px; letter-spacing: 1px; color: var(--text-main); }
@@ -71,12 +70,10 @@
         .user-info p { font-size: 12px; color: var(--text-muted); }
         .avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-yellow); }
 
-        /* --- MAIN CONTENT & POST UI --- */
         .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); display: flex; flex-direction: column; transition: margin-left 0.3s, width 0.3s; }
         .sidebar.collapsed ~ .main-content { margin-left: var(--sidebar-collapsed-width); width: calc(100% - var(--sidebar-collapsed-width)); }
-        .content-area { padding: 50px 40px; max-width: 900px; margin: 0 auto; width: 100%; position: relative; }
+        .content-area { padding: 50px 40px; max-width: 1000px; margin: 0 auto; width: 100%; position: relative; }
 
-        /* LOCK SCREEN (THE GATEKEEPER) */
         .lock-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(7, 13, 20, 0.85); backdrop-filter: blur(8px); z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border-radius: 20px; display: none; }
         .lock-overlay i { font-size: 60px; color: #ff4d4d; margin-bottom: 20px; }
         .lock-overlay h2 { font-size: 28px; margin-bottom: 10px; color: #fff; }
@@ -88,7 +85,6 @@
         .page-title { font-size: 32px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
         .page-subtitle { color: var(--text-muted); font-size: 15px; }
 
-        /* POST CARD */
         .post-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 24px; padding: 30px; text-align: left; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 30px; }
         .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;}
         .post-header h3 { font-size: 18px; color: var(--primary-yellow); }
@@ -102,9 +98,13 @@
         .btn-share { flex: 1; background: #25D366; color: #fff; border: none; padding: 15px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none;}
         .btn-share:hover { background: #128C7E; }
         
-        .btn-claim { flex: 1; background: var(--yellow-gradient); color: #0b1421; border: none; padding: 15px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;}
-        .btn-claim:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3); }
-        .btn-claim:disabled { background: #333; color: #777; cursor: not-allowed; transform: none; box-shadow: none; border: 1px solid #555;}
+        .btn-submit-task { flex: 1; background: var(--yellow-gradient); color: #0b1421; border: none; padding: 15px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;}
+        .btn-submit-task:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3); }
+        .btn-submit-task:disabled { background: #333; color: #777; cursor: not-allowed; transform: none; box-shadow: none; border: 1px solid #555;}
+
+        .status-badge { font-size: 12px; padding: 4px 12px; border-radius: 20px; display: inline-block; }
+        .status-pending { background: rgba(243, 156, 18, 0.2); color: #f39c12; border: 1px solid #f39c12; }
+        .status-approved { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border: 1px solid #2ecc71; }
 
         @media (max-width: 768px) {
             .sidebar { left: -260px; width: var(--sidebar-width) !important; }
@@ -169,38 +169,26 @@
             <div class="lock-overlay" id="lockScreen">
                 <i class="fa-solid fa-lock"></i>
                 <h2>Activation Required</h2>
-                <p>You must fund your Account and activate a premium plan to unlock Sponsored Posts and earn shares.</p>
+                <p>You must activate a premium plan to unlock Sponsored Posts and earn rewards.</p>
                 <button onclick="window.location.href='/activation.html'">Activate Now</button>
             </div>
             
             <div class="page-header">
                 <h1 class="page-title">Sponsored Posts</h1>
-                <p class="page-subtitle">Share promotional content to your social media to earn extra task balance.</p>
+                <p class="page-subtitle">Complete sponsored tasks and earn rewards. All submissions are reviewed by admin.</p>
             </div>
 
-            <div class="post-card">
-                <div class="post-header">
-                    <h3>Today's Campaign: Join Access Wealth</h3>
-                    <div class="post-reward">Reward: ₦300</div>
-                </div>
-                
-                <div class="post-content">
-                    <p><strong>Required Text:</strong> I just upgraded my Account on Access Wealth and claimed my welcome bonus! 🚀 Start earning daily through simple tasks and spins. Sign up today and let's grow together!</p>
-                    <p><em>(Copy the text above and post it to your WhatsApp status or Facebook timeline)</em></p>
-                    <div style="width: 100%; height: 120px; background: rgba(212,175,55,0.1); border-radius: 8px; margin-top: 15px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-light);">
-                        <i class="fa-solid fa-image" style="font-size: 30px; color: var(--primary-yellow);"></i> &nbsp; Promotional Banner
-                    </div>
-                </div>
-
-                <div class="action-buttons">
-                    <a href="#" class="btn-share" onclick="simulateShare(event)"><i class="fa-brands fa-whatsapp"></i> Share on WhatsApp</a>
-                    <button class="btn-claim" id="claimBtn" disabled onclick="claimReward()"><i class="fa-solid fa-check"></i> Claim ₦300</button>
+            <div id="postsContainer">
+                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size: 30px; margin-bottom: 15px; display: block;"></i>
+                    Loading sponsored posts...
                 </div>
             </div>
 
         </div>
     </div>
 
+    <script src="global.js"></script>
     <script>
         // UI Navigation
         function toggleDesktopSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
@@ -210,7 +198,6 @@
 
         // --- GATEKEEPER LOGIC ---
         window.onload = () => {
-            // Setup User Info
             const user = localStorage.getItem('username') || "Guest";
             document.getElementById('displayName').innerText = user.toUpperCase();
             document.getElementById('displayHandle').innerText = "@" + user.toLowerCase().replace(/\s+/g, '');
@@ -218,57 +205,128 @@
             document.getElementById('desktopAvatar').src = avatarUrl;
             document.getElementById('mobileAvatar').src = avatarUrl;
 
-            // THE GATEKEEPER: Check if Activated
             const isActivated = localStorage.getItem('planActivated') === 'true';
             if (!isActivated) {
-                document.getElementById('lockScreen').style.display = 'flex'; // Lock the screen!
+                document.getElementById('lockScreen').style.display = 'flex';
                 return;
             }
 
-            // Check if already claimed today
-            checkPostStatus();
+            loadSponsoredPosts();
         };
 
-        function simulateShare(e) {
-            e.preventDefault(); // Prevent page jump
-            // Unlock the claim button after they "share"
-            alert("Opening WhatsApp Make sure you actually post the text to your status!");
+        async function loadSponsoredPosts() {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin" style="font-size: 30px; margin-bottom: 15px; display: block;"></i>Loading...</div>';
             
-            const claimBtn = document.getElementById('claimBtn');
-            claimBtn.disabled = false;
-            claimBtn.innerHTML = "<i class='fa-solid fa-hand-holding-dollar'></i> Claim ₦300";
-        }
-
-        function checkPostStatus() {
-            const lastPostClaim = localStorage.getItem('lastPostClaim');
-            const today = new Date().toDateString();
-
-            if (lastPostClaim === today) {
-                const claimBtn = document.getElementById('claimBtn');
-                claimBtn.disabled = true;
-                claimBtn.innerText = "Already Claimed Today";
-                document.querySelector('.btn-share').style.pointerEvents = "none";
-                document.querySelector('.btn-share').style.opacity = "0.5";
+            try {
+                const { ok, data } = await window.apiFetchJson('/sponsored-posts');
+                if (ok && data.success) {
+                    if (data.posts.length === 0) {
+                        container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">No sponsored posts available at the moment. Check back later!</div>';
+                        return;
+                    }
+                    
+                    container.innerHTML = '';
+                    data.posts.forEach(post => {
+                        const card = document.createElement('div');
+                        card.className = 'post-card';
+                        card.innerHTML = `
+                            <div class="post-header">
+                                <h3>${post.title}</h3>
+                                <div class="post-reward">Reward: ₦${post.reward_amount}</div>
+                            </div>
+                            <div class="post-content">
+                                <p>${post.description}</p>
+                                ${post.image_url ? `<img src="${post.image_url}" alt="Post image">` : ''}
+                                ${post.link ? `<p><strong>Link:</strong> <a href="${post.link}" target="_blank" style="color: var(--primary-yellow);">${post.link}</a></p>` : ''}
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn-share" onclick="simulateShare(event, ${post.id})">
+                                    <i class="fa-brands fa-whatsapp"></i> Share on WhatsApp
+                                </button>
+                                <button class="btn-submit-task" id="submitBtn_${post.id}" data-postid="${post.id}" disabled onclick="submitTask(${post.id})">
+                                    <i class="fa-solid fa-check"></i> Submit for Review
+                                </button>
+                            </div>
+                            <div id="status_${post.id}" style="margin-top: 12px;"></div>
+                        `;
+                        container.appendChild(card);
+                        
+                        // Check if user already submitted this post
+                        checkSubmissionStatus(post.id);
+                    });
+                } else {
+                    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #ff4d4d;">Failed to load sponsored posts. Please try again.</div>';
+                }
+            } catch (err) {
+                console.error("Load posts error:", err);
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #ff4d4d;">Error loading posts. Please refresh.</div>';
             }
         }
 
-        function claimReward() {
-            const claimBtn = document.getElementById('claimBtn');
-            claimBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
-            claimBtn.disabled = true;
-
-            setTimeout(() => {
-                // Add 300 to Task Earnings
-                let currentEarnings = parseFloat(localStorage.getItem('taskEarnings')) || 0;
-                localStorage.setItem('taskEarnings', currentEarnings + 300);
+        async function checkSubmissionStatus(postId) {
+            try {
+                const { ok, data } = await window.apiFetchJson(`/sponsored-submission-status/${postId}`);
+                const btn = document.getElementById(`submitBtn_${postId}`);
+                const statusDiv = document.getElementById(`status_${postId}`);
                 
-                // Save today's date so they can't spam it
-                const today = new Date().toDateString();
-                localStorage.setItem('lastPostClaim', today);
+                if (ok && data.success && data.status !== 'not_submitted') {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.6';
+                    btn.innerHTML = data.status === 'approved' ? '<i class="fa-solid fa-check-circle"></i> Approved' : '<i class="fa-solid fa-clock"></i> Pending Review';
+                    
+                    if (data.status === 'approved') {
+                        statusDiv.innerHTML = `<span class="status-badge status-approved">✅ Approved - Reward credited!</span>`;
+                    } else {
+                        statusDiv.innerHTML = `<span class="status-badge status-pending">⏳ Submitted for review</span>`;
+                    }
+                } else {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit for Review';
+                }
+            } catch (err) {
+                console.error("Status check error:", err);
+            }
+        }
 
-                alert("🎉 Success! ₦300 has been added to your Task Earnings.");
-                checkPostStatus();
-            }, 1000);
+        let selectedPostId = null;
+
+        function simulateShare(e, postId) {
+            e.preventDefault();
+            selectedPostId = postId;
+            alert("📱 Please share this sponsored post on your WhatsApp status or social media. After sharing, click the 'Submit for Review' button.");
+            
+            const btn = document.getElementById(`submitBtn_${postId}`);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit for Review';
+            btn.style.background = 'var(--yellow-gradient)';
+        }
+
+        async function submitTask(postId) {
+            const btn = document.getElementById(`submitBtn_${postId}`);
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+            
+            try {
+                const { ok, data } = await window.apiFetchJson('/submit-sponsored-task', {
+                    method: 'POST',
+                    body: JSON.stringify({ post_id: postId })
+                });
+                
+                if (ok && data.success) {
+                    alert('✅ Task submitted successfully! Admin will review and credit your account.');
+                    btn.innerHTML = '<i class="fa-solid fa-clock"></i> Pending Review';
+                    document.getElementById(`status_${postId}`).innerHTML = `<span class="status-badge status-pending">⏳ Submitted for review</span>`;
+                } else {
+                    alert(data.error || 'Failed to submit task');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit for Review';
+                }
+            } catch (err) {
+                alert('Server error. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit for Review';
+            }
         }
     </script>
 </body>

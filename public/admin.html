@@ -118,6 +118,9 @@
             <a class="nav-item" onclick="switchTab('broadcast', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-bullhorn"></i> Broadcast</a>
             <a class="nav-item" onclick="switchTab('sponsored', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-ad"></i> Sponsored Posts</a>
             
+            <div class="nav-label">Task Reviews</div>
+            <a class="nav-item" onclick="switchTab('task-reviews', this); loadTaskSubmissions(); toggleSidebarMobileOnly();"><i class="fa-solid fa-check-double"></i> Sponsored Submissions</a>
+            
             <div class="nav-label">Support</div>
             <a href="/support-agent.html" class="nav-item" target="_blank"><i class="fa-solid fa-headset"></i> Support Portal</a>
 
@@ -143,8 +146,8 @@
             <div class="card">
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th>Username</th><th>Total Bal</th><th>Deposit</th><th>Engage</th><th>Daily</th><th>Affiliate</th><th>Plan Status</th></tr></thead>
-                        <tbody id="userTableBody"><tr><td colspan="7" style="text-align:center;">Loading users</td></tr></tbody>
+                        <thead><tr><th>Username</th><th>Total Bal</th><th>Deposit</th><th>Engage</th><th>Daily</th><th>Affiliate</th><th>Plan Status</th><th>Actions</th></tr></thead>
+                        <tbody id="userTableBody"><tr><td colspan="8" style="text-align:center;">Loading users</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -163,7 +166,7 @@
         </div>
 
         <div id="withdrawals" class="admin-section">
-            <div class="page-header"><div><h1>Withdrawal Requests</h1><p>Approve user withdrawal requests</p></div></div>
+            <div class="page-header"><div><h1>Withdrawal Requests</h1><p>Approve user withdrawal requests with bank details</p></div></div>
             <div class="card">
                 <div class="table-responsive">
                     <table>
@@ -175,15 +178,27 @@
         </div>
 
         <div id="financials" class="admin-section">
-            <div class="page-header"><div><h1>Manual Credit</h1><p>Credit any specific wallet category directly.</p></div></div>
+            <div class="page-header"><div><h1>Manual Credit / Adjust Balance</h1><p>Add or subtract from any wallet category</p></div></div>
             <div class="form-grid">
                 <div class="card">
                     <div class="card-title"><i class="fa-solid fa-bolt"></i> Force Credit Account</div>
                     <form id="manualCreditForm">
                         <div class="form-group"><label>Username</label><input type="text" id="creditUsername" class="form-control" required></div>
                         <div class="form-group"><label>Wallet to Credit</label><select id="creditWallet" class="form-control"><option value="balance">Deposit Wallet</option><option value="taskEarnings">Engagements Wallet</option><option value="daily_earnings">Daily Earnings Wallet</option><option value="affiliate_balance">Affiliates Wallet</option></select></div>
-                        <div class="form-group"><label>Amount to Add (₦)</label><input type="number" id="creditAmount" class="form-control" required></div>
+                        <div class="form-group"><label>Amount (₦)</label><input type="number" id="creditAmount" class="form-control" required></div>
                         <button type="submit" class="btn-submit" style="background: var(--success); color:#fff;" id="btnCredit">Credit User Now</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <div class="card-title"><i class="fa-solid fa-minus-circle" style="color: var(--danger);"></i> Adjust Balance</div>
+                    <form id="adjustBalanceForm">
+                        <div class="form-group"><label>Username</label><input type="text" id="adjustUsername" class="form-control" required></div>
+                        <div class="form-group"><label>Wallet to Adjust</label><select id="adjustWallet" class="form-control"><option value="balance">Deposit Wallet</option><option value="taskEarnings">Engagements Wallet</option><option value="daily_earnings">Daily Earnings Wallet</option><option value="affiliate_balance">Affiliates Wallet</option></select></div>
+                        <div class="form-group"><label>Amount (₦)</label><input type="number" id="adjustAmount" class="form-control" required></div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" id="btnAdd" class="btn-submit" style="background: var(--success); color:#fff; flex:1;" onclick="adjustBalance('add')">Add Funds</button>
+                            <button type="submit" id="btnSubtract" class="btn-submit" style="background: var(--danger); color:#fff; flex:1;" onclick="adjustBalance('subtract')">Subtract Funds</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -215,6 +230,18 @@
             </div>
         </div>
 
+        <div id="task-reviews" class="admin-section">
+            <div class="page-header"><div><h1>Sponsored Post Submissions</h1><p>Review and approve user task submissions</p></div></div>
+            <div class="card">
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>User</th><th>Post Title</th><th>Reward</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody id="taskSubmissionsTable"><tr><td colspan="6" style="text-align:center;">Loading submissions...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script src="global.js"></script>
@@ -237,8 +264,12 @@
             loadUsers();
             loadDeposits();
             loadWithdrawals();
+            loadTaskSubmissions();
         };
 
+        // ==========================================
+        // DASHBOARD STATS
+        // ==========================================
         async function loadDashboardStats() {
             try {
                 const { ok, data } = await window.apiFetchJson('/admin/stats');
@@ -254,9 +285,12 @@
             } catch (error) { console.error("Stats Error:", error); }
         }
 
+        // ==========================================
+        // USER MANAGEMENT
+        // ==========================================
         async function loadUsers() {
             const tbody = document.getElementById('userTableBody');
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading users</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Loading users</td></tr>';
             try {
                 const { ok, data } = await window.apiFetchJson('/admin/users');
                 if (ok && data.success) {
@@ -272,12 +306,21 @@
                             <td>₦${(user.daily_earnings || 0).toLocaleString()}</td>
                             <td>₦${(user.affiliate_balance || 0).toLocaleString()}</td>
                             <td>${statusBadge}</td>
+                            <td><button class="action-btn" onclick="quickAdjust('${user.username}')">Adjust</button></td>
                         </tr>`;
                     });
                 }
-            } catch (error) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Connection Error.</td></tr>'; }
+            } catch (error) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red;">Connection Error.</td></tr>'; }
         }
 
+        function quickAdjust(username) {
+            document.getElementById('adjustUsername').value = username;
+            document.getElementById('adjustUsername').scrollIntoView();
+        }
+
+        // ==========================================
+        // DEPOSITS
+        // ==========================================
         async function loadDeposits() {
             const tbody = document.getElementById('depositTableBody');
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading deposits</td></tr>';
@@ -300,6 +343,17 @@
             } catch (error) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Connection Error.</td></tr>'; }
         }
 
+        async function approveDeposit(id) {
+            if(!confirm("Approve this deposit?")) return;
+            try {
+                const { ok, data } = await window.apiFetchJson('/admin/approve-deposit', { method: 'POST', body: JSON.stringify({ depositId: id }) });
+                if(ok && data.success) { showToast('success', "Deposit Approved!"); loadDeposits(); loadDashboardStats(); loadUsers(); } else alert(data.error);
+            } catch(e) { alert("Server Error."); }
+        }
+
+        // ==========================================
+        // WITHDRAWALS
+        // ==========================================
         async function loadWithdrawals() {
             const tbody = document.getElementById('withdrawalTableBody');
             tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading withdrawals</td></tr>';
@@ -307,33 +361,25 @@
                 const { ok, data } = await window.apiFetchJson('/admin/withdrawals');
                 if (ok && data.success) {
                     tbody.innerHTML = '';
-                    if(data.withdrawals.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No pending withdrawals.倍的情况下'; return; }
+                    if(data.withdrawals.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No pending withdrawals.</td></tr>'; return; }
                     data.withdrawals.forEach(w => {
                         let bankInfo = '';
                         try {
                             const bank = JSON.parse(w.bank_details || '{}');
-                            bankInfo = `${bank.bank_name || ''} ${bank.account_number || ''}`;
+                            bankInfo = `${bank.bank_name || ''} - ${bank.account_number || ''} (${bank.account_holder || ''})`;
                         } catch(e) { bankInfo = w.bank_details || ''; }
                         tbody.innerHTML += `<tr>
                             <td>${new Date(w.created_at).toLocaleString()}</td>
                             <td><strong>${w.username}</strong></td>
                             <td style="font-weight:bold;">₦${w.amount.toLocaleString()}</td>
                             <td>${w.wallet_type || 'affiliate'}</td>
-                            <td>${bankInfo}</td>
+                            <td style="font-size:12px;">${bankInfo}</td>
                             <td><span class="badge warning">Pending</span></td>
                             <td><button class="action-btn" style="color:var(--success); border-color:var(--success);" onclick="approveWithdrawal(${w.id})">Approve</button></td>
                         </tr>`;
                     });
                 }
-            } catch (error) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Connection Error.倍的情况下'; }
-        }
-
-        async function approveDeposit(id) {
-            if(!confirm("Approve this deposit?")) return;
-            try {
-                const { ok, data } = await window.apiFetchJson('/admin/approve-deposit', { method: 'POST', body: JSON.stringify({ depositId: id }) });
-                if(ok && data.success) { showToast('success', "Deposit Approved!"); loadDeposits(); loadDashboardStats(); loadUsers(); } else alert(data.error);
-            } catch(e) { alert("Server Error."); }
+            } catch (error) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Connection Error.</td></tr>'; }
         }
 
         async function approveWithdrawal(id) {
@@ -344,6 +390,9 @@
             } catch(e) { alert("Server Error."); }
         }
 
+        // ==========================================
+        // MANUAL CREDIT
+        // ==========================================
         document.getElementById('manualCreditForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnCredit');
@@ -357,7 +406,35 @@
             } catch (err) { alert("Server error."); } finally { btn.innerText = "Credit User Now"; btn.disabled = false; }
         });
 
-        // Broadcast message
+        // ==========================================
+        // ADJUST BALANCE (NEW)
+        // ==========================================
+        async function adjustBalance(action) {
+            const btn = document.getElementById(action === 'add' ? 'btnAdd' : 'btnSubtract');
+            btn.innerText = "Processing..."; btn.disabled = true;
+            
+            const username = document.getElementById('adjustUsername').value;
+            const amount = document.getElementById('adjustAmount').value;
+            const walletType = document.getElementById('adjustWallet').value;
+            
+            try {
+                const { ok, data } = await window.apiFetchJson('/admin/adjust-balance', { 
+                    method: 'POST', 
+                    body: JSON.stringify({ username, amount, walletType, action }) 
+                });
+                if (ok && data.success) { 
+                    showToast('success', data.message); 
+                    document.getElementById('adjustBalanceForm').reset(); 
+                    loadUsers(); 
+                    loadDashboardStats(); 
+                } else alert(data.error);
+            } catch (err) { alert("Server error."); } 
+            finally { btn.innerText = action === 'add' ? 'Add Funds' : 'Subtract Funds'; btn.disabled = false; }
+        }
+
+        // ==========================================
+        // BROADCAST
+        // ==========================================
         document.getElementById('broadcastForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const title = document.getElementById('broadcastTitle').value;
@@ -371,7 +448,9 @@
             btn.disabled = false;
         });
 
-        // Sponsored post
+        // ==========================================
+        // SPONSORED POSTS
+        // ==========================================
         document.getElementById('sponsoredPostForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const postData = {
@@ -390,6 +469,52 @@
             btn.innerHTML = 'Create Sponsored Post';
             btn.disabled = false;
         });
+
+        // ==========================================
+        // TASK SUBMISSIONS (NEW)
+        // ==========================================
+        async function loadTaskSubmissions() {
+            const tbody = document.getElementById('taskSubmissionsTable');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading submissions...</td></tr>';
+            try {
+                const { ok, data } = await window.apiFetchJson('/admin/sponsored-submissions');
+                if (ok && data.success) {
+                    tbody.innerHTML = '';
+                    if (data.submissions.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No pending submissions.</td></tr>';
+                        return;
+                    }
+                    data.submissions.forEach(sub => {
+                        tbody.innerHTML += `<tr>
+                            <td><strong>${sub.username}</strong></td>
+                            <td>${sub.title}</td>
+                            <td style="font-weight:bold;">₦${sub.reward_amount}</td>
+                            <td>${new Date(sub.submitted_at).toLocaleDateString()}</td>
+                            <td><span class="badge warning">Pending Review</span></td>
+                            <td><button class="action-btn" style="color:var(--success); border-color:var(--success);" onclick="approveSubmission(${sub.id})">Approve & Credit</button></td>
+                        </tr>`;
+                    });
+                }
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Connection Error.</td></tr>';
+            }
+        }
+
+        async function approveSubmission(id) {
+            if(!confirm("Approve this submission and credit the user?")) return;
+            try {
+                const { ok, data } = await window.apiFetchJson('/admin/approve-sponsored-submission', { 
+                    method: 'POST', 
+                    body: JSON.stringify({ submission_id: id }) 
+                });
+                if(ok && data.success) { 
+                    showToast('success', 'Submission approved and user credited!'); 
+                    loadTaskSubmissions(); 
+                    loadDashboardStats(); 
+                    loadUsers(); 
+                } else alert(data.error);
+            } catch(e) { alert("Server Error."); }
+        }
     </script>
 </body>
 </html>

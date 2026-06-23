@@ -118,7 +118,7 @@
     <div class="main-content">
         <div class="page-header">
             <h1>Withdraw Funds</h1>
-            <p>Access your earnings. Please note the different rules for Tasks vs Affiliate withdrawals.</p>
+            <p>Access your earnings. Withdrawal requests are reviewed by admin.</p>
         </div>
 
         <div class="balances-wrapper">
@@ -130,7 +130,7 @@
             <div class="bal-card" style="border-color: var(--primary-yellow);">
                 <h3>Affiliate Earnings</h3>
                 <h2 id="dispAffiliateBal">₦0.00</h2>
-                <p style="color: var(--primary-yellow);"><i class="fa-solid fa-bolt"></i> Available for Instant Payout</p>
+                <p style="color: var(--primary-yellow);"><i class="fa-solid fa-bolt"></i> Available for withdrawal</p>
             </div>
         </div>
 
@@ -140,8 +140,8 @@
                 <div class="box-header">
                     <div class="box-icon"><i class="fa-solid fa-bolt"></i></div>
                     <div class="box-title">
-                        <h2>Instant Referral Payout</h2>
-                        <p>Request withdrawal from your affiliate earnings</p>
+                        <h2>Request Withdrawal</h2>
+                        <p>Submit withdrawal request with your bank details</p>
                     </div>
                 </div>
 
@@ -149,7 +149,7 @@
                 <div class="alert success" id="withdrawSuccess"></div>
 
                 <div class="form-group">
-                    <label>Amount to Withdraw (Min: ₦3,000)</label>
+                    <label>Amount (Min: ₦3,000)</label>
                     <div class="input-wrap">
                         <i class="fa-solid fa-naira-sign"></i>
                         <input type="number" id="withdrawAmount" class="form-control" placeholder="0.00">
@@ -244,7 +244,6 @@
         window.addEventListener('globalSyncComplete', updateDisplayBalances);
         document.addEventListener('DOMContentLoaded', updateDisplayBalances);
 
-        // ✅ FIXED: Use apiFetchJson to avoid token error
         async function requestWithdrawal() {
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
             const wallet_type = document.getElementById('walletType').value;
@@ -296,7 +295,7 @@
                 });
 
                 if (ok && data.success) {
-                    succBox.innerText = data.message;
+                    succBox.innerText = data.message + " Our admin will review and approve your request.";
                     succBox.style.display = 'block';
                     document.getElementById('withdrawAmount').value = '';
                     if (typeof globalSync === 'function') globalSync();
