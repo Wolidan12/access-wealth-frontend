@@ -111,6 +111,52 @@
             font-size: 13px;
         }
         .signal-pill strong { color: var(--text-main); }
+        .visual-showcase {
+            margin-top: 28px;
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.08);
+            min-height: 280px;
+            background: rgba(255,255,255,0.04);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+        .visual-showcase img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .visual-showcase::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(5,11,18,0.08), rgba(5,11,18,0.85));
+        }
+        .showcase-chip {
+            position: absolute;
+            left: 18px;
+            bottom: 18px;
+            z-index: 1;
+            max-width: 260px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(5,11,18,0.78);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .showcase-chip span {
+            display: block;
+            color: var(--primary-yellow);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 11px;
+            margin-bottom: 4px;
+        }
+        .showcase-chip strong {
+            display: block;
+            font-size: 18px;
+            line-height: 1.2;
+        }
         .auth-card {
             background: rgba(17, 42, 70, 0.82);
             padding: 36px;
@@ -215,6 +261,13 @@
                     <div class="signal-pill"><strong>Fast signup</strong> without friction</div>
                     <div class="signal-pill"><strong>Secure</strong> JWT-auth sessions</div>
                     <div class="signal-pill"><strong>Live</strong> on Netlify + Railway</div>
+                </div>
+                <div class="visual-showcase">
+                    <img src="/access-wealth-hero.png.png" alt="Access Wealth dashboard preview">
+                    <div class="showcase-chip">
+                        <span>Sample preview</span>
+                        <strong>Premium dashboard-style experience for new users</strong>
+                    </div>
                 </div>
             </div>
 

@@ -193,6 +193,51 @@
         .hero-panel-item .accent {
             color: var(--primary-yellow);
         }
+        .hero-art {
+            margin-top: 16px;
+            border-radius: 22px;
+            overflow: hidden;
+            min-height: 260px;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.03);
+        }
+        .hero-art img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .hero-art::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(7,13,20,0.05), rgba(7,13,20,0.78));
+        }
+        .hero-art-badge {
+            position: absolute;
+            left: 16px;
+            bottom: 16px;
+            z-index: 1;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: rgba(5, 11, 18, 0.8);
+            border: 1px solid rgba(255,255,255,0.08);
+            max-width: 250px;
+        }
+        .hero-art-badge span {
+            display: block;
+            font-size: 11px;
+            color: var(--primary-yellow);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 4px;
+        }
+        .hero-art-badge strong {
+            display: block;
+            font-size: 16px;
+            line-height: 1.2;
+        }
         .hero-panel-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -421,6 +466,13 @@
                     <div class="hero-panel-item">
                         <span>Logged in as</span>
                         <strong id="heroHandle">@user</strong>
+                    </div>
+                    <div class="hero-art">
+                        <img src="/access-wealth-hero.png.png" alt="Access Wealth dashboard sample design">
+                        <div class="hero-art-badge">
+                            <span>Sample design</span>
+                            <strong>Built to feel more polished and premium</strong>
+                        </div>
                     </div>
                 </div>
             </section>
