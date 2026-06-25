@@ -1,6 +1,13 @@
 // global.js - Master Sync Engine (Bypass Active)
-const BACKEND_HOST = 'https://access-wealth-backend-production.up.railway.app'; // ← update if different
-const API_BASE_URL = `${BACKEND_HOST}/api`;
+const DEFAULT_BACKEND_HOST = 'https://access-wealth-backend-production.up.railway.app';
+const isLocalHost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+const OVERRIDE_API_BASE_URL =
+    window.__API_BASE_URL ||
+    document.querySelector('meta[name="api-base-url"]')?.content ||
+    localStorage.getItem('apiBaseUrl') ||
+    '';
+const DEFAULT_API_BASE_URL = isLocalHost ? `${window.location.origin}/api` : `${DEFAULT_BACKEND_HOST}/api`;
+const API_BASE_URL = OVERRIDE_API_BASE_URL || DEFAULT_API_BASE_URL;
 const GLOBAL_SYNC_SKIP_PAGES = ['login.html', 'register.html', 'admin.html', 'support-agent.html', 'forgot-password.html', 'reset-password.html'];
 
 async function apiFetch(path, options = {}) {
@@ -50,6 +57,7 @@ async function apiFetchJson(path, options = {}) {
 
 window.apiFetch = apiFetch;
 window.apiFetchJson = apiFetchJson;
+window.getApiBaseUrl = () => API_BASE_URL;
 
 function isPageAllowedForSync() {
     const href = window.location.href;
@@ -125,7 +133,12 @@ async function globalSync() {
             safeUpdate('sidebarName', username.toUpperCase());
             safeUpdate('cardName', username);
             safeUpdate('displayName', username.toUpperCase());
+            safeUpdate('heroName', username.toUpperCase());
+            safeUpdate('heroHandle', "@" + username.toLowerCase().replace(/\s+/g, ''));
             safeUpdate('displayHandle', "@" + username.toLowerCase().replace(/\s+/g, ''));
+            safeUpdate('heroPlan', u.planActivated === 'true' ? (u.activePackage || 'Premium') : 'Standard');
+            safeMoneyUpdate('heroBalance', u.balance || 0);
+            safeUpdate('heroReferral', u.my_referral_id || '');
             
             const avatarUrl = `https://ui-avatars.com/api/?name=${username}&background=d4af37&color=112A46&bold=true`;
             if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').src = avatarUrl;

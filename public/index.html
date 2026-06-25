@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Access Wealth – Africa’s fastest digital earnings platform</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -18,6 +18,7 @@
             background: #070d14;
             color: #ffffff;
             line-height: 1.5;
+            overflow-x: hidden;
         }
 
         /* Navigation */
@@ -25,24 +26,25 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 40px;
+            padding: 20px 24px;
             border-bottom: 1px solid rgba(212, 175, 55, 0.15);
             flex-wrap: wrap;
             gap: 15px;
         }
 
         .logo {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 800;
             background: linear-gradient(135deg, #fff 0%, #d4af37 100%);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            letter-spacing: -0.3px;
         }
 
         .nav-links {
             display: flex;
-            gap: 32px;
+            gap: 24px;
             align-items: center;
             flex-wrap: wrap;
         }
@@ -51,6 +53,7 @@
             color: #cbd5e1;
             text-decoration: none;
             font-weight: 500;
+            font-size: 14px;
             transition: 0.2s;
         }
 
@@ -60,16 +63,17 @@
 
         .auth-buttons {
             display: flex;
-            gap: 16px;
+            gap: 12px;
         }
 
         .btn-outline {
             background: transparent;
             border: 1px solid #d4af37;
-            padding: 8px 20px;
+            padding: 6px 18px;
             border-radius: 40px;
             color: #d4af37;
             font-weight: 600;
+            font-size: 14px;
             transition: 0.2s;
             text-decoration: none;
             display: inline-block;
@@ -82,10 +86,11 @@
         .btn-primary {
             background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
             border: none;
-            padding: 8px 24px;
+            padding: 6px 22px;
             border-radius: 40px;
             color: #0b1421;
             font-weight: 700;
+            font-size: 14px;
             cursor: pointer;
             transition: transform 0.2s;
             text-decoration: none;
@@ -96,77 +101,85 @@
             transform: translateY(-2px);
         }
 
-        /* Hero Section with Image */
+        /* Hero Section */
         .hero {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 40px;
+            gap: 30px;
             max-width: 1200px;
             margin: 60px auto;
-            padding: 0 20px;
+            padding: 0 24px;
             flex-wrap: wrap;
         }
 
         .hero-content {
             flex: 1;
-            min-width: 280px;
+            min-width: 260px;
         }
 
         .hero-content h1 {
-            font-size: 48px;
+            font-size: clamp(32px, 5vw, 48px);
             font-weight: 800;
             background: linear-gradient(135deg, #ffffff 0%, #d4af37 80%);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             line-height: 1.2;
         }
 
         .hero-content p {
-            font-size: 18px;
+            font-size: clamp(16px, 4vw, 18px);
             color: #8a99af;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
         }
 
         .hero-buttons {
             display: flex;
-            gap: 20px;
+            gap: 16px;
             flex-wrap: wrap;
+        }
+
+        .hero-buttons .btn-primary,
+        .hero-buttons .btn-outline {
+            padding: 12px 28px;
+            font-size: 16px;
         }
 
         .hero-image {
             flex: 1;
-            min-width: 280px;
+            min-width: 260px;
             text-align: center;
         }
 
         .hero-image img {
             max-width: 100%;
+            height: auto;
             border-radius: 24px;
             box-shadow: 0 20px 35px -10px rgba(0,0,0,0.5);
         }
 
-        /* Features Section */
+        /* Features */
         .section-title {
             text-align: center;
-            font-size: 36px;
+            font-size: clamp(28px, 6vw, 36px);
             font-weight: 700;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .section-sub {
             text-align: center;
             color: #8a99af;
             margin-bottom: 48px;
-            font-size: 18px;
+            font-size: clamp(14px, 4vw, 18px);
+            padding: 0 20px;
         }
 
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
+            gap: 24px;
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
@@ -176,7 +189,7 @@
             background: rgba(17, 42, 70, 0.6);
             backdrop-filter: blur(10px);
             border-radius: 24px;
-            padding: 32px;
+            padding: 28px;
             border: 1px solid rgba(212, 175, 55, 0.2);
             transition: 0.3s;
         }
@@ -187,28 +200,30 @@
         }
 
         .feature-icon {
-            width: 60px;
-            height: 60px;
+            width: 56px;
+            height: 56px;
             background: rgba(212, 175, 55, 0.1);
             border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .feature-icon i {
-            font-size: 28px;
+            font-size: 26px;
             color: #d4af37;
         }
 
         .feature-card h3 {
-            font-size: 22px;
-            margin-bottom: 12px;
+            font-size: 20px;
+            margin-bottom: 10px;
         }
 
         .feature-card p {
             color: #8a99af;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
         /* Stats Row */
@@ -216,23 +231,23 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 60px;
+            gap: 40px;
             background: rgba(17, 42, 70, 0.4);
-            border-radius: 60px;
-            padding: 40px 20px;
-            margin: 80px auto;
-            max-width: 1000px;
+            border-radius: 50px;
+            padding: 30px 20px;
+            margin: 70px auto;
+            max-width: 950px;
             text-align: center;
             border: 1px solid rgba(212, 175, 55, 0.15);
         }
 
         .stat-item h2 {
-            font-size: 36px;
+            font-size: clamp(28px, 6vw, 36px);
             color: #d4af37;
         }
 
         .stat-item p {
-            font-size: 14px;
+            font-size: 13px;
             color: #8a99af;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -241,49 +256,80 @@
         /* CTA */
         .cta {
             background: linear-gradient(135deg, rgba(17,42,70,0.9), rgba(7,13,20,0.95));
-            margin: 60px 20px 40px;
-            padding: 60px 20px;
+            margin: 50px 20px 40px;
+            padding: 50px 20px;
             border-radius: 40px;
             text-align: center;
             border: 1px solid rgba(212, 175, 55, 0.2);
         }
 
         .cta h2 {
-            font-size: 32px;
-            margin-bottom: 16px;
+            font-size: clamp(24px, 5vw, 32px);
+            margin-bottom: 14px;
         }
 
         .cta p {
             color: #8a99af;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
+            font-size: 16px;
         }
 
+        .cta .btn-primary {
+            padding: 14px 40px;
+            font-size: 16px;
+        }
+
+        /* Footer */
         .footer {
             border-top: 1px solid rgba(212, 175, 55, 0.1);
-            padding: 40px 20px;
+            padding: 30px 20px;
             text-align: center;
             color: #8a99af;
-            font-size: 14px;
+            font-size: 13px;
         }
 
+        /* Mobile optimisations */
         @media (max-width: 768px) {
             .navbar {
                 flex-direction: column;
                 text-align: center;
+                padding: 16px 20px;
+            }
+            .nav-links {
+                justify-content: center;
             }
             .hero {
+                margin: 40px auto;
                 flex-direction: column;
                 text-align: center;
             }
             .hero-buttons {
                 justify-content: center;
             }
-            .hero-content h1 {
-                font-size: 36px;
+            .hero-content h1 br {
+                display: none;
             }
             .stats-row {
                 gap: 30px;
                 border-radius: 30px;
+                margin: 50px 20px;
+            }
+            .features-grid {
+                gap: 18px;
+            }
+            .feature-card {
+                padding: 22px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-buttons .btn-primary,
+            .hero-buttons .btn-outline {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            .cta .btn-primary {
+                padding: 12px 30px;
             }
         }
     </style>
@@ -303,18 +349,17 @@
     </nav>
 
     <main>
-        <!-- Hero with your custom design image -->
+        <!-- Hero with image -->
         <div class="hero">
             <div class="hero-content">
                 <h1>Africa's fastest<br>digital earnings platform</h1>
                 <p>Earn daily, refer friends, and withdraw instantly. Secure. Instant. Reliable.</p>
                 <div class="hero-buttons">
-                    <a href="/register.html" class="btn-primary" style="padding: 12px 32px;">Get Started</a>
-                    <a href="/login.html" class="btn-outline" style="padding: 12px 32px;">Sign In</a>
+                    <a href="/register.html" class="btn-primary">Get Started</a>
+                    <a href="/login.html" class="btn-outline">Sign In</a>
                 </div>
             </div>
             <div class="hero-image">
-                <!-- Image is stored in the 'public' folder, Netlify serves it at root level -->
                 <img src="/access-wealth-hero.png" alt="Access Wealth platform design">
             </div>
         </div>
@@ -324,12 +369,36 @@
             <div class="section-title">What we offer</div>
             <div class="section-sub">Everything you need to grow, all on one platform.</div>
             <div class="features-grid">
-                <div class="feature-card"><div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div><h3>Daily Task Earnings</h3><p>Complete simple tasks and earn daily. Your earning potential grows with your plan.</p></div>
-                <div class="feature-card"><div class="feature-icon"><i class="fa-solid fa-users"></i></div><h3>50% Referral Commissions</h3><p>Invite friends and earn 50% every time they activate a plan.</p></div>
-                <div class="feature-card"><div class="feature-icon"><i class="fa-solid fa-dharmachakra"></i></div><h3>Spin & Win</h3><p>Daily free spins with multipliers up to 5x. Win real cash every day.</p></div>
-                <div class="feature-card"><div class="feature-icon"><i class="fa-solid fa-bolt"></i></div><h3>Instant Withdrawals</h3><p>Referral earnings are available for instant payout. Task earnings paid twice monthly.</p></div>
-                <div class="feature-card"><div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div><h3>Bank‑Grade Security</h3><p>256‑bit encryption and secure payment gateways. Your funds are always safe.</p></div>
-                <div class="feature-card"><div class="feature-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div><h3>Business Tools</h3><p>Bulk SMS, payment links, invoices – all powered by your earnings.</p></div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div>
+                    <h3>Daily Task Earnings</h3>
+                    <p>Complete simple tasks and earn daily. Your earning potential grows with your plan.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-users"></i></div>
+                    <h3>50% Referral Commissions</h3>
+                    <p>Invite friends and earn 50% every time they activate a plan.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-dharmachakra"></i></div>
+                    <h3>Spin & Win</h3>
+                    <p>Daily free spins with multipliers up to 5x. Win real cash every day.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
+                    <h3>Instant Withdrawals</h3>
+                    <p>Referral earnings are available for instant payout. Task earnings paid twice monthly.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h3>Bank‑Grade Security</h3>
+                    <p>256‑bit encryption and secure payment gateways. Your funds are always safe.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                    <h3>Business Tools</h3>
+                    <p>Bulk SMS, payment links, invoices – all powered by your earnings.</p>
+                </div>
             </div>
         </div>
 
@@ -348,14 +417,14 @@
             <div class="cta">
                 <h2>Ready to start earning?</h2>
                 <p>Create your free account in under 60 seconds. No documents, no waiting.</p>
-                <a href="/register.html" class="btn-primary" style="padding: 14px 40px; font-size: 16px;">Create Free Account</a>
+                <a href="/register.html" class="btn-primary">Create Free Account</a>
             </div>
         </div>
     </main>
 
     <footer class="footer">
         <p>© 2026 Access Wealth. All rights reserved.</p>
-        <p style="margin-top: 8px;">Invest. Grow. Promote.</p>
+        <p style="margin-top: 6px;">Invest. Grow. Promote.</p>
     </footer>
 </body>
 </html>
