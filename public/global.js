@@ -9,6 +9,42 @@ const OVERRIDE_API_BASE_URL =
 const DEFAULT_API_BASE_URL = isLocalHost ? `${window.location.origin}/api` : `${DEFAULT_BACKEND_HOST}/api`;
 const API_BASE_URL = OVERRIDE_API_BASE_URL || DEFAULT_API_BASE_URL;
 const GLOBAL_SYNC_SKIP_PAGES = ['login.html', 'register.html', 'admin.html', 'support-agent.html', 'forgot-password.html', 'reset-password.html'];
+const THEME_STORAGE_KEY = 'accesswealth-theme';
+
+function getPreferredTheme() {
+    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    if (storedTheme === 'light' || storedTheme === 'dark') return storedTheme;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function applyTheme(theme) {
+    const nextTheme = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
+        btn.setAttribute('aria-pressed', nextTheme === 'dark' ? 'true' : 'false');
+        btn.dataset.theme = nextTheme;
+        const icon = btn.querySelector('i');
+        if (icon) {
+            icon.className = nextTheme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        }
+    });
+    return nextTheme;
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || getPreferredTheme();
+    return applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+function initThemeControls() {
+    applyTheme(getPreferredTheme());
+    document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
+        if (btn.dataset.themeBound === 'true') return;
+        btn.dataset.themeBound = 'true';
+        btn.addEventListener('click', toggleTheme);
+    });
+}
 
 async function apiFetch(path, options = {}) {
     const url = path.startsWith('http') ? path : `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
@@ -58,6 +94,11 @@ async function apiFetchJson(path, options = {}) {
 window.apiFetch = apiFetch;
 window.apiFetchJson = apiFetchJson;
 window.getApiBaseUrl = () => API_BASE_URL;
+window.applyTheme = applyTheme;
+window.toggleTheme = toggleTheme;
+window.initThemeControls = initThemeControls;
+
+document.documentElement.setAttribute('data-theme', getPreferredTheme());
 
 function isPageAllowedForSync() {
     const href = window.location.href;
@@ -179,6 +220,7 @@ window.logout = function() {
 };
 
 document.addEventListener('DOMContentLoaded', globalSync);
+document.addEventListener('DOMContentLoaded', initThemeControls);
 
 function injectMobileNav() {
     if (document.getElementById('mobile-nav-toggle')) return;

@@ -2,429 +2,648 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Access Wealth – Africa’s fastest digital earnings platform</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Wealth | Africa's fastest digital services platform</title>
+    <script>
+        (function () {
+            try {
+                var theme = localStorage.getItem('accesswealth-theme') || 'light';
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #f5f9ff;
+            --bg-2: #eef7ff;
+            --card: rgba(255, 255, 255, 0.92);
+            --card-strong: #ffffff;
+            --text: #08111f;
+            --muted: #6d7787;
+            --line: rgba(10, 18, 32, 0.08);
+            --accent: #12a8f4;
+            --accent-2: #0e87ef;
+            --shadow: 0 24px 50px rgba(16, 40, 80, 0.12);
+            --shadow-soft: 0 10px 24px rgba(16, 40, 80, 0.08);
+            --hero-grid: radial-gradient(circle at 0 0, rgba(18, 168, 244, 0.14), transparent 34%),
+                         linear-gradient(90deg, rgba(255,255,255,0.95), rgba(233, 246, 255, 0.88) 56%, rgba(205, 233, 255, 0.92));
         }
-
+        html[data-theme="dark"] {
+            --bg: #07111f;
+            --bg-2: #0c1728;
+            --card: rgba(12, 23, 40, 0.92);
+            --card-strong: #0e1a2d;
+            --text: #f4f7fb;
+            --muted: #9aa7ba;
+            --line: rgba(255, 255, 255, 0.09);
+            --shadow: 0 24px 50px rgba(0, 0, 0, 0.34);
+            --shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.2);
+            --hero-grid: radial-gradient(circle at 0 0, rgba(18, 168, 244, 0.16), transparent 34%),
+                         linear-gradient(90deg, rgba(8, 16, 30, 0.95), rgba(8, 18, 32, 0.92) 56%, rgba(9, 21, 38, 0.98));
+        }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
         body {
+            margin: 0;
             font-family: 'Inter', sans-serif;
-            background: #070d14;
-            color: #ffffff;
-            line-height: 1.5;
+            color: var(--text);
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0)),
+                var(--bg);
+            min-height: 100vh;
             overflow-x: hidden;
         }
-
-        /* Navigation */
-        .navbar {
+        a { color: inherit; text-decoration: none; }
+        .page {
+            position: relative;
+            isolation: isolate;
+        }
+        .page::before,
+        .page::after {
+            content: "";
+            position: fixed;
+            inset: auto;
+            width: 32rem;
+            height: 32rem;
+            border-radius: 999px;
+            filter: blur(24px);
+            opacity: 0.28;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .page::before { left: -9rem; top: 8rem; background: rgba(18, 168, 244, 0.22); }
+        .page::after { right: -12rem; top: 0; background: rgba(108, 200, 255, 0.18); }
+        .container {
+            width: min(1220px, calc(100% - 32px));
+            margin: 0 auto;
+        }
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.82);
+            border-bottom: 1px solid var(--line);
+        }
+        html[data-theme="dark"] .topbar { background: rgba(7, 17, 31, 0.82); }
+        .topbar-inner {
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
-            padding: 20px 24px;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.15);
-            flex-wrap: wrap;
-            gap: 15px;
+            gap: 16px;
+            min-height: 88px;
         }
-
-        .logo {
-            font-size: 22px;
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
             font-weight: 800;
-            background: linear-gradient(135deg, #fff 0%, #d4af37 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            letter-spacing: -0.3px;
+            font-size: 1.1rem;
+            letter-spacing: -0.03em;
         }
-
-        .nav-links {
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #19b3f7, #0e86ef);
+            color: #fff;
+            box-shadow: var(--shadow-soft);
+        }
+        .brand-mark i { font-size: 1.1rem; }
+        .nav {
             display: flex;
-            gap: 24px;
             align-items: center;
-            flex-wrap: wrap;
+            gap: 28px;
+            color: var(--muted);
+            font-weight: 600;
         }
-
-        .nav-links a {
-            color: #cbd5e1;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 14px;
-            transition: 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: #d4af37;
-        }
-
-        .auth-buttons {
+        .nav a:hover { color: var(--text); }
+        .top-actions {
             display: flex;
+            align-items: center;
             gap: 12px;
         }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #d4af37;
-            padding: 6px 18px;
-            border-radius: 40px;
-            color: #d4af37;
-            font-weight: 600;
-            font-size: 14px;
-            transition: 0.2s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-outline:hover {
-            background: rgba(212, 175, 55, 0.1);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
-            border: none;
-            padding: 6px 22px;
-            border-radius: 40px;
-            color: #0b1421;
+        .theme-btn,
+        .ghost-btn,
+        .primary-btn {
+            border: 0;
+            border-radius: 999px;
+            font: inherit;
             font-weight: 700;
-            font-size: 14px;
             cursor: pointer;
-            transition: transform 0.2s;
-            text-decoration: none;
-            display: inline-block;
+            transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease, color 160ms ease;
         }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
+        .theme-btn {
+            width: 46px;
+            height: 46px;
+            display: inline-grid;
+            place-items: center;
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow-soft);
         }
-
-        /* Hero Section */
+        .ghost-btn {
+            padding: 14px 22px;
+            background: transparent;
+            border: 1px solid var(--line);
+            color: var(--text);
+        }
+        .primary-btn {
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #12a8f4, #0e87ef);
+            color: #fff;
+            box-shadow: 0 16px 28px rgba(14, 135, 239, 0.24);
+        }
+        .primary-btn:hover,
+        .ghost-btn:hover,
+        .theme-btn:hover { transform: translateY(-1px); }
         .hero {
+            padding: 48px 0 32px;
+            background: var(--hero-grid);
+            border-bottom: 1px solid var(--line);
+        }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.02fr 0.98fr;
+            gap: 30px;
+            align-items: center;
+            min-height: 720px;
+        }
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            color: #12a8f4;
+            background: rgba(18, 168, 244, 0.12);
+            font-weight: 800;
+            margin-bottom: 24px;
+        }
+        .hero h1 {
+            margin: 0;
+            font-size: clamp(3.2rem, 7vw, 5.6rem);
+            line-height: 0.95;
+            letter-spacing: -0.08em;
+            font-weight: 900;
+            max-width: 10ch;
+        }
+        .hero h1 .accent {
+            color: #12a8f4;
+            font-style: italic;
+            font-weight: 900;
+        }
+        .hero-copy p {
+            margin: 28px 0 0;
+            max-width: 680px;
+            font-size: 1.12rem;
+            line-height: 1.75;
+            color: var(--muted);
+        }
+        .hero-actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        .hero-visual {
+            justify-self: end;
+            width: min(100%, 700px);
+        }
+        .visual-frame {
+            position: relative;
+            border-radius: 26px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(17, 36, 64, 0.12);
+        }
+        html[data-theme="dark"] .visual-frame { background: rgba(10, 18, 32, 0.62); }
+        .visual-frame img {
+            display: block;
+            width: 100%;
+            border-radius: 18px;
+        }
+        .visual-chip {
+            position: absolute;
+            left: 22px;
+            bottom: 22px;
+            max-width: 250px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(7, 17, 31, 0.9);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 14px 30px rgba(0,0,0,0.2);
+        }
+        .visual-chip span {
+            display: block;
+            color: #73d8ff;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 6px;
+            font-weight: 800;
+        }
+        .stats-strip {
+            padding: 16px 0 28px;
+            background: var(--bg);
+        }
+        .ticker {
+            display: flex;
+            gap: 12px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .ticker-track {
+            display: flex;
+            gap: 12px;
+            min-width: 100%;
+            animation: ticker 26s linear infinite;
+        }
+        .stat-pill {
+            flex: 0 0 auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: var(--card);
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow-soft);
+            color: var(--muted);
+            font-weight: 600;
+        }
+        .stat-pill strong { color: var(--text); }
+        .stat-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            background: linear-gradient(135deg, #12a8f4, #7ed8ff);
+            flex: 0 0 auto;
+        }
+        .section {
+            padding: 90px 0;
+        }
+        .section-head {
+            max-width: 820px;
+            margin: 0 auto 36px;
+            text-align: center;
+        }
+        .section-head .eyebrow { margin-bottom: 18px; }
+        .section-head h2 {
+            margin: 0;
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            line-height: 1.02;
+            letter-spacing: -0.06em;
+            font-weight: 900;
+        }
+        .section-head h2 em {
+            color: #12a8f4;
+            font-style: italic;
+        }
+        .section-head p {
+            margin: 16px auto 0;
+            max-width: 700px;
+            color: var(--muted);
+            font-size: 1.05rem;
+            line-height: 1.75;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr 0.8fr;
+            gap: 18px;
+        }
+        .feature-grid.bottom {
+            margin-top: 18px;
+            grid-template-columns: 0.8fr 0.8fr 1.2fr;
+        }
+        .feature-card {
+            position: relative;
+            min-height: 210px;
+            padding: 24px;
+            border-radius: 28px;
+            background: var(--card);
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+        }
+        .feature-card.large { min-height: 240px; }
+        .feature-card.blue {
+            background: linear-gradient(145deg, #14b1f6, #0d90f1);
+            color: #fff;
+            border-color: transparent;
+        }
+        .feature-card .mini-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 18px;
+            display: grid;
+            place-items: center;
+            background: rgba(18, 168, 244, 0.1);
+            color: #12a8f4;
+            margin-bottom: 24px;
+            font-size: 1.2rem;
+        }
+        .feature-card.blue .mini-icon {
+            background: rgba(255, 255, 255, 0.16);
+            color: #fff;
+        }
+        .feature-card h3 {
+            margin: 0 0 12px;
+            font-size: 1.6rem;
+            line-height: 1.06;
+            letter-spacing: -0.04em;
+        }
+        .feature-card p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+        .feature-card.blue p,
+        .feature-card.blue .stat-value { color: rgba(255,255,255,0.92); }
+        .feature-image {
+            position: absolute;
+            right: 22px;
+            bottom: 0;
+            width: min(46%, 220px);
+            opacity: 0.95;
+            filter: drop-shadow(0 18px 24px rgba(0,0,0,0.2));
+        }
+        .feature-image img {
+            width: 100%;
+            display: block;
+            border-radius: 20px 20px 0 0;
+        }
+        .cta {
+            padding: 28px 0 96px;
+        }
+        .cta-panel {
+            position: relative;
+            overflow: hidden;
+            padding: 62px 28px;
+            border-radius: 36px;
+            background: linear-gradient(135deg, #10aef6, #0989ef);
+            box-shadow: 0 26px 50px rgba(9, 137, 239, 0.28);
+            color: #fff;
+            text-align: center;
+        }
+        .cta-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+            background-size: 36px 36px;
+            opacity: 0.28;
+            pointer-events: none;
+        }
+        .cta-panel > * { position: relative; z-index: 1; }
+        .cta-panel h2 {
+            margin: 0;
+            font-size: clamp(2.2rem, 4vw, 3.8rem);
+            line-height: 1.03;
+            letter-spacing: -0.06em;
+        }
+        .cta-panel p {
+            margin: 18px auto 0;
+            max-width: 760px;
+            font-size: 1.1rem;
+            line-height: 1.75;
+            color: rgba(255,255,255,0.92);
+        }
+        .cta-actions {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        .cta-actions .ghost-btn {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            border-color: rgba(255,255,255,0.24);
+        }
+        .footer {
+            padding: 30px 0 48px;
+            border-top: 1px solid var(--line);
+        }
+        .footer-inner {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 30px;
-            max-width: 1200px;
-            margin: 60px auto;
-            padding: 0 24px;
+            gap: 20px;
+            flex-wrap: wrap;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+        .footer-links {
+            display: flex;
+            gap: 18px;
             flex-wrap: wrap;
         }
-
-        .hero-content {
-            flex: 1;
-            min-width: 260px;
+        @keyframes ticker {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
         }
-
-        .hero-content h1 {
-            font-size: clamp(32px, 5vw, 48px);
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffffff 0%, #d4af37 80%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 16px;
-            line-height: 1.2;
+        @media (max-width: 1080px) {
+            .hero-grid { grid-template-columns: 1fr; min-height: auto; }
+            .hero-visual { justify-self: stretch; width: 100%; }
+            .feature-grid,
+            .feature-grid.bottom { grid-template-columns: 1fr 1fr; }
         }
-
-        .hero-content p {
-            font-size: clamp(16px, 4vw, 18px);
-            color: #8a99af;
-            margin-bottom: 28px;
+        @media (max-width: 820px) {
+            .topbar-inner { min-height: 80px; }
+            .nav { display: none; }
+            .hero { padding-top: 30px; }
+            .hero h1 { max-width: none; }
+            .feature-grid,
+            .feature-grid.bottom { grid-template-columns: 1fr; }
+            .feature-card,
+            .feature-card.large { min-height: 0; }
+            .feature-image { position: static; width: 100%; margin-top: 18px; }
+            .cta-panel { padding: 48px 20px; }
         }
-
-        .hero-buttons {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .hero-buttons .btn-primary,
-        .hero-buttons .btn-outline {
-            padding: 12px 28px;
-            font-size: 16px;
-        }
-
-        .hero-image {
-            flex: 1;
-            min-width: 260px;
-            text-align: center;
-        }
-
-        .hero-image img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 24px;
-            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.5);
-        }
-
-        /* Features */
-        .section-title {
-            text-align: center;
-            font-size: clamp(28px, 6vw, 36px);
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .section-sub {
-            text-align: center;
-            color: #8a99af;
-            margin-bottom: 48px;
-            font-size: clamp(14px, 4vw, 18px);
-            padding: 0 20px;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .feature-card {
-            background: rgba(17, 42, 70, 0.6);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            padding: 28px;
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            transition: 0.3s;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            border-color: #d4af37;
-        }
-
-        .feature-icon {
-            width: 56px;
-            height: 56px;
-            background: rgba(212, 175, 55, 0.1);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .feature-icon i {
-            font-size: 26px;
-            color: #d4af37;
-        }
-
-        .feature-card h3 {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-
-        .feature-card p {
-            color: #8a99af;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        /* Stats Row */
-        .stats-row {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 40px;
-            background: rgba(17, 42, 70, 0.4);
-            border-radius: 50px;
-            padding: 30px 20px;
-            margin: 70px auto;
-            max-width: 950px;
-            text-align: center;
-            border: 1px solid rgba(212, 175, 55, 0.15);
-        }
-
-        .stat-item h2 {
-            font-size: clamp(28px, 6vw, 36px);
-            color: #d4af37;
-        }
-
-        .stat-item p {
-            font-size: 13px;
-            color: #8a99af;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* CTA */
-        .cta {
-            background: linear-gradient(135deg, rgba(17,42,70,0.9), rgba(7,13,20,0.95));
-            margin: 50px 20px 40px;
-            padding: 50px 20px;
-            border-radius: 40px;
-            text-align: center;
-            border: 1px solid rgba(212, 175, 55, 0.2);
-        }
-
-        .cta h2 {
-            font-size: clamp(24px, 5vw, 32px);
-            margin-bottom: 14px;
-        }
-
-        .cta p {
-            color: #8a99af;
-            margin-bottom: 28px;
-            font-size: 16px;
-        }
-
-        .cta .btn-primary {
-            padding: 14px 40px;
-            font-size: 16px;
-        }
-
-        /* Footer */
-        .footer {
-            border-top: 1px solid rgba(212, 175, 55, 0.1);
-            padding: 30px 20px;
-            text-align: center;
-            color: #8a99af;
-            font-size: 13px;
-        }
-
-        /* Mobile optimisations */
-        @media (max-width: 768px) {
-            .navbar {
-                flex-direction: column;
-                text-align: center;
-                padding: 16px 20px;
-            }
-            .nav-links {
-                justify-content: center;
-            }
-            .hero {
-                margin: 40px auto;
-                flex-direction: column;
-                text-align: center;
-            }
-            .hero-buttons {
-                justify-content: center;
-            }
-            .hero-content h1 br {
-                display: none;
-            }
-            .stats-row {
-                gap: 30px;
-                border-radius: 30px;
-                margin: 50px 20px;
-            }
-            .features-grid {
-                gap: 18px;
-            }
-            .feature-card {
-                padding: 22px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .hero-buttons .btn-primary,
-            .hero-buttons .btn-outline {
-                padding: 10px 20px;
-                font-size: 14px;
-            }
-            .cta .btn-primary {
-                padding: 12px 30px;
-            }
+        @media (max-width: 560px) {
+            .container { width: min(100% - 22px, 1220px); }
+            .top-actions .ghost-btn { display: none; }
+            .hero h1 { font-size: clamp(2.6rem, 14vw, 4rem); }
+            .hero-copy p,
+            .section-head p,
+            .cta-panel p { font-size: 1rem; }
+            .hero-actions,
+            .cta-actions { flex-direction: column; }
+            .hero-actions .primary-btn,
+            .hero-actions .ghost-btn,
+            .cta-actions .primary-btn,
+            .cta-actions .ghost-btn { width: 100%; justify-content: center; }
+            .cta-panel { border-radius: 28px; }
         }
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo">ACCESS WEALTH</div>
-        <div class="nav-links">
-            <a href="#features">Features</a>
-            <a href="#stats">Stats</a>
-            <a href="#cta">Get Started</a>
-        </div>
-        <div class="auth-buttons">
-            <a href="/login.html" class="btn-outline">Sign In</a>
-            <a href="/register.html" class="btn-primary">Create Free Account</a>
-        </div>
-    </nav>
-
-    <main>
-        <!-- Hero with image -->
-        <div class="hero">
-            <div class="hero-content">
-                <h1>Africa's fastest<br>digital earnings platform</h1>
-                <p>Earn daily, refer friends, and withdraw instantly. Secure. Instant. Reliable.</p>
-                <div class="hero-buttons">
-                    <a href="/register.html" class="btn-primary">Get Started</a>
-                    <a href="/login.html" class="btn-outline">Sign In</a>
+    <div class="page">
+        <header class="topbar">
+            <div class="container topbar-inner">
+                <a class="brand" href="/index.html">
+                    <span class="brand-mark"><i class="fa-solid fa-paper-plane"></i></span>
+                    <span>Access Wealth</span>
+                </a>
+                <nav class="nav" aria-label="Primary">
+                    <a href="#services">Services</a>
+                    <a href="#features">Features</a>
+                    <a href="#about">About</a>
+                </nav>
+                <div class="top-actions">
+                    <button class="theme-btn" type="button" data-theme-toggle aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+                    <a class="ghost-btn" href="/login.html">Sign in</a>
+                    <a class="primary-btn" href="/register.html">Get Started <i class="fa-solid fa-arrow-right" style="margin-left:10px;"></i></a>
                 </div>
             </div>
-            <div class="hero-image">
-                <img src="/access-wealth-hero.png" alt="Access Wealth platform design">
-            </div>
-        </div>
+        </header>
 
-        <!-- Features -->
-        <div id="features">
-            <div class="section-title">What we offer</div>
-            <div class="section-sub">Everything you need to grow, all on one platform.</div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div>
-                    <h3>Daily Task Earnings</h3>
-                    <p>Complete simple tasks and earn daily. Your earning potential grows with your plan.</p>
+        <main>
+            <section class="hero">
+                <div class="container hero-grid">
+                    <div class="hero-copy">
+                        <div class="eyebrow"><i class="fa-solid fa-sparkles"></i> Live platform for users and teams</div>
+                        <h1>Africa's fastest <span class="accent">digital services</span> platform.</h1>
+                        <p>
+                            Buy airtime, data, pay bills, manage your account, and move around the dashboard in a
+                            cleaner, more professional experience built for real users.
+                        </p>
+                        <div class="hero-actions">
+                            <a class="primary-btn" href="/register.html">Create Free Account <i class="fa-solid fa-arrow-right" style="margin-left:10px;"></i></a>
+                            <a class="ghost-btn" href="/login.html">Sign In <i class="fa-solid fa-arrow-right" style="margin-left:10px;"></i></a>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="visual-frame">
+                            <img src="/access-wealth-hero.png.png" alt="Access Wealth sample dashboard design">
+                            <div class="visual-chip">
+                                <span>Sample preview</span>
+                                Premium dashboard and onboarding flow for new users.
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fa-solid fa-users"></i></div>
-                    <h3>50% Referral Commissions</h3>
-                    <p>Invite friends and earn 50% every time they activate a plan.</p>
+            </section>
+
+            <section class="stats-strip">
+                <div class="container ticker" aria-label="Platform stats">
+                    <div class="ticker-track">
+                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-circle-check"></i></span> Uptime <strong>99.9%</strong></div>
+                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-headset"></i></span> Support <strong>24/7</strong></div>
+                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-users"></i></span> Total Users <strong>150K+</strong></div>
+                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-wallet"></i></span> Payouts <strong>NGN 80M+</strong></div>
+                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-circle-check"></i></span> Uptime <strong>99.9%</strong></div>
+                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-headset"></i></span> Support <strong>24/7</strong></div>
+                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-users"></i></span> Total Users <strong>150K+</strong></div>
+                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-wallet"></i></span> Payouts <strong>NGN 80M+</strong></div>
+                    </div>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fa-solid fa-dharmachakra"></i></div>
-                    <h3>Spin & Win</h3>
-                    <p>Daily free spins with multipliers up to 5x. Win real cash every day.</p>
+            </section>
+
+            <section class="section" id="features">
+                <div class="container">
+                    <div class="section-head">
+                        <div class="eyebrow"><i class="fa-solid fa-bolt"></i> Why users choose Access Wealth</div>
+                        <h2>Built for <em>speed</em>, secured for <em>trust</em>.</h2>
+                        <p>
+                            Every key page is designed to feel clear, modern, and easy to move through. The goal is
+                            simple: fewer distractions, better hierarchy, and a smoother path from signup to action.
+                        </p>
+                    </div>
+
+                    <div class="feature-grid" id="services">
+                        <article class="feature-card large">
+                            <div class="mini-icon"><i class="fa-solid fa-bolt"></i></div>
+                            <h3>Instant delivery</h3>
+                            <p>
+                                Airtime, data, and wallet actions are laid out with a clean card system so users can
+                                understand what to do next without guessing.
+                            </p>
+                            <div class="feature-image">
+                                <img src="/access-wealth-hero.png.png" alt="Access Wealth platform preview">
+                            </div>
+                        </article>
+                        <article class="feature-card blue">
+                            <div class="mini-icon"><i class="fa-solid fa-circle-check"></i></div>
+                            <h3>99.9% uptime</h3>
+                            <p>Reliable service flow with a simple structure that keeps the important actions visible.</p>
+                        </article>
+                        <article class="feature-card">
+                            <div class="mini-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                            <h3>Bank-grade security</h3>
+                            <p>Safer form flows, clear callouts, and a layout that makes account actions easy to trust.</p>
+                        </article>
+                    </div>
+
+                    <div class="feature-grid bottom" id="about">
+                        <article class="feature-card">
+                            <div class="mini-icon"><i class="fa-solid fa-wallet"></i></div>
+                            <h3>Best market rates</h3>
+                            <p>Users get a simple dashboard experience with less clutter and more emphasis on actions.</p>
+                        </article>
+                        <article class="feature-card">
+                            <div class="mini-icon"><i class="fa-solid fa-user-group"></i></div>
+                            <h3>Fast onboarding</h3>
+                            <p>Signup and login pages match the same professional language as the landing page.</p>
+                        </article>
+                        <article class="feature-card blue">
+                            <div class="mini-icon"><i class="fa-solid fa-chart-line"></i></div>
+                            <h3>150K+ users</h3>
+                            <p>Designed to support a growing live community without losing clarity or polish.</p>
+                        </article>
+                    </div>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
-                    <h3>Instant Withdrawals</h3>
-                    <p>Referral earnings are available for instant payout. Task earnings paid twice monthly.</p>
+            </section>
+
+            <section class="cta" id="about">
+                <div class="container">
+                    <div class="cta-panel">
+                        <h2>Ready to get started?</h2>
+                        <p>
+                            Create your account in under 60 seconds. No documents, no waiting. Once you sign in, the
+                            dashboard and settings pages keep the same clean, premium look across the app.
+                        </p>
+                        <div class="cta-actions">
+                            <a class="primary-btn" href="/register.html">Create Account <i class="fa-solid fa-arrow-right" style="margin-left:10px;"></i></a>
+                            <a class="ghost-btn" href="/login.html">Sign In</a>
+                        </div>
+                    </div>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                    <h3>Bank‑Grade Security</h3>
-                    <p>256‑bit encryption and secure payment gateways. Your funds are always safe.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
-                    <h3>Business Tools</h3>
-                    <p>Bulk SMS, payment links, invoices – all powered by your earnings.</p>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <div class="container footer-inner">
+                <a class="brand" href="/index.html">
+                    <span class="brand-mark"><i class="fa-solid fa-paper-plane"></i></span>
+                    <span>Access Wealth</span>
+                </a>
+                <div>© 2026 Access Wealth. All rights reserved.</div>
+                <div class="footer-links">
+                    <a href="/login.html">Sign in</a>
+                    <a href="/register.html">Register</a>
+                    <a href="/support.html">Support</a>
                 </div>
             </div>
-        </div>
+        </footer>
+    </div>
 
-        <!-- Stats -->
-        <div id="stats">
-            <div class="stats-row">
-                <div class="stat-item"><h2>150K+</h2><p>Total Users</p></div>
-                <div class="stat-item"><h2>₦80M+</h2><p>Total Payouts</p></div>
-                <div class="stat-item"><h2>99.9%</h2><p>Uptime</p></div>
-                <div class="stat-item"><h2>24/7</h2><p>Support</p></div>
-            </div>
-        </div>
-
-        <!-- CTA -->
-        <div id="cta">
-            <div class="cta">
-                <h2>Ready to start earning?</h2>
-                <p>Create your free account in under 60 seconds. No documents, no waiting.</p>
-                <a href="/register.html" class="btn-primary">Create Free Account</a>
-            </div>
-        </div>
-    </main>
-
-    <footer class="footer">
-        <p>© 2026 Access Wealth. All rights reserved.</p>
-        <p style="margin-top: 6px;">Invest. Grow. Promote.</p>
-    </footer>
+    <script src="global.js"></script>
 </body>
 </html>
