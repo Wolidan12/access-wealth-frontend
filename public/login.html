@@ -1,507 +1,325 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign In – Access Wealth</title>
-    <script>
-        (function () {
-            try {
-                var theme = localStorage.getItem('accesswealth-theme') || 'light';
-                document.documentElement.setAttribute('data-theme', theme);
-            } catch (e) {
-                document.documentElement.setAttribute('data-theme', 'light');
-            }
-        })();
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Access Wealth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg: #f5f9ff;
-            --bg-2: #eef7ff;
-            --card: rgba(255, 255, 255, 0.92);
-            --card-strong: #ffffff;
-            --text: #08111f;
-            --muted: #6d7787;
-            --line: rgba(10, 18, 32, 0.08);
-            --deep-blue: #0f2b5c;
-            --deep-blue-light: #1a4a8a;
-            --yellow: #facc15;
-            --yellow-dark: #eab308;
-            --yellow-light: #fef9c3;
-            --shadow: 0 24px 50px rgba(15, 43, 92, 0.15);
-            --shadow-soft: 0 10px 24px rgba(15, 43, 92, 0.08);
-            --hero-grid: radial-gradient(circle at 0 0, rgba(15, 43, 92, 0.10), transparent 34%),
-                         linear-gradient(90deg, rgba(255,255,255,0.95), rgba(233, 246, 255, 0.88) 56%, rgba(205, 233, 255, 0.92));
+            --bg: #070d14;
+            --surface: rgba(17,42,70,0.92);
+            --surface-strong: #112A46;
+            --text: #ffffff;
+            --muted: #8a99af;
+            --line: rgba(212,175,55,0.15);
+            --accent: #d4af37;
+            --accent-2: #b8860b;
+            --accent-soft: rgba(212,175,55,0.12);
+            --shadow: 0 20px 44px rgba(0,0,0,0.22);
+            --shadow-soft: 0 12px 24px rgba(0,0,0,0.14);
+            --good: #2ecc71;
+            --danger: #ef4444;
         }
         html[data-theme="dark"] {
-            --bg: #0a1425;
-            --bg-2: #0f1d33;
-            --card: rgba(21, 39, 63, 0.92);
-            --card-strong: #15273f;
-            --text: #e8edf5;
-            --muted: #8fa0b9;
-            --line: rgba(255, 255, 255, 0.08);
-            --deep-blue: #1a3a6b;
-            --deep-blue-light: #2a5090;
-            --yellow: #facc15;
-            --yellow-light: #2a2a10;
-            --shadow: 0 24px 50px rgba(0, 0, 0, 0.5);
-            --shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.4);
-            --hero-grid: radial-gradient(circle at 0 0, rgba(26, 58, 107, 0.3), transparent 34%),
-                         linear-gradient(90deg, rgba(10, 20, 37, 0.95), rgba(15, 29, 51, 0.92) 56%, rgba(21, 39, 63, 0.98));
+            --bg: #050b12;
+            --surface: rgba(12,26,43,0.92);
+            --surface-strong: #112A46;
+            --text: #ffffff;
+            --muted: #8a99af;
+            --line: rgba(212,175,55,0.15);
+            --accent-soft: rgba(212,175,55,0.12);
+            --shadow: 0 20px 44px rgba(0,0,0,0.3);
+            --shadow-soft: 0 12px 24px rgba(0,0,0,0.18);
         }
         * { box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top left, rgba(212,175,55,0.10), transparent 26%), var(--bg);
             color: var(--text);
-            background: var(--bg);
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
         a { color: inherit; text-decoration: none; }
-        .page {
-            position: relative;
-            isolation: isolate;
-        }
-        .page::before {
-            content: "";
-            position: fixed;
-            inset: auto;
-            width: 32rem;
-            height: 32rem;
-            border-radius: 999px;
-            filter: blur(24px);
-            opacity: 0.18;
-            pointer-events: none;
-            z-index: -1;
-            left: -9rem;
-            top: 8rem;
-            background: rgba(15, 43, 92, 0.25);
-        }
-        html[data-theme="dark"] .page::before { background: rgba(26, 58, 107, 0.4); }
-        .container {
-            width: min(1220px, calc(100% - 32px));
-            margin: 0 auto;
-        }
-        .topbar {
-            position: sticky;
-            top: 0;
-            z-index: 30;
-            backdrop-filter: blur(16px);
-            background: rgba(255, 255, 255, 0.82);
-            border-bottom: 1px solid var(--line);
-        }
-        html[data-theme="dark"] .topbar { background: rgba(7, 17, 31, 0.82); }
-        .topbar-inner {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            min-height: 88px;
-        }
-        .brand {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 800;
-            font-size: 1.1rem;
-            letter-spacing: -0.03em;
-        }
-        .brand-mark.crown-mark {
-            width: 42px;
-            height: 42px;
-            border-radius: 14px;
-            display: grid;
-            place-items: center;
-            background: var(--deep-blue);
-            box-shadow: 0 4px 12px rgba(15, 43, 92, 0.4);
-        }
-        .brand-mark.crown-mark i {
-            color: var(--yellow);
-            font-size: 1.2rem;
-        }
-        .brand-name .gold {
-            color: var(--yellow);
-            font-weight: 900;
-            background: linear-gradient(135deg, #facc15, #eab308);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .nav {
-            display: flex;
-            align-items: center;
-            gap: 28px;
-            color: var(--muted);
-            font-weight: 600;
-        }
-        .nav a:hover { color: var(--text); }
-        .top-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .theme-btn,
-        .ghost-btn,
-        .primary-btn {
-            border: 0;
-            border-radius: 999px;
-            font: inherit;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 160ms ease, box-shadow 160ms ease;
-        }
-        .theme-btn {
-            width: 46px;
-            height: 46px;
-            display: inline-grid;
-            place-items: center;
-            background: var(--card);
-            color: var(--text);
+        button, input { font: inherit; }
+
+        .auth-card {
+            width: 100%;
+            max-width: 480px;
+            background: var(--surface);
             border: 1px solid var(--line);
-            box-shadow: var(--shadow-soft);
+            border-radius: 32px;
+            padding: 32px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            position: relative;
         }
-        .ghost-btn {
-            padding: 14px 22px;
+        .theme-toggle {
+            position: absolute;
+            top: 16px;
+            right: 16px;
             background: transparent;
             border: 1px solid var(--line);
-            color: var(--text);
-        }
-        .primary-btn {
-            padding: 14px 24px;
-            background: linear-gradient(135deg, var(--deep-blue), var(--deep-blue-light));
-            color: var(--yellow);
-            box-shadow: 0 16px 28px rgba(15, 43, 92, 0.3);
-        }
-        .primary-btn:hover,
-        .ghost-btn:hover,
-        .theme-btn:hover { transform: translateY(-1px); }
-        .login-hero {
-            padding: 48px 0 32px;
-            background: var(--hero-grid);
-            border-bottom: 1px solid var(--line);
-        }
-        .login-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
-            align-items: center;
-            min-height: 680px;
-        }
-        .login-copy .eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
             border-radius: 999px;
-            color: var(--deep-blue);
-            background: var(--yellow-light);
-            font-weight: 800;
-            margin-bottom: 24px;
-        }
-        .login-copy h1 {
-            margin: 0;
-            font-size: clamp(2.8rem, 5vw, 4.2rem);
-            line-height: 0.95;
-            letter-spacing: -0.08em;
-            font-weight: 900;
-        }
-        .login-copy h1 em {
-            color: var(--yellow);
-            font-style: italic;
-            background: linear-gradient(135deg, #facc15, #eab308);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .login-copy p {
-            margin: 24px 0 0;
-            max-width: 480px;
-            font-size: 1.12rem;
-            line-height: 1.75;
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
             color: var(--muted);
+            cursor: pointer;
+            transition: 160ms ease;
         }
-        .login-copy .quick-links {
-            display: flex;
-            gap: 18px;
-            margin-top: 28px;
-            flex-wrap: wrap;
+        .theme-toggle:hover {
+            background: var(--accent-soft);
+            border-color: var(--accent);
         }
-        .login-copy .quick-links span {
+        .auth-brand {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            color: var(--muted);
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 28px;
         }
-        .login-copy .quick-links i {
-            color: var(--deep-blue);
+        .auth-brand .brand-mark {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #d4af37, #b8860b);
+            color: #fff;
+            font-size: 1.4rem;
         }
-        .login-card {
-            background: var(--card-strong);
-            border-radius: 28px;
-            padding: 40px 36px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--line);
-        }
-        .login-card h2 {
-            margin: 0 0 8px;
-            font-size: 1.8rem;
-            font-weight: 800;
+        .auth-brand h1 {
+            font-size: 1.6rem;
+            font-weight: 900;
             letter-spacing: -0.04em;
+            margin: 0;
         }
-        .login-card .sub {
-            margin: 0 0 28px;
+        .auth-brand h1 span { color: #d4af37; }
+        .auth-sub {
+            text-align: center;
+            margin-bottom: 28px;
             color: var(--muted);
             font-size: 0.95rem;
         }
+        .auth-sub strong { color: var(--text); }
+
         .form-group {
             margin-bottom: 20px;
         }
         .form-group label {
             display: block;
             font-weight: 700;
-            font-size: 0.8rem;
-            letter-spacing: 0.03em;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
             color: var(--muted);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
-        .form-group input {
+        .input-wrap {
+            position: relative;
+        }
+        .input-wrap i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #d4af37;
+            font-size: 1.1rem;
+        }
+        .input-wrap input {
             width: 100%;
-            padding: 14px 16px;
-            border-radius: 14px;
+            padding: 16px 16px 16px 48px;
+            background: rgba(0,0,0,0.22);
             border: 1px solid var(--line);
-            background: var(--bg);
+            border-radius: 16px;
             color: var(--text);
-            font: inherit;
-            font-size: 0.95rem;
-            transition: border 160ms ease, box-shadow 160ms ease;
-        }
-        .form-group input:focus {
+            font-weight: 500;
+            font-size: 1rem;
             outline: none;
-            border-color: var(--deep-blue);
-            box-shadow: 0 0 0 4px rgba(15, 43, 92, 0.12);
+            transition: 160ms ease;
         }
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 6px 0 24px;
+        .input-wrap input:focus {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 4px rgba(212,175,55,0.14);
+            background: rgba(0,0,0,0.30);
         }
-        .form-options .remember {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-            color: var(--muted);
-        }
-        .form-options .remember input {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--deep-blue);
-        }
-        .form-options .forgot {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--deep-blue);
-        }
-        .login-card .primary-btn {
+
+        .btn-primary {
             width: 100%;
             padding: 16px;
+            border: 0;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #d4af37, #b8860b);
+            color: #fff;
+            font-weight: 900;
             font-size: 1.05rem;
-            border-radius: 14px;
+            cursor: pointer;
+            transition: 160ms ease;
+            box-shadow: 0 4px 14px rgba(212,175,55,0.26);
+            margin-top: 6px;
         }
-        .signup-link {
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,175,55,0.32); }
+        .btn-primary:disabled { opacity: 0.6; transform: none; cursor: not-allowed; }
+
+        .auth-footer {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 24px;
             color: var(--muted);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
-        .signup-link a {
-            color: var(--deep-blue);
+        .auth-footer a {
+            color: #d4af37;
             font-weight: 700;
         }
-        .stats-strip {
-            padding: 16px 0 28px;
-            background: var(--bg);
-        }
-        .ticker {
+        .auth-footer a:hover { text-decoration: underline; }
+
+        .auth-extra {
             display: flex;
-            gap: 12px;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-        .ticker-track {
-            display: flex;
-            gap: 12px;
-            min-width: 100%;
-            animation: ticker 26s linear infinite;
-        }
-        .stat-pill {
-            flex: 0 0 auto;
-            display: inline-flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            border-radius: 999px;
-            background: var(--card);
-            border: 1px solid var(--line);
-            box-shadow: var(--shadow-soft);
+            gap: 16px;
+            margin: 16px 0 6px;
+            flex-wrap: wrap;
+        }
+        .auth-extra .link {
             color: var(--muted);
+            font-size: 0.85rem;
             font-weight: 600;
         }
-        .stat-pill strong { color: var(--text); }
-        .stat-icon {
-            width: 26px;
-            height: 26px;
-            border-radius: 999px;
-            display: grid;
-            place-items: center;
-            color: #fff;
-            background: var(--deep-blue);
-            flex: 0 0 auto;
+        .auth-extra .link:hover { color: #d4af37; }
+
+        .error-msg {
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.20);
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            color: #ef4444;
+            display: none;
+            font-weight: 600;
+            font-size: 0.92rem;
         }
-        .footer {
-            padding: 30px 0 48px;
-            border-top: 1px solid var(--line);
-        }
-        .footer-inner {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-            flex-wrap: wrap;
-            color: var(--muted);
-            font-size: 0.95rem;
-        }
-        .footer-links {
-            display: flex;
-            gap: 18px;
-            flex-wrap: wrap;
-        }
-        @keyframes ticker {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
-        @media (max-width: 1080px) {
-            .login-grid { grid-template-columns: 1fr; min-height: auto; gap: 30px; }
-            .login-copy p { max-width: 100%; }
-        }
-        @media (max-width: 820px) {
-            .topbar-inner { min-height: 80px; }
-            .nav { display: none; }
-            .login-hero { padding-top: 30px; }
-        }
-        @media (max-width: 560px) {
-            .container { width: min(100% - 22px, 1220px); }
-            .top-actions .ghost-btn { display: none; }
-            .login-card { padding: 28px 18px; }
-            .login-copy h1 { font-size: clamp(2.4rem, 12vw, 3.2rem); }
-            .form-options { flex-direction: column; gap: 12px; align-items: flex-start; }
+
+        @media (max-width: 480px) {
+            .auth-card { padding: 24px; }
+            .auth-brand h1 { font-size: 1.3rem; }
         }
     </style>
 </head>
 <body>
-    <div class="page">
-        <header class="topbar">
-            <div class="container topbar-inner">
-                <a class="brand" href="/index.html">
-                    <span class="brand-mark crown-mark"><i class="fa-solid fa-crown"></i></span>
-                    <span class="brand-name">Access <span class="gold">Wealth</span></span>
-                </a>
-                <nav class="nav" aria-label="Primary">
-                    <a href="/index.html#services">Services</a>
-                    <a href="/index.html#features">Features</a>
-                    <a href="/index.html#about">About</a>
-                </nav>
-                <div class="top-actions">
-                    <button class="theme-btn" type="button" data-theme-toggle aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
-                    <a class="ghost-btn" href="/login.html">Sign in</a>
-                    <a class="primary-btn" href="/register.html">Get Started <i class="fa-solid fa-arrow-right" style="margin-left:10px;"></i></a>
+    <div class="auth-card">
+        <!-- Theme toggle button (will be handled by global.js) -->
+        <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+            <i class="fa-solid fa-moon"></i>
+        </button>
+
+        <div class="auth-brand">
+            <span class="brand-mark"><i class="fa-solid fa-paper-plane"></i></span>
+            <h1>Access <span>Wealth</span></h1>
+        </div>
+        <div class="auth-sub">
+            <strong>Welcome back.</strong> Login to your dashboard.
+        </div>
+
+        <div class="error-msg" id="errorMsg"></div>
+
+        <form id="loginForm" novalidate>
+            <div class="form-group">
+                <label>Username or email</label>
+                <div class="input-wrap">
+                    <i class="fa-regular fa-user"></i>
+                    <input type="text" id="loginUsername" placeholder="Enter your username or email" required>
                 </div>
             </div>
-        </header>
 
-        <main>
-            <section class="login-hero">
-                <div class="container login-grid">
-                    <div class="login-copy">
-                        <div class="eyebrow"><i class="fa-solid fa-arrow-right-to-bracket"></i> Welcome back</div>
-                        <h1>Login to your <em>dashboard</em>.</h1>
-                        <p>
-                            Access your airtime, data, bill payments, wallet, and account settings — all in one
-                            clean, secure, and professional interface.
-                        </p>
-                        <div class="quick-links">
-                            <span><i class="fa-solid fa-circle-check"></i> 150K+ users</span>
-                            <span><i class="fa-solid fa-bolt"></i> 10s delivery</span>
-                            <span><i class="fa-solid fa-headset"></i> 24/7 support</span>
-                        </div>
-                    </div>
-
-                    <div class="login-card">
-                        <h2>Sign in</h2>
-                        <p class="sub">Enter your credentials to access your account.</p>
-                        <form>
-                            <div class="form-group">
-                                <label for="username">Username or Email</label>
-                                <input type="text" id="username" placeholder="Esther12" value="Esther12" />
-                            </div>
-                            <div class="form-group">
-                                <label for="password">Password</label>
-                                <input type="password" id="password" placeholder="••••••••" value="********" />
-                            </div>
-                            <div class="form-options">
-                                <label class="remember">
-                                    <input type="checkbox" checked /> Remember me
-                                </label>
-                                <a class="forgot" href="#">Forgot password?</a>
-                            </div>
-                            <button type="submit" class="primary-btn">Login to Dashboard <i class="fa-solid fa-arrow-right" style="margin-left:10px;"></i></button>
-                            <div class="signup-link">
-                                Don't have an account? <a href="/register.html">Create one now</a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </section>
-
-            <section class="stats-strip">
-                <div class="container ticker" aria-label="Platform stats">
-                    <div class="ticker-track">
-                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-circle-check"></i></span> Uptime <strong>99.9%</strong></div>
-                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-headset"></i></span> Support <strong>24/7</strong></div>
-                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-users"></i></span> Total Users <strong>150K+</strong></div>
-                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-wallet"></i></span> Payouts <strong>NGN 80M+</strong></div>
-                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-bolt"></i></span> Delivery <strong>10s</strong></div>
-                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-circle-check"></i></span> Uptime <strong>99.9%</strong></div>
-                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-headset"></i></span> Support <strong>24/7</strong></div>
-                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-users"></i></span> Total Users <strong>150K+</strong></div>
-                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-wallet"></i></span> Payouts <strong>NGN 80M+</strong></div>
-                        <div class="stat-pill"><span class="stat-icon"><i class="fa-solid fa-bolt"></i></span> Delivery <strong>10s</strong></div>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <footer class="footer">
-            <div class="container footer-inner">
-                <a class="brand" href="/index.html">
-                    <span class="brand-mark crown-mark"><i class="fa-solid fa-crown"></i></span>
-                    <span class="brand-name">Access <span class="gold">Wealth</span></span>
-                </a>
-                <div>© 2026 Access Wealth. All rights reserved.</div>
-                <div class="footer-links">
-                    <a href="/login.html">Sign in</a>
-                    <a href="/register.html">Register</a>
-                    <a href="/support.html">Support</a>
+            <div class="form-group">
+                <label>Password</label>
+                <div class="input-wrap">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
                 </div>
             </div>
-        </footer>
+
+            <div class="auth-extra">
+                <a href="/forgot-password.html" class="link">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn-primary" id="loginBtn">Login to Dashboard</button>
+        </form>
+
+        <div class="auth-footer">
+            Don't have an account? <a href="/register.html">Create one now</a>
+        </div>
     </div>
+
     <script src="global.js"></script>
+    <script>
+        (function() {
+            const form = document.getElementById('loginForm');
+            const btn = document.getElementById('loginBtn');
+            const errorEl = document.getElementById('errorMsg');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errorEl.style.display = 'none';
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
+
+                const username = document.getElementById('loginUsername').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
+
+                if (!username || !password) {
+                    errorEl.innerText = 'Username and password are required.';
+                    errorEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Login to Dashboard';
+                    return;
+                }
+
+                try {
+                    const { ok, data } = await window.apiFetchJson('/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    if (ok && data.success) {
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('username', data.user.username);
+                        localStorage.setItem('role', data.user.role);
+                        localStorage.setItem('planActivated', data.user.planActivated || 'false');
+                        localStorage.setItem('activePackage', data.user.activePackage || '');
+                        localStorage.setItem('my_referral_id', data.user.my_referral_id || '');
+
+                        if (data.user.role === 'admin') {
+                            window.location.href = '/admin.html';
+                        } else if (data.user.role === 'support') {
+                            window.location.href = '/support-agent.html';
+                        } else {
+                            window.location.href = '/dashboard.html';
+                        }
+                    } else {
+                        errorEl.innerText = data.error || 'Invalid username or password.';
+                        errorEl.style.display = 'block';
+                        btn.disabled = false;
+                        btn.innerHTML = 'Login to Dashboard';
+                    }
+                } catch (err) {
+                    console.error('Login error:', err);
+                    errorEl.innerText = 'Network error. Please check your connection.';
+                    errorEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Login to Dashboard';
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
