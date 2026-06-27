@@ -1,50 +1,7 @@
 // global.js - Master Sync Engine (Bypass Active)
-const DEFAULT_BACKEND_HOST = 'https://access-wealth-backend-production.up.railway.app';
-const isLocalHost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
-const OVERRIDE_API_BASE_URL =
-    window.__API_BASE_URL ||
-    document.querySelector('meta[name="api-base-url"]')?.content ||
-    localStorage.getItem('apiBaseUrl') ||
-    '';
-const DEFAULT_API_BASE_URL = isLocalHost ? `${window.location.origin}/api` : `${DEFAULT_BACKEND_HOST}/api`;
-const API_BASE_URL = OVERRIDE_API_BASE_URL || DEFAULT_API_BASE_URL;
+const BACKEND_HOST = 'https://access-wealth-backend-production.up.railway.app';
+const API_BASE_URL = `${BACKEND_HOST}/api`;
 const GLOBAL_SYNC_SKIP_PAGES = ['login.html', 'register.html', 'admin.html', 'support-agent.html', 'forgot-password.html', 'reset-password.html'];
-const THEME_STORAGE_KEY = 'accesswealth-theme';
-
-function getPreferredTheme() {
-    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-    if (storedTheme === 'light' || storedTheme === 'dark') return storedTheme;
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
-function applyTheme(theme) {
-    const nextTheme = theme === 'dark' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', nextTheme);
-    localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
-    document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
-        btn.setAttribute('aria-pressed', nextTheme === 'dark' ? 'true' : 'false');
-        btn.dataset.theme = nextTheme;
-        const icon = btn.querySelector('i');
-        if (icon) {
-            icon.className = nextTheme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-        }
-    });
-    return nextTheme;
-}
-
-function toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme') || getPreferredTheme();
-    return applyTheme(current === 'dark' ? 'light' : 'dark');
-}
-
-function initThemeControls() {
-    applyTheme(getPreferredTheme());
-    document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
-        if (btn.dataset.themeBound === 'true') return;
-        btn.dataset.themeBound = 'true';
-        btn.addEventListener('click', toggleTheme);
-    });
-}
 
 async function apiFetch(path, options = {}) {
     const url = path.startsWith('http') ? path : `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
@@ -93,12 +50,6 @@ async function apiFetchJson(path, options = {}) {
 
 window.apiFetch = apiFetch;
 window.apiFetchJson = apiFetchJson;
-window.getApiBaseUrl = () => API_BASE_URL;
-window.applyTheme = applyTheme;
-window.toggleTheme = toggleTheme;
-window.initThemeControls = initThemeControls;
-
-document.documentElement.setAttribute('data-theme', getPreferredTheme());
 
 function isPageAllowedForSync() {
     const href = window.location.href;
@@ -174,12 +125,7 @@ async function globalSync() {
             safeUpdate('sidebarName', username.toUpperCase());
             safeUpdate('cardName', username);
             safeUpdate('displayName', username.toUpperCase());
-            safeUpdate('heroName', username.toUpperCase());
-            safeUpdate('heroHandle', "@" + username.toLowerCase().replace(/\s+/g, ''));
             safeUpdate('displayHandle', "@" + username.toLowerCase().replace(/\s+/g, ''));
-            safeUpdate('heroPlan', u.planActivated === 'true' ? (u.activePackage || 'Premium') : 'Standard');
-            safeMoneyUpdate('heroBalance', u.balance || 0);
-            safeUpdate('heroReferral', u.my_referral_id || '');
             
             const avatarUrl = `https://ui-avatars.com/api/?name=${username}&background=d4af37&color=112A46&bold=true`;
             if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').src = avatarUrl;
@@ -220,7 +166,6 @@ window.logout = function() {
 };
 
 document.addEventListener('DOMContentLoaded', globalSync);
-document.addEventListener('DOMContentLoaded', initThemeControls);
 
 function injectMobileNav() {
     if (document.getElementById('mobile-nav-toggle')) return;
