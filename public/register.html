@@ -200,7 +200,7 @@
 
         <div class="error-msg" id="errorMsg"></div>
 
-        <form id="registerForm">
+        <form id="registerForm" novalidate>
             <div class="form-group">
                 <label>Username or email</label>
                 <div class="input-wrap">
@@ -235,54 +235,76 @@
 
     <script src="global.js"></script>
     <script>
-        // Auto-fill referral code from URL if present (e.g., ?ref=AW12345)
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('ref')) {
-            document.getElementById('regReferral').value = urlParams.get('ref');
-        }
+        (function() {
+            // Auto-fill referral code from URL if present (e.g., ?ref=AW12345)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('ref')) {
+                document.getElementById('regReferral').value = urlParams.get('ref');
+            }
 
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+            const form = document.getElementById('registerForm');
             const btn = document.getElementById('regBtn');
             const errorEl = document.getElementById('errorMsg');
-            errorEl.style.display = 'none';
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
-            btn.disabled = true;
 
-            const username = document.getElementById('regUsername').value;
-            const password = document.getElementById('regPassword').value;
-            const referred_by = document.getElementById('regReferral').value;
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errorEl.style.display = 'none';
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
 
-            try {
-                const { ok, data } = await window.apiFetchJson('/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password, referred_by })
-                });
+                const username = document.getElementById('regUsername').value.trim();
+                const password = document.getElementById('regPassword').value.trim();
+                const referred_by = document.getElementById('regReferral').value.trim();
 
-                if (ok && data.success) {
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('username', data.user.username);
-                    localStorage.setItem('role', data.user.role);
-                    localStorage.setItem('planActivated', data.user.planActivated || 'false');
-                    localStorage.setItem('my_referral_id', data.user.my_referral_id || '');
-
-                    alert('✅ Account created successfully! You are now logged in.');
-                    window.location.href = '/dashboard.html';
-                } else {
-                    errorEl.innerText = data.error || 'Registration failed. Username may already be taken.';
+                // Basic client-side validation
+                if (!username || !password) {
+                    errorEl.innerText = 'Username and password are required.';
                     errorEl.style.display = 'block';
-                    btn.innerHTML = 'Create Account';
                     btn.disabled = false;
+                    btn.innerHTML = 'Create Account';
+                    return;
                 }
-            } catch (err) {
-                console.error('Registration error:', err);
-                errorEl.innerText = 'Server error. Please try again later.';
-                errorEl.style.display = 'block';
-                btn.innerHTML = 'Create Account';
-                btn.disabled = false;
-            }
-        });
+                if (password.length < 6) {
+                    errorEl.innerText = 'Password must be at least 6 characters.';
+                    errorEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Create Account';
+                    return;
+                }
+
+                try {
+                    const { ok, data } = await window.apiFetchJson('/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password, referred_by })
+                    });
+
+                    if (ok && data.success) {
+                        // Store token and user data
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('username', data.user.username);
+                        localStorage.setItem('role', data.user.role);
+                        localStorage.setItem('planActivated', data.user.planActivated || 'false');
+                        localStorage.setItem('my_referral_id', data.user.my_referral_id || '');
+
+                        // Redirect to dashboard
+                        window.location.href = '/dashboard.html';
+                    } else {
+                        // Show error returned by the backend
+                        errorEl.innerText = data.error || 'Registration failed. Please try again.';
+                        errorEl.style.display = 'block';
+                        btn.disabled = false;
+                        btn.innerHTML = 'Create Account';
+                    }
+                } catch (err) {
+                    console.error('Registration error:', err);
+                    errorEl.innerText = 'Network error. Please check your connection and try again.';
+                    errorEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Create Account';
+                }
+            });
+        })();
     </script>
 </body>
 </html>

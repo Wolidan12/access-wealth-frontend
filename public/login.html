@@ -215,7 +215,7 @@
 
         <div class="error-msg" id="errorMsg"></div>
 
-        <form id="loginForm">
+        <form id="loginForm" novalidate>
             <div class="form-group">
                 <label>Username or email</label>
                 <div class="input-wrap">
@@ -246,53 +246,65 @@
 
     <script src="global.js"></script>
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        (function() {
+            const form = document.getElementById('loginForm');
             const btn = document.getElementById('loginBtn');
             const errorEl = document.getElementById('errorMsg');
-            errorEl.style.display = 'none';
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying';
-            btn.disabled = true;
 
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errorEl.style.display = 'none';
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
 
-            try {
-                const { ok, data } = await window.apiFetchJson('/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
+                const username = document.getElementById('loginUsername').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
 
-                if (ok && data.success) {
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('username', data.user.username);
-                    localStorage.setItem('role', data.user.role);
-                    localStorage.setItem('planActivated', data.user.planActivated || 'false');
-                    localStorage.setItem('activePackage', data.user.activePackage || '');
-                    localStorage.setItem('my_referral_id', data.user.my_referral_id || '');
-
-                    if (data.user.role === 'admin') {
-                        window.location.href = '/admin.html';
-                    } else if (data.user.role === 'support') {
-                        window.location.href = '/support-agent.html';
-                    } else {
-                        window.location.href = '/dashboard.html';
-                    }
-                } else {
-                    errorEl.innerText = data.error || 'Invalid username or password';
+                if (!username || !password) {
+                    errorEl.innerText = 'Username and password are required.';
                     errorEl.style.display = 'block';
-                    btn.innerHTML = 'Login to Dashboard';
                     btn.disabled = false;
+                    btn.innerHTML = 'Login to Dashboard';
+                    return;
                 }
-            } catch (err) {
-                console.error('Login error:', err);
-                errorEl.innerText = 'Server error. Please try again later.';
-                errorEl.style.display = 'block';
-                btn.innerHTML = 'Login to Dashboard';
-                btn.disabled = false;
-            }
-        });
+
+                try {
+                    const { ok, data } = await window.apiFetchJson('/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    if (ok && data.success) {
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('username', data.user.username);
+                        localStorage.setItem('role', data.user.role);
+                        localStorage.setItem('planActivated', data.user.planActivated || 'false');
+                        localStorage.setItem('activePackage', data.user.activePackage || '');
+                        localStorage.setItem('my_referral_id', data.user.my_referral_id || '');
+
+                        if (data.user.role === 'admin') {
+                            window.location.href = '/admin.html';
+                        } else if (data.user.role === 'support') {
+                            window.location.href = '/support-agent.html';
+                        } else {
+                            window.location.href = '/dashboard.html';
+                        }
+                    } else {
+                        errorEl.innerText = data.error || 'Invalid username or password.';
+                        errorEl.style.display = 'block';
+                        btn.disabled = false;
+                        btn.innerHTML = 'Login to Dashboard';
+                    }
+                } catch (err) {
+                    console.error('Login error:', err);
+                    errorEl.innerText = 'Network error. Please check your connection.';
+                    errorEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Login to Dashboard';
+                }
+            });
+        })();
     </script>
 </body>
 </html>
