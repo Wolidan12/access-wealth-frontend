@@ -1,4 +1,5 @@
-// global.js - Master Sync Engine (Bypass Active)
+// global.js - Master Sync Engine + Theme Toggle
+
 const BACKEND_HOST = 'https://access-wealth-backend-production.up.railway.app';
 const API_BASE_URL = `${BACKEND_HOST}/api`;
 const GLOBAL_SYNC_SKIP_PAGES = ['login.html', 'register.html', 'admin.html', 'support-agent.html', 'forgot-password.html', 'reset-password.html'];
@@ -119,7 +120,7 @@ async function globalSync() {
             localStorage.setItem('affiliate_balance', u.affiliate_balance || 0); 
             localStorage.setItem('planActivated', u.planActivated === true || u.planActivated === 'true' ? 'true' : 'false');
             localStorage.setItem('activePackage', u.activePackage || 'Standard');
-            localStorage.setItem('my_referral_id', u.my_referral_id || u.referralId || ''); // ✅ FIX: store referral ID
+            localStorage.setItem('my_referral_id', u.my_referral_id || u.referralId || '');
             localStorage.setItem('referred_by', u.referred_by || '');
 
             safeUpdate('sidebarName', username.toUpperCase());
@@ -472,3 +473,38 @@ function ensureConsistentTitle() {
 
 document.addEventListener('DOMContentLoaded', ensureConsistentTitle);
 document.addEventListener('DOMContentLoaded', injectMobileNav);
+
+// =================================================================
+// 🎨 THEME TOGGLE – FIXED & ADDED HERE
+// =================================================================
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.querySelector('[data-theme-toggle]');
+    const html = document.documentElement;
+
+    if (!toggleBtn) return;
+
+    // Helper to update icon
+    function updateIcon(theme) {
+        const icon = toggleBtn.querySelector('i');
+        if (!icon) return;
+        if (theme === 'dark') {
+            icon.className = 'fa-solid fa-sun';
+        } else {
+            icon.className = 'fa-solid fa-moon';
+        }
+    }
+
+    // Set initial icon based on current theme
+    const currentTheme = html.getAttribute('data-theme') || 'light';
+    updateIcon(currentTheme);
+
+    // Toggle click handler
+    toggleBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const current = html.getAttribute('data-theme') || 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('accesswealth-theme', next);
+        updateIcon(next);
+    });
+});
