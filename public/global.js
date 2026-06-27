@@ -1,9 +1,12 @@
-// global.js - Master Sync Engine + Theme Toggle
+// global.js - Master Sync Engine + Theme Toggle (FULLY CORRECTED)
 
 const BACKEND_HOST = 'https://access-wealth-backend-production.up.railway.app';
 const API_BASE_URL = `${BACKEND_HOST}/api`;
 const GLOBAL_SYNC_SKIP_PAGES = ['login.html', 'register.html', 'admin.html', 'support-agent.html', 'forgot-password.html', 'reset-password.html'];
 
+// ==========================================
+// API HELPERS (unchanged)
+// ==========================================
 async function apiFetch(path, options = {}) {
     const url = path.startsWith('http') ? path : `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
     try {
@@ -52,6 +55,61 @@ async function apiFetchJson(path, options = {}) {
 window.apiFetch = apiFetch;
 window.apiFetchJson = apiFetchJson;
 
+// ==========================================
+// THEME MANAGEMENT (FIXED)
+// ==========================================
+const THEME_STORAGE_KEY = 'accesswealth-theme';
+
+function getPreferredTheme() {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    if (stored === 'light' || stored === 'dark') return stored;
+    // Fallback to system preference or 'light'
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function applyTheme(theme) {
+    const next = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem(THEME_STORAGE_KEY, next);
+    // Update all toggle buttons on the page (if any)
+    document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
+        const icon = btn.querySelector('i');
+        if (icon) {
+            icon.className = next === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        }
+        btn.setAttribute('aria-pressed', next === 'dark' ? 'true' : 'false');
+    });
+    return next;
+}
+
+function initTheme() {
+    const preferred = getPreferredTheme();
+    applyTheme(preferred);
+}
+
+// Attach toggle handlers to all existing and future toggle buttons
+function setupThemeToggle() {
+    document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
+        if (btn.dataset.themeBound === 'true') return;
+        btn.dataset.themeBound = 'true';
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            applyTheme(next);
+        });
+    });
+}
+
+// Expose theme functions globally
+window.applyTheme = applyTheme;
+window.getPreferredTheme = getPreferredTheme;
+window.initTheme = initTheme;
+window.setupThemeToggle = setupThemeToggle;
+
+// ==========================================
+// SYNC ENGINE (unchanged)
+// ==========================================
 function isPageAllowedForSync() {
     const href = window.location.href;
     return !GLOBAL_SYNC_SKIP_PAGES.some(page => href.includes(page));
@@ -166,8 +224,9 @@ window.logout = function() {
     window.location.href = '/login.html'; 
 };
 
-document.addEventListener('DOMContentLoaded', globalSync);
-
+// ==========================================
+// MOBILE NAV, TOAST, CONFIRM (unchanged)
+// ==========================================
 function injectMobileNav() {
     if (document.getElementById('mobile-nav-toggle')) return;
 
@@ -474,37 +533,12 @@ function ensureConsistentTitle() {
 document.addEventListener('DOMContentLoaded', ensureConsistentTitle);
 document.addEventListener('DOMContentLoaded', injectMobileNav);
 
-// =================================================================
-// 🎨 THEME TOGGLE – FIXED & ADDED HERE
-// =================================================================
+// ==========================================
+// INITIALIZE THEME AND TOGGLE ON PAGE LOAD
+// ==========================================
 document.addEventListener('DOMContentLoaded', function() {
-    const toggleBtn = document.querySelector('[data-theme-toggle]');
-    const html = document.documentElement;
-
-    if (!toggleBtn) return;
-
-    // Helper to update icon
-    function updateIcon(theme) {
-        const icon = toggleBtn.querySelector('i');
-        if (!icon) return;
-        if (theme === 'dark') {
-            icon.className = 'fa-solid fa-sun';
-        } else {
-            icon.className = 'fa-solid fa-moon';
-        }
-    }
-
-    // Set initial icon based on current theme
-    const currentTheme = html.getAttribute('data-theme') || 'light';
-    updateIcon(currentTheme);
-
-    // Toggle click handler
-    toggleBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        const current = html.getAttribute('data-theme') || 'light';
-        const next = current === 'dark' ? 'light' : 'dark';
-        html.setAttribute('data-theme', next);
-        localStorage.setItem('accesswealth-theme', next);
-        updateIcon(next);
-    });
+    // Apply the saved theme (or system preference)
+    initTheme();
+    // Set up toggle buttons
+    setupThemeToggle();
 });
