@@ -250,6 +250,8 @@
 
         <div class="content-area">
             
+            <div id="broadcastNotice" style="display:none; margin-bottom:20px; background:rgba(212,175,55,0.08); border:1px solid var(--border-light); border-radius:16px; padding:16px 18px;"></div>
+
             <div class="top-grid">
                 <div class="balance-card">
                     <div class="bc-header">
@@ -355,6 +357,45 @@
             }
         }
 
+        function getQueryParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+
+        async function verifyDeposit(reference) {
+            if (!reference) return;
+            try {
+                const { ok, data } = await window.apiFetchJson(`/paystack/verify/${reference}`);
+                if (ok && data.success) {
+                    if (typeof showToast === 'function') showToast('success', data.message || 'Deposit credited successfully');
+                    else alert(data.message || 'Deposit credited successfully');
+                    if (typeof globalSync === 'function') globalSync();
+                } else {
+                    const msg = data.error || 'Payment verification failed';
+                    if (typeof showToast === 'function') showToast('error', msg);
+                    else alert(msg);
+                }
+            } catch (error) {
+                console.error('Verify deposit error:', error);
+            }
+        }
+
+        async function loadBroadcastNotice() {
+            try {
+                const { ok, data } = await window.apiFetchJson('/broadcasts');
+                const notice = document.getElementById('broadcastNotice');
+                if (ok && data.success && data.broadcasts && data.broadcasts.length) {
+                    const latest = data.broadcasts[0];
+                    notice.innerHTML = `<div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;"><div><strong style="color:var(--primary-yellow);">${latest.title || 'Admin Announcement'}</strong><div style="font-size:13px; color:var(--text-main); margin-top:6px; line-height:1.6;">${latest.message}</div></div><span style="font-size:12px; color:var(--text-muted);">${new Date(latest.created_at).toLocaleString()}</span></div>`;
+                    notice.style.display = 'block';
+                } else {
+                    notice.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Broadcast notice error:', error);
+            }
+        }
+
         // --- 5-Wallet Dashboard Logic ---
         let isHidden = false;
         let currentView = 'total';
@@ -408,7 +449,14 @@
             }
         }
 
-        window.addEventListener('globalSyncComplete', updateBalanceDisplay);
+        window.addEventListener('globalSyncComplete', () => {
+            updateBalanceDisplay();
+            loadBroadcastNotice();
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBroadcastNotice();
+            verifyDeposit(getQueryParam('reference'));
+        });
         updateBalanceDisplay();
     </script>
 </body>

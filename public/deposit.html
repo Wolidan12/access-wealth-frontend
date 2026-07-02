@@ -241,6 +241,36 @@
             document.getElementById('displayHandle').innerText = "@" + user.toLowerCase().replace(/\s+/g, '');
         });
 
+        function getQueryParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+
+        async function verifyDeposit(reference) {
+            if (!reference) return;
+            try {
+                const { ok, data } = await window.apiFetchJson(`/paystack/verify/${reference}`);
+                if (ok && data.success) {
+                    if (typeof showToast === 'function') showToast('success', data.message || 'Deposit credited successfully');
+                    else alert(data.message || 'Deposit credited successfully');
+                    if (typeof globalSync === 'function') globalSync();
+                } else {
+                    const msg = data.error || 'Payment verification failed';
+                    if (typeof showToast === 'function') showToast('error', msg);
+                    else alert(msg);
+                }
+            } catch (err) {
+                console.error('Verify deposit error:', err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const ref = getQueryParam('reference');
+            if (ref) {
+                verifyDeposit(ref);
+            }
+        });
+
         // HANDLE AUTOMATED PAYSTACK DEPOSIT SUBMISSION
         document.getElementById('depositForm').addEventListener('submit', async (e) => {
             e.preventDefault();

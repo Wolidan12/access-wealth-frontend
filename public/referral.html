@@ -146,7 +146,7 @@
                     const tbody = document.getElementById('leaderboardBody');
                     tbody.innerHTML = '';
                     if (!lbData.leaderboard || lbData.leaderboard.length === 0) {
-                        tbody.innerHTML = '<td><td colspan="4" style="text-align:center;">No referrals yet.倍<double';
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No referrals yet.</td></tr>';
                     } else {
                         lbData.leaderboard.forEach((user, idx) => {
                             const row = `<tr>
@@ -192,12 +192,24 @@
             const copyText = document.getElementById("refLinkInput");
             copyText.select();
             copyText.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(copyText.value);
             const btn = event.target;
             const originalText = btn.innerText;
-            btn.innerText = "Copied!";
-            btn.style.background = "#fff";
-            setTimeout(() => { btn.innerText = originalText; btn.style.background = "var(--primary-yellow)"; }, 2000);
+
+            const finishCopy = () => {
+                btn.innerText = "Copied!";
+                btn.style.background = "#fff";
+                setTimeout(() => { btn.innerText = originalText; btn.style.background = "var(--primary-yellow)"; }, 2000);
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(copyText.value).then(finishCopy).catch(() => {
+                    document.execCommand('copy');
+                    finishCopy();
+                });
+            } else {
+                document.execCommand('copy');
+                finishCopy();
+            }
         }
 
         function logout() { localStorage.clear(); window.location.href = '/login.html'; }

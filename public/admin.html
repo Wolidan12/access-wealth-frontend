@@ -117,6 +117,7 @@
             <div class="nav-label">Communication</div>
             <a class="nav-item" onclick="switchTab('broadcast', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-bullhorn"></i> Broadcast</a>
             <a class="nav-item" onclick="switchTab('sponsored', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-ad"></i> Sponsored Posts</a>
+            <a class="nav-item" onclick="switchTab('settings', this); loadSiteSettings(); toggleSidebarMobileOnly();"><i class="fa-solid fa-sliders"></i> Site Settings</a>
             
             <div class="nav-label">Task Reviews</div>
             <a class="nav-item" onclick="switchTab('task-reviews', this); loadTaskSubmissions(); toggleSidebarMobileOnly();"><i class="fa-solid fa-check-double"></i> Sponsored Submissions</a>
@@ -221,6 +222,22 @@
             </div>
         </div>
 
+        <div id="settings" class="admin-section">
+            <div class="page-header"><div><h1>Site Settings</h1><p>Control platform access and feature availability.</p></div></div>
+            <div class="card">
+                <form id="settingsForm">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Maintenance Mode</label><select id="maintenance_mode" class="form-control"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+                        <div class="form-group"><label>Registrations Open</label><select id="registrations_open" class="form-control"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+                        <div class="form-group"><label>Deposits Open</label><select id="deposits_open" class="form-control"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+                        <div class="form-group"><label>Withdrawals Open</label><select id="withdrawals_open" class="form-control"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+                        <div class="form-group"><label>Sponsored Posts Open</label><select id="sponsored_posts_open" class="form-control"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+                    </div>
+                    <button type="submit" class="btn-submit">Save Settings</button>
+                </form>
+            </div>
+        </div>
+
         <div id="sponsored" class="admin-section">
             <div class="page-header"><div><h1>Sponsored Posts</h1><p>Create tasks for users to earn rewards</p></div></div>
             <div class="card">
@@ -268,6 +285,7 @@
             if (role !== 'admin') { window.location.href = '/login.html'; return; }
             loadDashboardStats();
             loadUsers();
+            loadSiteSettings();
             loadDeposits();
             loadAllWithdrawals('pending');
             loadTaskSubmissions();
@@ -304,15 +322,19 @@
                     data.users.forEach(user => {
                         const total = (user.balance || 0) + (user.taskEarnings || 0) + (user.daily_earnings || 0) + (user.affiliate_balance || 0);
                         const statusBadge = user.planActivated === 'true' ? `<span class="badge success">${user.activePackage || 'Premium'}</span>` : '<span class="badge warning">No Plan</span>';
+                        const accountStatus = (user.status || 'active').toLowerCase() === 'banned' ? '<span class="badge danger">Banned</span>' : '<span class="badge success">Active</span>';
                         tbody.innerHTML += `<tr>
-                            <td><strong>${user.username}</strong></td>
+                            <td><strong>${user.username}</strong><br><small>${accountStatus}</small></td>
                             <td style="color:var(--primary-yellow); font-weight:bold;">₦${total.toLocaleString()}</td>
                             <td>₦${(user.balance || 0).toLocaleString()}</td>
                             <td>₦${(user.taskEarnings || 0).toLocaleString()}</td>
                             <td>₦${(user.daily_earnings || 0).toLocaleString()}</td>
                             <td>₦${(user.affiliate_balance || 0).toLocaleString()}</td>
                             <td>${statusBadge}</td>
-                            <td><button class="action-btn" onclick="quickAdjust('${user.username}')">Adjust</button></td>
+                            <td>
+                                <button class="action-btn" onclick="quickAdjust('${user.username}')">Adjust</button>
+                                ${((user.status || 'active').toLowerCase() === 'banned') ? `<button class="action-btn" style="color:var(--success); border-color:var(--success);" onclick="toggleUserStatus('${user.username}', 'active')">Activate</button>` : `<button class="action-btn" style="color:var(--danger); border-color:var(--danger);" onclick="toggleUserStatus('${user.username}', 'banned')">Ban</button>`}
+                            </td>
                         </tr>`;
                     });
                 }
@@ -323,6 +345,63 @@
             document.getElementById('adjustUsername').value = username;
             document.getElementById('adjustUsername').scrollIntoView();
         }
+
+        async function toggleUserStatus(username, status) {
+            try {
+                const { ok, data } = await window.apiFetchJson('/admin/toggle-user-status', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, status })
+                });
+                if (ok && data.success) {
+                    showToast('success', data.message || 'User status updated');
+                    loadUsers();
+                    loadDashboardStats();
+                } else {
+                    alert(data.error || 'Failed to update user status');
+                }
+            } catch (error) {
+                alert('Server error while updating user status');
+            }
+        }
+
+        async function loadSiteSettings() {
+            try {
+                const { ok, data } = await window.apiFetchJson('/site-settings');
+                if (ok && data.success) {
+                    const settings = data.settings || {};
+                    Object.entries(settings).forEach(([key, value]) => {
+                        const el = document.getElementById(key);
+                        if (el) el.value = value;
+                    });
+                }
+            } catch (error) {
+                console.error('Site settings error:', error);
+            }
+        }
+
+        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {};
+            ['maintenance_mode','registrations_open','deposits_open','withdrawals_open','sponsored_posts_open'].forEach((key) => {
+                payload[key] = document.getElementById(key).value;
+            });
+            const btn = e.target.querySelector('button');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            btn.disabled = true;
+            try {
+                const { ok, data } = await window.apiFetchJson('/admin/settings', { method: 'POST', body: JSON.stringify(payload) });
+                if (ok && data.success) {
+                    showToast('success', 'Site settings updated');
+                } else {
+                    alert(data.error || 'Failed to save settings');
+                }
+            } catch (error) {
+                alert('Server error while saving settings');
+            } finally {
+                btn.innerHTML = 'Save Settings';
+                btn.disabled = false;
+            }
+        });
 
         // ==========================================
         // DEPOSITS
