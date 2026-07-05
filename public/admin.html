@@ -562,10 +562,27 @@
             const username = document.getElementById('creditUsername').value;
             const amount = document.getElementById('creditAmount').value;
             const walletType = document.getElementById('creditWallet').value;
+            const payload = { username, amount: parseFloat(amount), walletType };
+            console.log('[MANUAL CREDIT] Submitting:', payload);
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/manual-credit', { method: 'POST', body: JSON.stringify({ username, amount, walletType }) });
-                if (ok && data.success) { showToast('success', data.message || "Credit successful!"); document.getElementById('manualCreditForm').reset(); loadUsers(); loadDashboardStats(); } else alert(data.error);
-            } catch (err) { alert("Server error."); } finally { btn.innerText = "Credit User Now"; btn.disabled = false; }
+                const { ok, data, status } = await window.apiFetchJson('/admin/manual-credit', { method: 'POST', body: JSON.stringify(payload) });
+                console.log('[MANUAL CREDIT] Response:', { ok, status, data });
+                if (ok && data.success) { 
+                    showToast('success', data.message || "Credit successful!"); 
+                    document.getElementById('manualCreditForm').reset(); 
+                    loadUsers(); 
+                    loadDashboardStats(); 
+                } else { 
+                    console.error('[MANUAL CREDIT] Error:', data.error);
+                    alert(data.error || 'Failed to process credit'); 
+                }
+            } catch (err) { 
+                console.error('[MANUAL CREDIT] Exception:', err);
+                alert("Server error: " + err.message); 
+            } finally { 
+                btn.innerText = "Credit User Now"; 
+                btn.disabled = false; 
+            }
         });
 
         // ==========================================
