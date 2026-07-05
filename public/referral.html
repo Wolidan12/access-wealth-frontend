@@ -165,7 +165,6 @@
         async function setReferralLink() {
             let refId = localStorage.getItem('my_referral_id');
             if (!refId || refId === 'undefined' || refId === 'null') {
-                // Try to fetch from backend directly
                 const username = localStorage.getItem('username');
                 if (username) {
                     const { ok, data } = await window.apiFetchJson(`/user/${username}`);
@@ -175,10 +174,11 @@
                     }
                 }
             }
+            const linkInput = document.getElementById('refLinkInput');
+            if (!linkInput) return;
             if (refId && refId !== 'undefined' && refId !== 'null') {
-                document.getElementById('refLinkInput').value = `https://accesswealthhq.com/register?ref=${refId}`;
-            } else {
-                document.getElementById('refLinkInput').value = 'https://accesswealthhq.com/register?ref=ERROR_NO_REFERRAL_ID';
+                linkInput.value = `https://accesswealthhq.com/register.html?ref=${encodeURIComponent(refId)}`;\n            } else {
+                linkInput.value = 'https://accesswealthhq.com/register.html';
             }
         }
 
