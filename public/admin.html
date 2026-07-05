@@ -570,8 +570,11 @@
                 if (ok && data.success) { 
                     showToast('success', data.message || "Credit successful!"); 
                     document.getElementById('manualCreditForm').reset(); 
-                    loadUsers(); 
-                    loadDashboardStats(); 
+                    // Add slight delay to ensure database write is committed, then refresh
+                    setTimeout(() => {
+                        loadUsers(); 
+                        loadDashboardStats();
+                    }, 500);
                 } else { 
                     console.error('[MANUAL CREDIT] Error:', data.error);
                     alert(data.error || 'Failed to process credit'); 
@@ -604,8 +607,11 @@
                 if (ok && data.success) { 
                     showToast('success', data.message); 
                     document.getElementById('adjustBalanceForm').reset(); 
-                    loadUsers(); 
-                    loadDashboardStats(); 
+                    // Add slight delay to ensure database write is committed, then refresh
+                    setTimeout(() => {
+                        loadUsers(); 
+                        loadDashboardStats();
+                    }, 500);
                 } else alert(data.error);
             } catch (err) { alert("Server error."); } 
             finally { btn.innerText = action === 'add' ? 'Add Funds' : 'Subtract Funds'; btn.disabled = false; }
