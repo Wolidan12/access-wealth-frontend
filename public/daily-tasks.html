@@ -261,8 +261,10 @@
                     localStorage.setItem('taskEarnings', data.newBalance);
                     localStorage.setItem('lastTaskClaimTime', Date.now().toString());
                     
-                    // Trigger global sync to update dashboard
-                    if (typeof globalSync === 'function') globalSync();
+                    // Trigger global sync to update all wallet displays across pages
+                    if (typeof globalSync === 'function') {
+                        globalSync();
+                    }
                     
                     startTimer(24 * 60 * 60 * 1000);
                 } else {
