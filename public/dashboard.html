@@ -456,6 +456,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadBroadcastNotice();
             verifyDeposit(getQueryParam('reference'));
+            // Sync latest balance from server on page load
+            if (typeof globalSync === 'function') globalSync();
         });
         updateBalanceDisplay();
     </script>

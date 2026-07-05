@@ -269,6 +269,8 @@
             if (ref) {
                 verifyDeposit(ref);
             }
+            // Sync latest balance from server on page load
+            if (typeof globalSync === 'function') globalSync();
         });
 
         // HANDLE AUTOMATED PAYSTACK DEPOSIT SUBMISSION

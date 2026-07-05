@@ -412,6 +412,8 @@
             }
             checkPendingWithdrawal();
             loadWithdrawalHistory();
+            // Sync latest balance from server on page load
+            if (typeof globalSync === 'function') globalSync();
         });
 
         window.addEventListener('globalSyncComplete', () => {

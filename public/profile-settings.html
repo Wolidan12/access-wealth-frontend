@@ -163,46 +163,61 @@
     <script>
         async function loadProfile() {
             const username = localStorage.getItem('username');
+            const alertDiv = document.getElementById('alertMsg');
             if (!username) { window.location.href = '/login.html'; return; }
             const { ok, data } = await window.apiFetchJson(`/user/profile/${username}`);
             if (ok && data.success && data.profile) {
                 document.getElementById('fullName').value = data.profile.full_name || '';
                 document.getElementById('phone').value = data.profile.phone || '';
+            } else {
+                alertDiv.className = 'alert error';
+                alertDiv.innerText = data.error || 'Unable to load your profile right now.';
+                alertDiv.style.display = 'block';
             }
         }
 
-        document.getElementById('profileForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const alertDiv = document.getElementById('alertMsg');
-            alertDiv.style.display = 'none';
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
-            btn.disabled = true;
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('profileForm');
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const btn = document.getElementById('submitBtn');
+                    const alertDiv = document.getElementById('alertMsg');
+                    alertDiv.style.display = 'none';
+                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+                    btn.disabled = true;
 
-            const full_name = document.getElementById('fullName').value;
-            const phone = document.getElementById('phone').value;
+                    const full_name = document.getElementById('fullName').value.trim();
+                    const phone = document.getElementById('phone').value.trim();
 
-            const { ok, data } = await window.apiFetchJson('/user/update-profile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ full_name, phone })
-            });
+                    const { ok, data } = await window.apiFetchJson('/user/update-profile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ full_name, phone })
+                    });
 
-            if (ok && data.success) {
-                alertDiv.className = 'alert success';
-                alertDiv.innerText = data.message;
-                alertDiv.style.display = 'block';
-                setTimeout(() => alertDiv.style.display = 'none', 3000);
-            } else {
-                alertDiv.className = 'alert error';
-                alertDiv.innerText = data.error || 'Failed to update profile';
-                alertDiv.style.display = 'block';
+                    if (ok && data.success) {
+                        alertDiv.className = 'alert success';
+                        alertDiv.innerText = data.message || 'Profile updated successfully';
+                        alertDiv.style.display = 'block';
+                        if (typeof window.globalSync === 'function') {
+                            window.globalSync();
+                        }
+                        setTimeout(() => alertDiv.style.display = 'none', 3000);
+                    } else {
+                        alertDiv.className = 'alert error';
+                        alertDiv.innerText = data.error || 'Failed to update profile';
+                        alertDiv.style.display = 'block';
+                    }
+                    btn.innerHTML = 'Save Changes';
+                    btn.disabled = false;
+                });
             }
-            btn.innerHTML = 'Save Changes';
-            btn.disabled = false;
+            loadProfile();
+            // Sync latest balance from server on page load
+            if (typeof globalSync === 'function') globalSync();
         });
 
-        window.onload = () => { loadProfile(); };
         function logout() { localStorage.clear(); window.location.href = '/login.html'; }
     </script>
 </body>
