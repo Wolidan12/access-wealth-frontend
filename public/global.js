@@ -2,6 +2,7 @@
 const BACKEND_HOST = 'https://access-wealth-backend-production.up.railway.app'; // ← update if different
 const API_BASE_URL = `${BACKEND_HOST}/api`;
 const GLOBAL_SYNC_SKIP_PAGES = ['login.html', 'register.html', 'admin.html', 'support-agent.html', 'forgot-password.html', 'reset-password.html'];
+window.__AW_DEBUG__ = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
 async function apiFetch(path, options = {}) {
     const url = path.startsWith('http') ? path : `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
@@ -112,13 +113,16 @@ async function globalSync() {
         
         if (ok && data.success) {
             const u = data.user;
+            const walletBalance = Number(u.wallet_balance ?? u.balance ?? 0);
             
-            localStorage.setItem('balance', u.balance || 0); 
+            localStorage.setItem('balance', walletBalance); 
+            localStorage.setItem('wallet_balance', walletBalance);
             localStorage.setItem('taskEarnings', u.taskEarnings || 0); 
             localStorage.setItem('daily_earnings', u.daily_earnings || 0); 
             localStorage.setItem('affiliate_balance', u.affiliate_balance || 0); 
             localStorage.setItem('planActivated', u.planActivated === true || u.planActivated === 'true' ? 'true' : 'false');
             localStorage.setItem('activePackage', u.activePackage || 'Standard');
+            localStorage.setItem('activePackageId', u.activePackageId || '');
             localStorage.setItem('my_referral_id', u.my_referral_id || u.referralId || ''); // ✅ FIX: store referral ID
             localStorage.setItem('referred_by', u.referred_by || '');
 
@@ -136,7 +140,7 @@ async function globalSync() {
             const refLinkInput = document.getElementById('refLinkInput');
             if (refLinkInput) refLinkInput.value = `${window.location.origin}/register.html?ref=${u.my_referral_id}`;
 
-            safeMoneyUpdate('liveBalanceDisplay', u.balance || 0); 
+            safeMoneyUpdate('liveBalanceDisplay', walletBalance); 
 
             if(u.planActivated === 'true') {
                 safeUpdate('sidebarStatus', `Premium (${u.activePackage})`);
@@ -151,8 +155,8 @@ async function globalSync() {
 
             window.dispatchEvent(new Event('globalSyncComplete'));
         }
-    } catch (err) { 
-        console.error("Access Wealth Sync Blocked. Check Terminal.", err); 
+    } catch (err) {
+        if (window.__AW_DEBUG__) console.error("Access Wealth Sync Blocked. Check Terminal.", err);
     }
 }
 
@@ -304,7 +308,7 @@ function showToast(type, message, timeout = 4000) {
         });
 
         return toast;
-    } catch (e) { console.warn('Toast error', e); }
+    } catch (e) { if (window.__AW_DEBUG__) console.warn('Toast error', e); }
 }
 
 window.showToast = showToast;
@@ -436,7 +440,7 @@ function showConfirm(message, title = 'Please Confirm') {
             btnYes.addEventListener('click', () => cleanUp(true));
             overlay.addEventListener('click', () => cleanUp(false));
             document.addEventListener('keydown', keyHandler);
-        } catch (e) { console.warn('Confirm modal error', e); resolve(false); }
+        } catch (e) { if (window.__AW_DEBUG__) console.warn('Confirm modal error', e); resolve(false); }
     });
 }
 

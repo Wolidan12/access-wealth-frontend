@@ -92,6 +92,7 @@
                 if (ok && data.success) {
                     // Store the token and basic user data (including my_referral_id)
                     localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
                     localStorage.setItem('username', data.user.username);
                     localStorage.setItem('role', data.user.role);
                     localStorage.setItem('planActivated', data.user.planActivated || 'false');

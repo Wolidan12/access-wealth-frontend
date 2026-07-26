@@ -1,8 +1,8 @@
-=<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Support | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -151,6 +151,13 @@
             padding: 40px;
         }
 
+        .empty-state-icon {
+            font-size: 40px;
+            opacity: 0.3;
+            margin-bottom: 10px;
+            display: block;
+        }
+
         @media (min-width: 768px) {
             body {
                 max-width: 600px;
@@ -162,7 +169,7 @@
 </head>
 <body>
     <div class="chat-header">
-        <button class="back-btn" onclick="window.location.href='/dashboard.html'"><i class="fa-solid fa-arrow-left"></i></button>
+        <button class="back-btn" title="Back to dashboard" aria-label="Back to dashboard" onclick="window.location.href='/dashboard.html'"><i class="fa-solid fa-arrow-left"></i></button>
         <div>
             <h2><i class="fa-solid fa-headset"></i> Live Support</h2>
             <p>We typically reply within a few minutes</p>
@@ -171,14 +178,14 @@
 
     <div class="messages-area" id="messagesArea">
         <div class="empty-state">
-            <i class="fa-solid fa-comments" style="font-size: 40px; opacity: 0.3; margin-bottom: 10px; display: block;"></i>
+            <i class="fa-solid fa-comments empty-state-icon"></i>
             Loading messages...
         </div>
     </div>
 
     <div class="input-area">
         <input type="text" id="messageInput" placeholder="Type your message here...">
-        <button id="sendBtn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+        <button id="sendBtn" title="Send message" aria-label="Send message" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
     </div>
 
     <script src="global.js"></script>
@@ -213,7 +220,7 @@
                     container.innerHTML = '';
                     
                     if (!data.messages || data.messages.length === 0) {
-                        container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-comments" style="font-size: 40px; opacity: 0.3; margin-bottom: 10px; display: block;"></i>No messages yet. Send a message to start the conversation!</div>';
+                        container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-comments empty-state-icon"></i>No messages yet. Send a message to start the conversation!</div>';
                     } else {
                         data.messages.forEach(msg => {
                             const isSupport = (msg.sender === 'support' || msg.sender !== username);
@@ -230,7 +237,7 @@
                     }
                 }
             } catch (err) {
-                console.error("Load messages error:", err);
+                if (window.__AW_DEBUG__) console.error("Load messages error:", err);
             }
         }
 
@@ -258,7 +265,7 @@
                     input.value = message;
                 }
             } catch (err) {
-                console.error("Send error:", err);
+                if (window.__AW_DEBUG__) console.error("Send error:", err);
                 alert("Failed to send message. Please try again.");
                 input.value = message;
             } finally {

@@ -27,7 +27,7 @@
         .mobile-header i.menu-btn { font-size: 24px; color: var(--primary-yellow); cursor: pointer; }
         .mobile-header .logo-text { font-weight: 700; font-size: 16px; letter-spacing: 1px; color: var(--text-main); }
         .mobile-header .logo-text span { color: var(--primary-yellow); }
-        .overlay-menu { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 900; backdrop-filter: blur(3px); }
+        .overlay-menu { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 900; -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
         .overlay-menu.active { display: block; }
 
         .sidebar { width: var(--sidebar-width); background: var(--bg-cards); height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; border-right: 1px solid var(--border-light); z-index: 1100; transition: width 0.3s ease, left 0.3s ease; }
@@ -53,6 +53,9 @@
 
         .btn-upgrade-sidebar { background: var(--yellow-gradient); color: #0b1421; display: flex; justify-content: center; align-items: center; padding: 12px; border-radius: 8px; margin: 15px 0; text-decoration: none; font-weight: 600; border: none; cursor: pointer; width: 100%; white-space: nowrap; }
         .btn-upgrade-sidebar span { margin-left: 8px; }
+        .nav-item-logout { color: #ff4d4d; margin-top: 30px; }
+        .nav-item-logout .main-icon { color: #ff4d4d; }
+        .success-icon { margin-top: 3px; }
 
         .sidebar.collapsed { width: var(--sidebar-collapsed-width); }
         .sidebar.collapsed .logo-area { justify-content: center; padding: 25px 0; }
@@ -122,14 +125,14 @@
     <div class="mobile-header">
         <i class="fa-solid fa-bars-staggered menu-btn" onclick="toggleMobileSidebar()"></i>
         <div class="logo-text">Access <span>WEALTH</span></div>
-        <img src="" class="avatar" id="mobileAvatar">
+        <img src="" class="avatar" id="mobileAvatar" alt="Mobile profile avatar">
     </div>
     <div class="overlay-menu" id="overlayMenu" onclick="toggleMobileSidebar()"></div>
 
     <div class="sidebar collapsed" id="sidebar">
         <div class="logo-area"><i class="fa-solid fa-crown"></i><span>Access Wealth</span></div>
         <div class="nav-menu">
-            <a href="/dashboard.html" class="nav-item"><i class="fa-solid fa-border-all main-icon"></i> <span>Dashboard</span></a>
+            <a href="/dashboard.html" class="nav-item" title="Dashboard"><i class="fa-solid fa-border-all main-icon"></i> <span>Dashboard</span></a>
             <div class="nav-item has-dropdown" onclick="toggleDropdown('activityDropdown', this)">
                 <div class="nav-title-group"><i class="fa-solid fa-list-check main-icon"></i> <span>Daily Activity Earning</span></div>
                 <i class="fa-solid fa-chevron-down chevron"></i>
@@ -138,14 +141,14 @@
                 <a href="/daily-tasks.html" class="nav-item sub-item"><i class="fa-regular fa-clipboard main-icon"></i> Daily Tasks</a>
                 <a href="/sponsored-posts.html" class="nav-item sub-item"><i class="fa-solid fa-bullhorn main-icon"></i> Sponsored Posts</a>
             </div>
-            <a href="/activation.html" class="nav-item"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
-            <a href="/spin-win.html" class="nav-item"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
+            <a href="/activation.html" class="nav-item" title="Account Activation"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
+            <a href="/spin-win.html" class="nav-item" title="Spin and Win"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
             
-            <a href="/deposit.html" class="nav-item active"><i class="fa-solid fa-money-bill-transfer main-icon"></i> <span>Fund Account</span></a>
-            <a href="/withdraw.html" class="nav-item"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
-            <a href="/referral.html" class="nav-item"><i class="fa-solid fa-users main-icon"></i> <span>Top Earners</span></a>
-            <button onclick="window.location.href='/activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
-            <a href="#" class="nav-item" onclick="logout()" style="color: #ff4d4d; margin-top: 30px;"><i class="fa-solid fa-power-off main-icon" style="color: #ff4d4d;"></i> <span>Logout</span></a>
+            <a href="/deposit.html" class="nav-item active" title="Fund Account"><i class="fa-solid fa-money-bill-transfer main-icon"></i> <span>Fund Account</span></a>
+            <a href="/withdraw.html" class="nav-item" title="Withdraw"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
+            <a href="/referral.html" class="nav-item" title="Top Earners"><i class="fa-solid fa-users main-icon"></i> <span>Top Earners</span></a>
+            <button onclick="window.location.href='/activation.html'" class="btn-upgrade-sidebar" title="Upgrade Account"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
+            <a href="#" class="nav-item nav-item-logout" onclick="logout()" title="Logout"><i class="fa-solid fa-power-off main-icon"></i> <span>Logout</span></a>
         </div>
     </div>
 
@@ -154,7 +157,7 @@
             <div class="header-left"><i class="fa-solid fa-bars-staggered" onclick="toggleDesktopSidebar()"></i></div>
             <div class="header-right">
                 <div class="user-info"><h4 id="displayName">USER</h4><p id="displayHandle">@user</p></div>
-                <img src="" class="avatar" id="desktopAvatar">
+                <img src="" class="avatar" id="desktopAvatar" alt="Desktop profile avatar">
             </div>
         </div>
 
@@ -194,8 +197,8 @@
                     </div>
 
                     <div class="success-text">
-                        <i class="fa-solid fa-circle-check" style="margin-top: 3px;"></i>
-                        <span><strong>Powered by Paystack:</strong> Your funds will reflect in your Access Wealth dashboard immediately after a successful transaction. No manual waiting required!</span>
+                        <i class="fa-solid fa-circle-check success-icon"></i>
+                        <span><strong>Powered by Squad:</strong> Your funds will reflect in your Access Wealth dashboard immediately after a successful transaction. No manual waiting required!</span>
                     </div>
                 </div>
 
@@ -241,7 +244,7 @@
             document.getElementById('displayHandle').innerText = "@" + user.toLowerCase().replace(/\s+/g, '');
         });
 
-        // HANDLE AUTOMATED PAYSTACK DEPOSIT SUBMISSION
+        // HANDLE AUTOMATED SQUAD DEPOSIT SUBMISSION
         document.getElementById('depositForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -249,6 +252,15 @@
             const email = document.getElementById('email').value;
             const btn = document.getElementById('submitBtn');
             const token = localStorage.getItem('token');
+            const storedUser = localStorage.getItem('user');
+            let userId = '';
+
+            if (storedUser) {
+                try {
+                    const parsedUser = JSON.parse(storedUser);
+                    userId = parsedUser.id || '';
+                } catch (_) {}
+            }
 
             if (!token) {
                 if(typeof showToast === 'function') showToast('error', 'You must be logged in to fund your account.');
@@ -262,18 +274,18 @@
 
             try {
                 // Use the globally injected apiFetchJson from your global.js
-                const { ok, data, error } = await window.apiFetchJson('/paystack/initialize', {
+                const { ok, data, error } = await window.apiFetchJson('/deposit', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}` 
                     },
-                    body: JSON.stringify({ amount, email })
+                    body: JSON.stringify({ amount, email, user_id: userId })
                 });
 
-                if (ok && data.success && data.authorization_url) {
-                    // Redirect directly to Paystack's secure checkout
-                    window.location.href = data.authorization_url;
+                if (ok && data.success && (data.checkout_url || data.payment_link)) {
+                    // Redirect directly to Squad's secure checkout
+                    window.location.href = data.checkout_url || data.payment_link;
                 } else {
                     const errorMsg = data.error || error || "Payment initialization failed.";
                     if(typeof showToast === 'function') showToast('error', errorMsg);
@@ -283,7 +295,7 @@
                     btn.disabled = false;
                 }
             } catch (err) {
-                console.error("Deposit Error:", err);
+                if (window.__AW_DEBUG__) console.error("Deposit Error:", err);
                 if(typeof showToast === 'function') showToast('error', "Network error. Please try again.");
                 else alert("Network error. Please try again.");
                 
