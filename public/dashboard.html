@@ -413,8 +413,9 @@
         async function verifyDeposit(reference) {
             if (!reference) return;
             try {
-                const { ok, data } = await window.apiFetchJson(`/paystack/verify/${reference}`);
-                if (ok && data.success) {
+                const { ok, data } = await window.apiFetchJson(`/squad/transaction/${reference}`);
+                const settled = (data && (data.success || data.status === 'success'));
+                if (ok && settled) {
                     if (typeof showToast === 'function') showToast('success', data.message || 'Deposit credited successfully');
                     else alert(data.message || 'Deposit credited successfully');
                     if (typeof globalSync === 'function') globalSync();
