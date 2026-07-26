@@ -150,6 +150,7 @@
             <div class="nav-label">Communication</div>
             <a class="nav-item" onclick="switchTab('broadcast', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-bullhorn"></i> Broadcast</a>
             <a class="nav-item" onclick="switchTab('sponsored', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-ad"></i> Sponsored Posts</a>
+            <a class="nav-item" onclick="switchTab('settings', this); loadSiteSettings(); toggleSidebarMobileOnly();"><i class="fa-solid fa-sliders"></i> Site Settings</a>
             
             <div class="nav-label">Task Reviews</div>
             <a class="nav-item" onclick="switchTab('task-reviews', this); loadTaskSubmissions(); toggleSidebarMobileOnly();"><i class="fa-solid fa-check-double"></i> Sponsored Submissions</a>
@@ -266,6 +267,22 @@
             </div>
         </div>
 
+        <div id="settings" class="admin-section">
+            <div class="page-header"><div><h1>Site Settings</h1><p>Control platform access and feature availability.</p></div></div>
+            <div class="card">
+                <form id="settingsForm">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Maintenance Mode</label><select id="maintenance_mode" class="form-control"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+                        <div class="form-group"><label>Registrations Open</label><select id="registrations_open" class="form-control"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+                        <div class="form-group"><label>Deposits Open</label><select id="deposits_open" class="form-control"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+                        <div class="form-group"><label>Withdrawals Open</label><select id="withdrawals_open" class="form-control"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+                        <div class="form-group"><label>Sponsored Posts Open</label><select id="sponsored_posts_open" class="form-control"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+                    </div>
+                    <button type="submit" class="btn-submit">Save Settings</button>
+                </form>
+            </div>
+        </div>
+
         <div id="sponsored" class="admin-section">
             <div class="page-header"><div><h1>Sponsored Posts</h1><p>Create tasks for users to earn rewards</p></div></div>
             <div class="card">
@@ -314,6 +331,7 @@
             loadDashboardStats();
             loadLegacyMigrationStatus();
             loadUsers();
+            loadSiteSettings();
             loadDeposits();
             loadAllWithdrawals('pending');
             loadTaskSubmissions();
@@ -452,6 +470,7 @@
                     data.users.forEach(user => {
                         const total = (user.balance || 0) + (user.taskEarnings || 0) + (user.daily_earnings || 0) + (user.affiliate_balance || 0);
                         const statusBadge = user.planActivated === 'true' ? `<span class="badge success">${user.activePackage || 'Premium'}</span>` : '<span class="badge warning">No Plan</span>';
+                        const accountStatus = (user.status || 'active').toLowerCase() === 'banned' ? '<span class="badge danger">Banned</span>' : '<span class="badge success">Active</span>';
                         tbody.innerHTML += `<tr>
                             <td><strong>${user.username}</strong></td>
                             <td class="font-bold">₦${total.toLocaleString()}</td>
@@ -460,7 +479,10 @@
                             <td>₦${(user.daily_earnings || 0).toLocaleString()}</td>
                             <td>₦${(user.affiliate_balance || 0).toLocaleString()}</td>
                             <td>${statusBadge}</td>
-                            <td><button class="action-btn" onclick="quickAdjust('${user.username}')">Adjust</button></td>
+                            <td>
+                                <button class="action-btn" onclick="quickAdjust('${user.username}')">Adjust</button>
+                                ${((user.status || 'active').toLowerCase() === 'banned') ? `<button class="action-btn" style="color:var(--success); border-color:var(--success);" onclick="toggleUserStatus('${user.username}', 'active')">Activate</button>` : `<button class="action-btn" style="color:var(--danger); border-color:var(--danger);" onclick="toggleUserStatus('${user.username}', 'banned')">Ban</button>`}
+                            </td>
                         </tr>`;
                     });
                 }
@@ -471,6 +493,63 @@
             document.getElementById('adjustUsername').value = username;
             document.getElementById('adjustUsername').scrollIntoView();
         }
+
+        async function toggleUserStatus(username, status) {
+            try {
+                const { ok, data } = await window.apiFetchJson('/admin/toggle-user-status', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, status })
+                });
+                if (ok && data.success) {
+                    showToast('success', data.message || 'User status updated');
+                    loadUsers();
+                    loadDashboardStats();
+                } else {
+                    alert(data.error || 'Failed to update user status');
+                }
+            } catch (error) {
+                alert('Server error while updating user status');
+            }
+        }
+
+        async function loadSiteSettings() {
+            try {
+                const { ok, data } = await window.apiFetchJson('/site-settings');
+                if (ok && data.success) {
+                    const settings = data.settings || {};
+                    Object.entries(settings).forEach(([key, value]) => {
+                        const el = document.getElementById(key);
+                        if (el) el.value = value;
+                    });
+                }
+            } catch (error) {
+                console.error('Site settings error:', error);
+            }
+        }
+
+        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {};
+            ['maintenance_mode','registrations_open','deposits_open','withdrawals_open','sponsored_posts_open'].forEach((key) => {
+                payload[key] = document.getElementById(key).value;
+            });
+            const btn = e.target.querySelector('button');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            btn.disabled = true;
+            try {
+                const { ok, data } = await window.apiFetchJson('/admin/settings', { method: 'POST', body: JSON.stringify(payload) });
+                if (ok && data.success) {
+                    showToast('success', 'Site settings updated');
+                } else {
+                    alert(data.error || 'Failed to save settings');
+                }
+            } catch (error) {
+                alert('Server error while saving settings');
+            } finally {
+                btn.innerHTML = 'Save Settings';
+                btn.disabled = false;
+            }
+        });
 
         // ==========================================
         // DEPOSITS
@@ -538,22 +617,45 @@
                             bankInfo = `${bank.bank_name || ''} - ${bank.account_number || ''}<br><small>${bank.account_holder || ''}</small>`;
                         } catch(e) { bankInfo = w.bank_details || ''; }
                         
+                        // Updated status badges to include processing, success, failed
                         let statusBadge = '';
-                        if (w.status === 'pending') statusBadge = '<span class="badge warning">Pending</span>';
-                        else if (w.status === 'approved') statusBadge = '<span class="badge success">Approved</span>';
-                        else if (w.status === 'declined') statusBadge = '<span class="badge danger">Declined</span>';
+                        if (w.status === 'pending') statusBadge = '<span class="badge warning">⏳ Pending</span>';
+                        else if (w.status === 'approved') statusBadge = '<span class="badge warning">⏳ Approved</span>';
+                        else if (w.status === 'processing') statusBadge = '<span class="badge info" style="background:#3498db;">🔄 Processing</span>';
+                        else if (w.status === 'success') statusBadge = '<span class="badge success">✅ Success</span>';
+                        else if (w.status === 'failed') statusBadge = '<span class="badge danger">❌ Failed</span>';
+                        else if (w.status === 'declined') statusBadge = '<span class="badge danger">❌ Declined</span>';
                         
+                        // Approve/Decline buttons only shown for pending status
                         let actions = '';
                         if (w.status === 'pending') {
                             actions = `
                                 <button class="action-btn action-approve" onclick="openWithdrawalAction(${w.id}, 'approve')">Approve</button>
                                 <button class="action-btn action-decline" onclick="openWithdrawalAction(${w.id}, 'decline')">Decline</button>
                             `;
+                        } else if (w.status === 'processing') {
+                            actions = `<span style="color:#3498db; font-weight:bold;">🔄 Processing...</span>`;
+                        } else if (w.status === 'success') {
+                            actions = `<span style="color:var(--success); font-size:11px;">✅ Completed</span>`;
+                        } else if (w.status === 'failed') {
+                            actions = `<span style="color:var(--danger); font-size:11px;">❌ Transfer Failed</span>`;
                         } else {
                             actions = `<span class="review-meta">Reviewed by ${w.reviewed_by || 'Admin'}</span>`;
                         }
                         
                         const note = w.admin_note || '-';
+                        
+                        // Build transfer info row if applicable
+                        let transferInfo = '-';
+                        if (w.paystack_transfer_reference) {
+                            transferInfo = `<strong>Ref:</strong> ${w.paystack_transfer_reference}<br>`;
+                            if (w.paystack_transfer_date) {
+                                transferInfo += `<small>Date: ${new Date(w.paystack_transfer_date).toLocaleString()}</small><br>`;
+                            }
+                            if (w.paystack_failure_reason) {
+                                transferInfo += `<small style="color:var(--danger);">❌ Reason: ${w.paystack_failure_reason}</small>`;
+                            }
+                        }
                         
                         tbody.innerHTML += `<tr>
                             <td>${new Date(w.created_at).toLocaleString()}</td>
@@ -573,15 +675,59 @@
         }
 
         function openWithdrawalAction(id, action) {
-            const note = prompt(`Enter a note for ${action === 'approve' ? 'approval' : 'declination'}:\n\n${action === 'approve' ? 'Default: Your withdrawal has been approved. Money is on the way!' : 'Default: Your withdrawal was declined. Please contact support.'}`);
+            const note = prompt(`Enter a note for ${action === 'approve' ? 'approval' : 'declination'}:\n\n${action === 'approve' ? 'Default: Processing Paystack transfer' : 'Default: Your withdrawal was declined. Please contact support.'}`);
             if (note === null) return; // cancelled
             
-            const finalNote = note || (action === 'approve' ? 'Your withdrawal has been approved. Money is on the way!' : 'Your withdrawal was declined. Please contact support for assistance.');
+            const finalNote = note || (action === 'approve' ? 'Processing Paystack transfer' : 'Your withdrawal was declined. Please contact support for assistance.');
             
             if (action === 'approve') {
                 approveWithdrawalWithNote(id, finalNote);
             } else {
                 declineWithdrawalWithNote(id, finalNote);
+            }
+        }
+
+        // New function to initiate approval (shows processing state)
+        async function approveWithdrawalStart(id) {
+            const note = prompt('Enter an optional note for this approval:');
+            if (note === null) return; // cancelled
+            
+            const finalNote = note || 'Processing Paystack transfer';
+            
+            if(!confirm("Approve this withdrawal? It will be sent to Paystack.")) return;
+            
+            // Show processing state on button
+            const btn = document.getElementById(`approveBtn_${id}`);
+            const declineBtn = document.getElementById(`declineBtn_${id}`);
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+            if (declineBtn) declineBtn.disabled = true;
+            
+            try {
+                const { ok, data } = await window.apiFetchJson('/admin/approve-withdrawal', { 
+                    method: 'POST', 
+                    body: JSON.stringify({ id, note: finalNote }) 
+                });
+                
+                if(ok && data.success) { 
+                    showToast('success', 'Withdrawal Approved! Transfer initiated: ' + (data.transfer_reference || 'tracking...')); 
+                    // Refresh in 2 seconds to show updated status
+                    setTimeout(() => {
+                        loadAllWithdrawals(currentWithdrawalsFilter); 
+                        loadDashboardStats(); 
+                        loadUsers(); 
+                    }, 2000);
+                } else {
+                    showToast('error', data.error || 'Failed to approve withdrawal');
+                    btn.innerHTML = 'Approve';
+                    btn.disabled = false;
+                    if (declineBtn) declineBtn.disabled = false;
+                }
+            } catch(e) { 
+                showToast('error', 'Server Error: ' + e.message);
+                btn.innerHTML = 'Approve';
+                btn.disabled = false;
+                if (declineBtn) declineBtn.disabled = false;
             }
         }
 
@@ -631,10 +777,30 @@
             const username = document.getElementById('creditUsername').value;
             const amount = document.getElementById('creditAmount').value;
             const walletType = document.getElementById('creditWallet').value;
+            const payload = { username, amount: parseFloat(amount), walletType };
+            console.log('[MANUAL CREDIT] Submitting:', payload);
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/manual-credit', { method: 'POST', body: JSON.stringify({ username, amount, walletType }) });
-                if (ok && data.success) { showToast('success', data.message || "Credit successful!"); document.getElementById('manualCreditForm').reset(); loadUsers(); loadDashboardStats(); } else alert(data.error);
-            } catch (err) { alert("Server error."); } finally { btn.innerText = "Credit User Now"; btn.disabled = false; }
+                const { ok, data, status } = await window.apiFetchJson('/admin/manual-credit', { method: 'POST', body: JSON.stringify(payload) });
+                console.log('[MANUAL CREDIT] Response:', { ok, status, data });
+                if (ok && data.success) { 
+                    showToast('success', data.message || "Credit successful!"); 
+                    document.getElementById('manualCreditForm').reset(); 
+                    // Add slight delay to ensure database write is committed, then refresh
+                    setTimeout(() => {
+                        loadUsers(); 
+                        loadDashboardStats();
+                    }, 500);
+                } else { 
+                    console.error('[MANUAL CREDIT] Error:', data.error);
+                    alert(data.error || 'Failed to process credit'); 
+                }
+            } catch (err) { 
+                console.error('[MANUAL CREDIT] Exception:', err);
+                alert("Server error: " + err.message); 
+            } finally { 
+                btn.innerText = "Credit User Now"; 
+                btn.disabled = false; 
+            }
         });
 
         // ==========================================
@@ -656,8 +822,11 @@
                 if (ok && data.success) { 
                     showToast('success', data.message); 
                     document.getElementById('adjustBalanceForm').reset(); 
-                    loadUsers(); 
-                    loadDashboardStats(); 
+                    // Add slight delay to ensure database write is committed, then refresh
+                    setTimeout(() => {
+                        loadUsers(); 
+                        loadDashboardStats();
+                    }, 500);
                 } else alert(data.error);
             } catch (err) { alert("Server error."); } 
             finally { btn.innerText = action === 'add' ? 'Add Funds' : 'Subtract Funds'; btn.disabled = false; }

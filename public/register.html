@@ -4,90 +4,272 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register | Access Wealth</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --bg-body: #070d14; --bg-cards: #112A46; --text-main: #ffffff; --text-muted: #8a99af; --primary-yellow: #d4af37; --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background-color: var(--bg-body); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .auth-card { background: var(--bg-cards); padding: 40px; border-radius: 20px; width: 100%; max-width: 450px; border: 1px solid rgba(212, 175, 55, 0.15); box-shadow: 0 15px 35px rgba(0,0,0,0.5); text-align: center; }
-        .auth-logo { font-size: 30px; color: var(--primary-yellow); margin-bottom: 10px; }
-        .auth-card h2 { font-size: 24px; margin-bottom: 5px; }
-        .auth-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 30px; }
-        .form-group { margin-bottom: 20px; text-align: left; }
-        .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
-        .input-wrapper { position: relative; }
-        .input-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--primary-yellow); }
-        .form-control { width: 100%; padding: 15px 15px 15px 45px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; font-size: 14px; outline: none; transition: 0.3s;}
-        .form-control:focus { border-color: var(--primary-yellow); }
-        .btn-auth { width: 100%; padding: 15px; border-radius: 50px; background: var(--yellow-gradient); color: #0b1421; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; margin-top: 10px; font-size: 16px;}
-        .btn-auth:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(212,175,55,0.3); }
-        .auth-links { margin-top: 25px; font-size: 14px; color: var(--text-muted); }
-        .auth-links a { color: var(--primary-yellow); text-decoration: none; font-weight: 600; }
-        .error-msg { background: rgba(255, 77, 77, 0.1); border: 1px solid #ff4d4d; border-radius: 10px; padding: 12px; margin-bottom: 20px; color: #ff4d4d; font-size: 14px; display: none; text-align: center; }
+        :root {
+            --bg: #070d14;
+            --surface: rgba(17,42,70,0.92);
+            --surface-strong: #112A46;
+            --text: #ffffff;
+            --muted: #8a99af;
+            --line: rgba(212,175,55,0.15);
+            --accent: #d4af37;
+            --accent-2: #b8860b;
+            --accent-soft: rgba(212,175,55,0.12);
+            --shadow: 0 20px 44px rgba(0,0,0,0.22);
+            --shadow-soft: 0 12px 24px rgba(0,0,0,0.14);
+            --good: #2ecc71;
+            --danger: #ef4444;
+        }
+        html[data-theme="dark"] {
+            --bg: #050b12;
+            --surface: rgba(12,26,43,0.92);
+            --surface-strong: #112A46;
+            --text: #ffffff;
+            --muted: #8a99af;
+            --line: rgba(212,175,55,0.15);
+            --accent-soft: rgba(212,175,55,0.12);
+            --shadow: 0 20px 44px rgba(0,0,0,0.3);
+            --shadow-soft: 0 12px 24px rgba(0,0,0,0.18);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top left, rgba(212,175,55,0.10), transparent 26%), var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        a { color: inherit; text-decoration: none; }
+        button, input { font: inherit; }
+
+        .auth-card {
+            width: 100%;
+            max-width: 480px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 32px;
+            padding: 32px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            position: relative;
+        }
+        .theme-toggle {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: transparent;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            color: var(--muted);
+            cursor: pointer;
+            transition: 160ms ease;
+        }
+        .theme-toggle:hover {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+        }
+        .auth-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+        .auth-brand .brand-mark {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #d4af37, #b8860b);
+            color: #fff;
+            font-size: 1.4rem;
+        }
+        .auth-brand h1 {
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            margin: 0;
+        }
+        .auth-brand h1 span { color: #d4af37; }
+        .auth-sub {
+            text-align: center;
+            margin-bottom: 28px;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+        .auth-sub strong { color: var(--text); }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+        .input-wrap {
+            position: relative;
+        }
+        .input-wrap i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #d4af37;
+            font-size: 1.1rem;
+        }
+        .input-wrap input {
+            width: 100%;
+            padding: 16px 16px 16px 48px;
+            background: rgba(0,0,0,0.22);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            color: var(--text);
+            font-weight: 500;
+            font-size: 1rem;
+            outline: none;
+            transition: 160ms ease;
+        }
+        .input-wrap input:focus {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 4px rgba(212,175,55,0.14);
+            background: rgba(0,0,0,0.30);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            border: 0;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #d4af37, #b8860b);
+            color: #fff;
+            font-weight: 900;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: 160ms ease;
+            box-shadow: 0 4px 14px rgba(212,175,55,0.26);
+            margin-top: 6px;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,175,55,0.32); }
+        .btn-primary:disabled { opacity: 0.6; transform: none; cursor: not-allowed; }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        .auth-footer a {
+            color: #d4af37;
+            font-weight: 700;
+        }
+        .auth-footer a:hover { text-decoration: underline; }
+
+        .error-msg {
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.20);
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            color: #ef4444;
+            display: none;
+            font-weight: 600;
+            font-size: 0.92rem;
+        }
+
+        @media (max-width: 480px) {
+            .auth-card { padding: 24px; }
+            .auth-brand h1 { font-size: 1.3rem; }
+        }
     </style>
 </head>
 <body>
     <div class="auth-card">
-        <i class="fa-solid fa-crown auth-logo"></i>
-        <h2>Create Account</h2>
-        <p>Join Access Wealth and start earning today.</p>
+        <!-- Theme toggle button (will be handled by global.js) -->
+        <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+            <i class="fa-solid fa-moon"></i>
+        </button>
+
+        <div class="auth-brand">
+            <span class="brand-mark"><i class="fa-solid fa-paper-plane"></i></span>
+            <h1>Access <span>Wealth</span></h1>
+        </div>
+        <div class="auth-sub">
+            <strong>Create your account.</strong> Start earning today.
+        </div>
+
         <div class="error-msg" id="errorMsg"></div>
-        <form id="registerForm">
+
+        <form id="registerForm" novalidate>
             <div class="form-group">
-                <label>Username or Email</label>
-                <div class="input-wrapper">
-                    <i class="fa-solid fa-user"></i>
-                    <input type="text" id="regUsername" class="form-control" placeholder="Enter a unique username" required>
+                <label>Username or email</label>
+                <div class="input-wrap">
+                    <i class="fa-regular fa-user"></i>
+                    <input type="text" id="regUsername" placeholder="Choose a unique username" required>
                 </div>
             </div>
+
             <div class="form-group">
                 <label>Password</label>
-                <div class="input-wrapper">
+                <div class="input-wrap">
                     <i class="fa-solid fa-lock"></i>
-                    <input type="password" id="regPassword" class="form-control" placeholder="Create a password" required>
+                    <input type="password" id="regPassword" placeholder="Create a strong password" required>
                 </div>
             </div>
+
             <div class="form-group">
-                <label>Referral Code (Optional)</label>
-                <div class="input-wrapper">
+                <label>Referral code (optional)</label>
+                <div class="input-wrap">
                     <i class="fa-solid fa-user-plus"></i>
-                    <input type="text" id="regReferral" class="form-control" placeholder="Enter referral code if you have one">
+                    <input type="text" id="regReferral" placeholder="Enter referral code if you have one">
                 </div>
             </div>
-            <button type="submit" class="btn-auth" id="regBtn">Create Account</button>
+
+            <button type="submit" class="btn-primary" id="regBtn">Create Account</button>
         </form>
-        <div class="auth-links">
-            Already have an Account? <a href="/login.html">Login here</a>
+
+        <div class="auth-footer">
+            Already have an account? <a href="/login.html">Login here</a>
         </div>
     </div>
 
     <script src="global.js"></script>
     <script>
-        // Auto-fill referral code from URL if it exists (e.g., ?ref=AW12345)
-        const urlParams = new URLSearchParams(window.location.search);
-        if(urlParams.has('ref')) {
-            document.getElementById('regReferral').value = urlParams.get('ref');
-        }
+        (function() {
+            // Auto-fill referral code from URL if present (e.g., ?ref=AW12345)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('ref')) {
+                document.getElementById('regReferral').value = urlParams.get('ref');
+            }
 
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+            const form = document.getElementById('registerForm');
             const btn = document.getElementById('regBtn');
             const errorEl = document.getElementById('errorMsg');
-            errorEl.style.display = 'none';
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
-            btn.disabled = true;
 
-            const username = document.getElementById('regUsername').value;
-            const password = document.getElementById('regPassword').value;
-            const referred_by = document.getElementById('regReferral').value;
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errorEl.style.display = 'none';
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
 
-            try {
-                const { ok, data } = await window.apiFetchJson('/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password, referred_by })
-                });
+                const username = document.getElementById('regUsername').value.trim();
+                const password = document.getElementById('regPassword').value.trim();
+                const referred_by = document.getElementById('regReferral').value.trim();
 
                 if (ok && data.success) {
                     // Store the token and basic user data (including my_referral_id)
@@ -103,17 +285,48 @@
                 } else {
                     errorEl.innerText = data.error || "Registration failed. Username might be taken.";
                     errorEl.style.display = 'block';
-                    btn.innerHTML = 'Create Account';
                     btn.disabled = false;
+                    btn.innerHTML = 'Create Account';
+                    return;
                 }
-            } catch (err) {
-                console.error("Registration error:", err);
-                errorEl.innerText = "Server error. Please try again.";
-                errorEl.style.display = 'block';
-                btn.innerHTML = 'Create Account';
-                btn.disabled = false;
-            }
-        });
+                if (password.length < 6) {
+                    errorEl.innerText = 'Password must be at least 6 characters.';
+                    errorEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Create Account';
+                    return;
+                }
+
+                try {
+                    const { ok, data } = await window.apiFetchJson('/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password, referred_by })
+                    });
+
+                    if (ok && data.success) {
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('username', data.user.username);
+                        localStorage.setItem('role', data.user.role);
+                        localStorage.setItem('planActivated', data.user.planActivated || 'false');
+                        localStorage.setItem('my_referral_id', data.user.my_referral_id || '');
+
+                        window.location.href = '/dashboard.html';
+                    } else {
+                        errorEl.innerText = data.error || 'Registration failed. Please try again.';
+                        errorEl.style.display = 'block';
+                        btn.disabled = false;
+                        btn.innerHTML = 'Create Account';
+                    }
+                } catch (err) {
+                    console.error('Registration error:', err);
+                    errorEl.innerText = 'Network error. Please check your connection.';
+                    errorEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Create Account';
+                }
+            });
+        })();
     </script>
 </body>
 </html>
