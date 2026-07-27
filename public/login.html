@@ -275,30 +275,6 @@
                 const username = document.getElementById('loginUsername').value.trim();
                 const password = document.getElementById('loginPassword').value.trim();
 
-                if (ok && data.success) {
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    localStorage.setItem('username', data.user.username);
-                    localStorage.setItem('role', data.user.role);
-                    localStorage.setItem('planActivated', data.user.planActivated || 'false');
-                    localStorage.setItem('activePackage', data.user.activePackage || '');
-                    localStorage.setItem('my_referral_id', data.user.my_referral_id || '');
-
-                    if (data.user.role === 'admin') {
-                        window.location.href = '/admin.html';
-                    } else if (data.user.role === 'support') {
-                        window.location.href = '/support-agent.html';
-                    } else {
-                        window.location.href = '/dashboard.html';
-                    }
-                } else {
-                    errorEl.innerText = data.error || "Invalid username or password";
-                    errorEl.style.display = 'block';
-                    btn.disabled = false;
-                    btn.innerHTML = 'Login to Dashboard';
-                    return;
-                }
-
                 try {
                     const { ok, data } = await window.apiFetchJson('/login', {
                         method: 'POST',
@@ -308,6 +284,7 @@
 
                     if (ok && data.success) {
                         localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify(data.user));
                         localStorage.setItem('username', data.user.username);
                         localStorage.setItem('role', data.user.role);
                         localStorage.setItem('planActivated', data.user.planActivated || 'false');
