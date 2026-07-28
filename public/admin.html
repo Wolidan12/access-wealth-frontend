@@ -138,7 +138,7 @@
             
             <div class="nav-label">Finance & Payouts</div>
             <a class="nav-item pos-relative" onclick="switchTab('deposits', this); loadDeposits(); toggleSidebarMobileOnly();">
-                <i class="fa-solid fa-money-bill-transfer"></i> Deposit Approvals
+                <i class="fa-solid fa-money-bill-transfer"></i> Offline Deposit Requests
                 <span class="badge warning badge-right" id="badgeDeposits">0</span>
             </a>
             <a class="nav-item pos-relative" onclick="switchTab('withdrawals', this); loadAllWithdrawals('pending'); toggleSidebarMobileOnly();">
@@ -200,7 +200,7 @@
         </div>
 
         <div id="deposits" class="admin-section">
-            <div class="page-header"><div><h1>Deposit Approvals</h1><p>Approve user deposit requests</p></div></div>
+            <div class="page-header"><div><h1>Offline Deposit Requests</h1><p>Review manually submitted payment requests. Squad deposits are credited automatically.</p></div></div>
             <div class="card">
                 <div class="table-responsive">
                     <table>
@@ -647,13 +647,13 @@
                         
                         // Build transfer info row if applicable
                         let transferInfo = '-';
-                        if (w.paystack_transfer_reference) {
-                            transferInfo = `<strong>Ref:</strong> ${w.paystack_transfer_reference}<br>`;
-                            if (w.paystack_transfer_date) {
-                                transferInfo += `<small>Date: ${new Date(w.paystack_transfer_date).toLocaleString()}</small><br>`;
+                        if (w.transfer_reference) {
+                            transferInfo = `<strong>Ref:</strong> ${w.transfer_reference}<br>`;
+                            if (w.transfer_date) {
+                                transferInfo += `<small>Date: ${new Date(w.transfer_date).toLocaleString()}</small><br>`;
                             }
-                            if (w.paystack_failure_reason) {
-                                transferInfo += `<small style="color:var(--danger);">❌ Reason: ${w.paystack_failure_reason}</small>`;
+                            if (w.transfer_failure_reason) {
+                                transferInfo += `<small style="color:var(--danger);">❌ Reason: ${w.transfer_failure_reason}</small>`;
                             }
                         }
                         
@@ -675,10 +675,10 @@
         }
 
         function openWithdrawalAction(id, action) {
-            const note = prompt(`Enter a note for ${action === 'approve' ? 'approval' : 'declination'}:\n\n${action === 'approve' ? 'Default: Processing Paystack transfer' : 'Default: Your withdrawal was declined. Please contact support.'}`);
+            const note = prompt(`Enter a note for ${action === 'approve' ? 'approval' : 'declination'}:\n\n${action === 'approve' ? 'Default: Withdrawal approved for processing' : 'Default: Your withdrawal was declined. Please contact support.'}`);
             if (note === null) return; // cancelled
             
-            const finalNote = note || (action === 'approve' ? 'Processing Paystack transfer' : 'Your withdrawal was declined. Please contact support for assistance.');
+            const finalNote = note || (action === 'approve' ? 'Withdrawal approved for processing' : 'Your withdrawal was declined. Please contact support for assistance.');
             
             if (action === 'approve') {
                 approveWithdrawalWithNote(id, finalNote);
@@ -692,9 +692,9 @@
             const note = prompt('Enter an optional note for this approval:');
             if (note === null) return; // cancelled
             
-            const finalNote = note || 'Processing Paystack transfer';
+            const finalNote = note || 'Withdrawal approved for processing';
             
-            if(!confirm("Approve this withdrawal? It will be sent to Paystack.")) return;
+            if(!confirm("Approve this withdrawal for processing?")) return;
             
             // Show processing state on button
             const btn = document.getElementById(`approveBtn_${id}`);
@@ -778,10 +778,8 @@
             const amount = document.getElementById('creditAmount').value;
             const walletType = document.getElementById('creditWallet').value;
             const payload = { username, amount: parseFloat(amount), walletType };
-            console.log('[MANUAL CREDIT] Submitting:', payload);
             try {
                 const { ok, data, status } = await window.apiFetchJson('/admin/manual-credit', { method: 'POST', body: JSON.stringify(payload) });
-                console.log('[MANUAL CREDIT] Response:', { ok, status, data });
                 if (ok && data.success) { 
                     showToast('success', data.message || "Credit successful!"); 
                     document.getElementById('manualCreditForm').reset(); 
@@ -791,11 +789,11 @@
                         loadDashboardStats();
                     }, 500);
                 } else { 
-                    console.error('[MANUAL CREDIT] Error:', data.error);
+                    if (window.__AW_DEBUG__) console.error('Manual credit error:', data.error);
                     alert(data.error || 'Failed to process credit'); 
                 }
             } catch (err) { 
-                console.error('[MANUAL CREDIT] Exception:', err);
+                if (window.__AW_DEBUG__) console.error('Manual credit request failed:', err);
                 alert("Server error: " + err.message); 
             } finally { 
                 btn.innerText = "Credit User Now"; 
