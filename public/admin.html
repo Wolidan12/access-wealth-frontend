@@ -253,6 +253,23 @@
                         </div>
                     </form>
                 </div>
+                <div class="card">
+                    <div class="card-title"><i class="fa-solid fa-gem"></i> Assign User Plan</div>
+                    <p class="text-muted">This assigns a plan manually and replaces any active plan. It does not debit or credit a wallet.</p>
+                    <form id="changePlanForm">
+                        <div class="form-group"><label>Username</label><input type="text" id="planUsername" class="form-control" required></div>
+                        <div class="form-group"><label>Plan</label><select id="planPackage" class="form-control" required><option value="">Loading plans...</option></select></div>
+                        <button type="submit" class="btn-submit" id="btnChangePlan">Assign Plan</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <div class="card-title"><i class="fa-solid fa-trash-can icon-danger"></i> Clear Total Balance</div>
+                    <p class="text-muted">Sets every liquid wallet balance to zero. Active plans are not cancelled.</p>
+                    <form id="clearBalanceForm">
+                        <div class="form-group"><label>Username</label><input type="text" id="clearBalanceUsername" class="form-control" required></div>
+                        <button type="submit" class="btn-submit btn-subtract" id="btnClearBalance">Clear All Wallet Balances</button>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -331,6 +348,7 @@
             loadDashboardStats();
             loadLegacyMigrationStatus();
             loadUsers();
+            loadPlanOptions();
             loadSiteSettings();
             loadDeposits();
             loadAllWithdrawals('pending');
@@ -481,6 +499,7 @@
                             <td>${statusBadge}</td>
                             <td>
                                 <button class="action-btn" onclick="quickAdjust('${user.username}')">Adjust</button>
+                                <button class="action-btn" onclick="quickAssignPlan('${user.username}')">Plan</button>
                                 ${((user.status || 'active').toLowerCase() === 'banned') ? `<button class="action-btn" style="color:var(--success); border-color:var(--success);" onclick="toggleUserStatus('${user.username}', 'active')">Activate</button>` : `<button class="action-btn" style="color:var(--danger); border-color:var(--danger);" onclick="toggleUserStatus('${user.username}', 'banned')">Ban</button>`}
                             </td>
                         </tr>`;
@@ -492,6 +511,24 @@
         function quickAdjust(username) {
             document.getElementById('adjustUsername').value = username;
             document.getElementById('adjustUsername').scrollIntoView();
+        }
+
+        function quickAssignPlan(username) {
+            document.getElementById('planUsername').value = username;
+            document.getElementById('planUsername').scrollIntoView();
+        }
+
+        async function loadPlanOptions() {
+            const select = document.getElementById('planPackage');
+            try {
+                const { ok, data } = await window.apiFetchJson('/packages');
+                if (!(ok && data.success)) throw new Error('Unable to load plans');
+                select.innerHTML = '<option value="">Select a plan</option>' + (data.packages || []).map((pkg) =>
+                    `<option value="${pkg.id}">${pkg.name} — ₦${Number(pkg.capital || 0).toLocaleString()}</option>`
+                ).join('');
+            } catch (_) {
+                select.innerHTML = '<option value="">Unable to load plans</option>';
+            }
         }
 
         async function toggleUserStatus(username, status) {
@@ -829,6 +866,59 @@
             } catch (err) { alert("Server error."); } 
             finally { btn.innerText = action === 'add' ? 'Add Funds' : 'Subtract Funds'; btn.disabled = false; }
         }
+
+        document.getElementById('changePlanForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('planUsername').value.trim();
+            const packageId = document.getElementById('planPackage').value;
+            if (!confirm(`Assign the selected plan to ${username}? Any active plan will be replaced.`)) return;
+            const btn = document.getElementById('btnChangePlan');
+            btn.disabled = true;
+            btn.innerText = 'Assigning...';
+            try {
+                const { ok, data } = await window.apiFetchJson('/admin/change-user-plan', {
+                    method: 'POST', body: JSON.stringify({ username, packageId })
+                });
+                if (!(ok && data.success)) throw new Error(data.error || 'Unable to assign the plan.');
+                showToast('success', data.message);
+                document.getElementById('changePlanForm').reset();
+                loadUsers();
+                loadDashboardStats();
+            } catch (error) {
+                alert(error.message || 'Unable to assign the plan.');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Assign Plan';
+            }
+        });
+
+        document.getElementById('clearBalanceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('clearBalanceUsername').value.trim();
+            const confirmation = prompt(`This will clear every liquid balance for ${username}. Type exactly: CLEAR ${username}`);
+            if (confirmation !== `CLEAR ${username}`) {
+                if (confirmation !== null) alert('Confirmation did not match. Nothing was changed.');
+                return;
+            }
+            const btn = document.getElementById('btnClearBalance');
+            btn.disabled = true;
+            btn.innerText = 'Clearing...';
+            try {
+                const { ok, data } = await window.apiFetchJson('/admin/clear-total-balance', {
+                    method: 'POST', body: JSON.stringify({ username, confirmation })
+                });
+                if (!(ok && data.success)) throw new Error(data.error || 'Unable to clear balance.');
+                showToast('success', data.message);
+                document.getElementById('clearBalanceForm').reset();
+                loadUsers();
+                loadDashboardStats();
+            } catch (error) {
+                alert(error.message || 'Unable to clear balance.');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Clear All Wallet Balances';
+            }
+        });
 
         // ==========================================
         // BROADCAST
