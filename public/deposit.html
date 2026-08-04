@@ -8,13 +8,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-body: #070d14;         
-            --bg-cards: #112A46;        
-            --text-main: #ffffff;       
-            --text-muted: #8a99af;      
-            --primary-yellow: #d4af37;  
+            --bg-body: #070d14;
+            --bg-cards: #112A46;
+            --text-main: #ffffff;
+            --text-muted: #8a99af;
+            --primary-yellow: #d4af37;
             --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
-            --border-light: rgba(212, 175, 55, 0.15); 
+            --border-light: rgba(212, 175, 55, 0.15);
             --sidebar-width: 260px;
             --sidebar-collapsed-width: 80px;
         }
@@ -76,7 +76,7 @@
         /* --- MAIN CONTENT & DEPOSIT UI --- */
         .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); display: flex; flex-direction: column; transition: margin-left 0.3s, width 0.3s; }
         .sidebar.collapsed ~ .main-content { margin-left: var(--sidebar-collapsed-width); width: calc(100% - var(--sidebar-collapsed-width)); }
-        .content-area { padding: 50px 40px; max-width: 900px; margin: 0 auto; width: 100%; }
+        .content-area { padding: 50px 40px; max-width: 1000px; margin: 0 auto; width: 100%; }
 
         .page-header { text-align: center; margin-bottom: 40px; }
         .page-title { font-size: 32px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
@@ -88,26 +88,58 @@
         .secure-card { background: linear-gradient(135deg, #112A46 0%, #0a192f 100%); border: 1px solid var(--primary-yellow); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(212, 175, 55, 0.1); position: relative; overflow: hidden; }
         .secure-card::before { content: ''; position: absolute; top: 0; right: 0; width: 150px; height: 150px; background: radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 70%); border-radius: 50%; transform: translate(30%, -30%); }
         .secure-card h3 { font-size: 20px; color: var(--primary-yellow); margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
-        
+
+        .bank-detail { background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 14px; }
+        .bank-detail i { font-size: 22px; color: var(--primary-yellow); width: 30px; text-align: center; flex-shrink: 0; }
+        .bank-detail .detail-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+        .bank-detail .detail-value { font-size: 15px; font-weight: 600; color: #fff; word-break: break-word; }
+        .bank-detail .copy-btn { margin-left: auto; background: rgba(212,175,55,0.12); border: 1px solid rgba(212,175,55,0.3); color: var(--primary-yellow); border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0; transition: 0.2s; }
+        .bank-detail .copy-btn:hover { background: var(--primary-yellow); color: #0b1421; }
+
         .info-row { margin-bottom: 20px; display: flex; align-items: center; gap: 15px;}
         .info-row i { font-size: 24px; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 12px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.05); }
         .info-text p { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
         .info-text h4 { font-size: 16px; font-weight: 600; color: #fff; }
 
         .success-text { font-size: 13px; color: #4CAF50; background: rgba(76, 175, 80, 0.1); padding: 15px; border-radius: 10px; display: flex; gap: 10px; align-items: flex-start; line-height: 1.5; margin-top: 25px;}
+        .info-note { font-size: 13px; color: var(--text-muted); background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.2); padding: 15px; border-radius: 10px; display: flex; gap: 10px; align-items: flex-start; line-height: 1.6; margin-top: 25px; }
 
         /* FORM CARD */
         .form-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; padding: 30px; }
-        .form-group { margin-bottom: 25px; }
+        .form-group { margin-bottom: 22px; }
         .form-group label { display: block; font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 10px; }
         .input-wrapper { position: relative; }
         .input-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 16px; }
         .form-control { width: 100%; padding: 15px 15px 15px 45px; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px; outline: none; transition: 0.3s; }
         .form-control:focus { border-color: var(--primary-yellow); background: rgba(0, 0, 0, 0.4); }
-        
+        .form-control::placeholder { color: #5a6a80; }
+
+        .file-upload-wrap { position: relative; }
+        .file-upload-box { width: 100%; padding: 18px; background: rgba(0, 0, 0, 0.2); border: 1.5px dashed rgba(255,255,255,0.2); border-radius: 10px; color: var(--text-muted); font-size: 14px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .file-upload-box:hover, .file-upload-box.dragover { border-color: var(--primary-yellow); color: var(--primary-yellow); }
+        .file-upload-box i { font-size: 22px; display: block; margin-bottom: 6px; }
+        .file-upload-box input[type="file"] { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .receipt-preview { display: none; margin-top: 12px; }
+        .receipt-preview img { max-width: 100%; max-height: 180px; border-radius: 10px; border: 1px solid var(--border-light); }
+
         .btn-submit { background: var(--yellow-gradient); color: #0b1421; border: none; padding: 18px; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; width: 100%; text-transform: uppercase; letter-spacing: 1px;}
         .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3); }
         .btn-submit:disabled { background: #333; color: #777; cursor: not-allowed; box-shadow: none; transform: none;}
+
+        /* DEPOSIT HISTORY */
+        .history-section { margin-top: 40px; }
+        .section-title { font-size: 20px; font-weight: 700; color: var(--primary-yellow); margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+        .history-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; padding: 24px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { text-align: left; padding: 13px 12px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        th { color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+        td { color: var(--text-main); }
+        .badge { padding: 5px 11px; border-radius: 50px; font-size: 11px; font-weight: 600; }
+        .badge.pending { background: rgba(243, 156, 18, 0.12); color: #f39c12; }
+        .badge.approved { background: rgba(46, 204, 113, 0.12); color: #2ecc71; }
+        .badge.declined { background: rgba(255, 77, 77, 0.12); color: #ff4d4d; }
+        .empty-state { text-align: center; color: var(--text-muted); padding: 30px 0; }
+        .font-bold { font-weight: 700; }
 
         @media (max-width: 768px) {
             .sidebar { left: -260px; width: var(--sidebar-width) !important; }
@@ -143,7 +175,7 @@
             </div>
             <a href="/activation.html" class="nav-item" title="Account Activation"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
             <a href="/spin-win.html" class="nav-item" title="Spin and Win"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
-            
+
             <a href="/deposit.html" class="nav-item active" title="Fund Account"><i class="fa-solid fa-money-bill-transfer main-icon"></i> <span>Fund Account</span></a>
             <a href="/withdraw.html" class="nav-item" title="Withdraw"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
             <a href="/referral.html" class="nav-item" title="Top Earners"><i class="fa-solid fa-users main-icon"></i> <span>Top Earners</span></a>
@@ -162,43 +194,44 @@
         </div>
 
         <div class="content-area">
-            
+
             <div class="page-header">
                 <h1 class="page-title">Fund Your Account</h1>
-                <p class="page-subtitle">Add funds instantly using our automated, secure payment gateway.</p>
+                <p class="page-subtitle">Transfer to the account below, then upload your payment receipt for admin approval.</p>
             </div>
 
             <div class="grid-container">
                 <div class="secure-card">
-                    <h3><i class="fa-solid fa-shield-halved"></i> Secure Payment</h3>
-                    
-                    <div class="info-row">
-                        <i class="fa-solid fa-bolt"></i>
-                        <div class="info-text">
-                            <p>Speed</p>
-                            <h4>Instant Auto-Funding</h4>
+                    <h3><i class="fa-solid fa-building-columns"></i> Bank Transfer Details</h3>
+
+                    <div class="bank-detail">
+                        <i class="fa-solid fa-landmark"></i>
+                        <div>
+                            <div class="detail-label">Bank</div>
+                            <div class="detail-value" id="infoBank">Moniepoint</div>
                         </div>
                     </div>
 
-                    <div class="info-row">
-                        <i class="fa-solid fa-lock"></i>
-                        <div class="info-text">
-                            <p>Security</p>
-                            <h4>256-bit Encryption</h4>
+                    <div class="bank-detail">
+                        <i class="fa-solid fa-hashtag"></i>
+                        <div>
+                            <div class="detail-label">Account Number</div>
+                            <div class="detail-value" id="infoAccountNumber">6977298247</div>
+                        </div>
+                        <button class="copy-btn" type="button" onclick="copyAccountNumber()"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+
+                    <div class="bank-detail">
+                        <i class="fa-solid fa-user-tie"></i>
+                        <div>
+                            <div class="detail-label">Account Name</div>
+                            <div class="detail-value" id="infoAccountName">Luna Entry Services - Access Wealth HQ</div>
                         </div>
                     </div>
 
-                    <div class="info-row">
-                        <i class="fa-solid fa-credit-card"></i>
-                        <div class="info-text">
-                            <p>Methods Supported</p>
-                            <h4>Cards, USSD, Bank Transfer</h4>
-                        </div>
-                    </div>
-
-                    <div class="success-text">
-                        <i class="fa-solid fa-circle-check success-icon"></i>
-                        <span><strong>Powered by Squad:</strong> Your funds will reflect in your Access Wealth dashboard immediately after a successful transaction. No manual waiting required!</span>
+                    <div class="info-note" id="infoInstructions">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span id="infoInstructionsText">Transfer the deposit amount to the account above, then upload your payment receipt to complete the request. Your deposit will be credited to your wallet once an admin approves it.</span>
                     </div>
                 </div>
 
@@ -208,20 +241,55 @@
                             <label>Amount to Fund (₦)</label>
                             <div class="input-wrapper">
                                 <i class="fa-solid fa-naira-sign"></i>
-                                <input type="number" id="amount" class="form-control" placeholder="E.g. 3000" required min="1000">
+                                <input type="number" id="amount" class="form-control" placeholder="Minimum ₦1,000" required min="1000">
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label>Email Address</label>
+                            <label>Sender Name <span style="font-weight:400;opacity:.7;">(optional)</span></label>
                             <div class="input-wrapper">
-                                <i class="fa-regular fa-envelope"></i>
-                                <input type="email" id="email" class="form-control" placeholder="E.g. john@example.com" required>
+                                <i class="fa-regular fa-user"></i>
+                                <input type="text" id="senderName" class="form-control" placeholder="Name used for the transfer">
                             </div>
                         </div>
 
-                        <button type="submit" class="btn-submit" id="submitBtn">Proceed to Payment</button>
+                        <div class="form-group">
+                            <label>Transaction Reference <span style="font-weight:400;opacity:.7;">(optional)</span></label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-fingerprint"></i>
+                                <input type="text" id="transactionRef" class="form-control" placeholder="Transfer reference / narration">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Payment Receipt (required)</label>
+                            <div class="file-upload-wrap">
+                                <div class="file-upload-box" id="uploadBox">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                    Click to upload your receipt (PNG, JPG, PDF)
+                                </div>
+                                <input type="file" id="receiptInput" accept="image/png,image/jpeg,image/gif,image/webp,application/pdf" required>
+                            </div>
+                            <div class="receipt-preview" id="receiptPreview"></div>
+                            <p style="font-size:11px;color:var(--text-muted);margin-top:8px;">Max file size: 5MB.</p>
+                        </div>
+
+                        <button type="submit" class="btn-submit" id="submitBtn">Submit Deposit Request</button>
                     </form>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <h3 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent Deposits</h3>
+                <div class="history-card">
+                    <table>
+                        <thead>
+                            <tr><th>Date</th><th>Amount</th><th>Sender</th><th>Reference</th><th>Status</th><th>Admin Note</th></tr>
+                        </thead>
+                        <tbody id="depositHistoryBody">
+                            <tr><td colspan="6" class="empty-state">Loading your deposit history...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -244,23 +312,126 @@
             document.getElementById('displayHandle').innerText = "@" + user.toLowerCase().replace(/\s+/g, '');
         });
 
-        // HANDLE AUTOMATED SQUAD DEPOSIT SUBMISSION
+        function copyAccountNumber() {
+            const val = document.getElementById('infoAccountNumber').innerText;
+            navigator.clipboard.writeText(val).then(() => {
+                if (typeof showToast === 'function') showToast('success', 'Account number copied!');
+            }).catch(() => {
+                if (typeof showToast === 'function') showToast('info', 'Account number: ' + val);
+            });
+        }
+
+        // Load manual payment info
+        async function loadManualPaymentInfo() {
+            try {
+                const { ok, data } = await window.apiFetchJson('/payment/manual-info');
+                if (ok && data.success && data.payment) {
+                    const p = data.payment;
+                    if (p.bank_name) document.getElementById('infoBank').innerText = p.bank_name;
+                    if (p.account_number) document.getElementById('infoAccountNumber').innerText = p.account_number;
+                    if (p.account_name) document.getElementById('infoAccountName').innerText = p.account_name;
+                    if (p.instructions) document.getElementById('infoInstructionsText').innerText = p.instructions;
+                    if (p.enabled === false) {
+                        const btn = document.getElementById('submitBtn');
+                        btn.disabled = true;
+                        btn.innerText = 'Deposits Currently Disabled';
+                        if (typeof showToast === 'function') showToast('error', 'Manual deposits are currently disabled.');
+                    }
+                }
+            } catch (err) {
+                if (window.__AW_DEBUG__) console.error('Load manual info error:', err);
+            }
+        }
+
+        // Receipt file -> base64 data URL
+        function handleReceiptFile(file) {
+            if (!file) return Promise.resolve(null);
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'application/pdf'];
+            if (!allowedTypes.includes(file.type)) {
+                if (typeof showToast === 'function') showToast('error', 'Receipt must be a PNG, JPG, GIF, WEBP or PDF file.');
+                else alert('Receipt must be a PNG, JPG, GIF, WEBP or PDF file.');
+                document.getElementById('receiptInput').value = '';
+                return Promise.resolve(null);
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                if (typeof showToast === 'function') showToast('error', 'Receipt file is too large. Maximum size is 5MB.');
+                else alert('Receipt file is too large. Maximum size is 5MB.');
+                document.getElementById('receiptInput').value = '';
+                return Promise.resolve(null);
+            }
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('Failed to read file.'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadManualPaymentInfo();
+            loadDepositHistory();
+
+            const receiptInput = document.getElementById('receiptInput');
+            const uploadBox = document.getElementById('uploadBox');
+            const preview = document.getElementById('receiptPreview');
+
+            receiptInput.addEventListener('change', async () => {
+                const file = receiptInput.files[0];
+                if (!file) return;
+                const dataUrl = await handleReceiptFile(file);
+                if (!dataUrl) return;
+                preview.innerHTML = file.type === 'application/pdf'
+                    ? '<i class="fa-solid fa-file-pdf" style="font-size:40px;color:#ff4d4d;"></i><p style="font-size:13px;color:var(--text-muted);margin-top:6px;">' + file.name + '</p>'
+                    : '<img src="' + dataUrl + '" alt="Receipt preview">';
+                preview.style.display = 'block';
+                uploadBox.querySelector('i').className = 'fa-solid fa-file-circle-check';
+            });
+        });
+
+        // Load user's deposit history
+        async function loadDepositHistory() {
+            const tbody = document.getElementById('depositHistoryBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Loading your deposit history...</td></tr>';
+            try {
+                const { ok, data } = await window.apiFetchJson('/my-deposits');
+                if (ok && data.success) {
+                    if (!data.deposits || data.deposits.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No deposits yet.</td></tr>';
+                        return;
+                    }
+                    tbody.innerHTML = '';
+                    data.deposits.forEach(dep => {
+                        let badge = '<span class="badge pending">Pending</span>';
+                        if (dep.status === 'approved') badge = '<span class="badge approved">Approved</span>';
+                        else if (dep.status === 'declined') badge = '<span class="badge declined">Declined</span>';
+                        tbody.innerHTML += `<tr>
+                            <td>${new Date(dep.created_at).toLocaleDateString()}</td>
+                            <td class="font-bold">₦${Number(dep.amount).toLocaleString()}</td>
+                            <td>${dep.sender_name || '-'}</td>
+                            <td>${dep.transaction_ref || '-'}</td>
+                            <td>${badge}</td>
+                            <td>${dep.admin_note || '-'}</td>
+                        </tr>`;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Unable to load deposit history.</td></tr>';
+                }
+            } catch (err) {
+                if (window.__AW_DEBUG__) console.error('Deposit history error:', err);
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Unable to load deposit history.</td></tr>';
+            }
+        }
+
+        // HANDLE MANUAL DEPOSIT SUBMISSION
         document.getElementById('depositForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const amount = document.getElementById('amount').value;
-            const email = document.getElementById('email').value;
+            const senderName = document.getElementById('senderName').value.trim();
+            const transactionRef = document.getElementById('transactionRef').value.trim();
+            const receiptInput = document.getElementById('receiptInput');
             const btn = document.getElementById('submitBtn');
             const token = localStorage.getItem('token');
-            const storedUser = localStorage.getItem('user');
-            let userId = '';
-
-            if (storedUser) {
-                try {
-                    const parsedUser = JSON.parse(storedUser);
-                    userId = parsedUser.id || '';
-                } catch (_) {}
-            }
 
             if (!token) {
                 if(typeof showToast === 'function') showToast('error', 'You must be logged in to fund your account.');
@@ -269,37 +440,60 @@
                 return;
             }
 
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Initializing Secure Gateway...';
+            if (!amount || Number(amount) < 1000) {
+                if(typeof showToast === 'function') showToast('error', 'Minimum deposit amount is ₦1,000.');
+                else alert('Minimum deposit amount is ₦1,000.');
+                return;
+            }
+
+            if (!receiptInput.files || !receiptInput.files[0]) {
+                if(typeof showToast === 'function') showToast('error', 'Please upload your payment receipt to complete the deposit request.');
+                else alert('Please upload your payment receipt to complete the deposit request.');
+                return;
+            }
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting Deposit Request...';
             btn.disabled = true;
 
             try {
-                // Use the globally injected apiFetchJson from your global.js
-                const { ok, data, error } = await window.apiFetchJson('/deposit', {
+                const receipt = await handleReceiptFile(receiptInput.files[0]);
+                if (!receipt) {
+                    btn.innerHTML = 'Submit Deposit Request';
+                    btn.disabled = false;
+                    return;
+                }
+
+                const { ok, data, error } = await window.apiFetchJson('/request-deposit', {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` 
-                    },
-                    body: JSON.stringify({ amount, email, user_id: userId })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount,
+                        sender_name: senderName,
+                        transaction_ref: transactionRef,
+                        payment_method: 'bank_transfer',
+                        receipt
+                    })
                 });
 
-                if (ok && data.success && (data.checkout_url || data.payment_link)) {
-                    // Redirect directly to Squad's secure checkout
-                    window.location.href = data.checkout_url || data.payment_link;
+                if (ok && data.success) {
+                    if(typeof showToast === 'function') showToast('success', data.message || 'Deposit request submitted!');
+                    else alert(data.message || 'Deposit request submitted!');
+                    document.getElementById('depositForm').reset();
+                    document.getElementById('receiptPreview').style.display = 'none';
+                    document.getElementById('uploadBox').querySelector('i').className = 'fa-solid fa-cloud-arrow-up';
+                    loadDepositHistory();
                 } else {
-                    const errorMsg = data.error || error || "Payment initialization failed.";
+                    const errorMsg = data.error || error || "Failed to submit deposit request.";
                     if(typeof showToast === 'function') showToast('error', errorMsg);
                     else alert(errorMsg);
-                    
-                    btn.innerHTML = 'Proceed to Payment';
+                    btn.innerHTML = 'Submit Deposit Request';
                     btn.disabled = false;
                 }
             } catch (err) {
-                if (window.__AW_DEBUG__) console.error("Deposit Error:", err);
+                if (window.__AW_DEBUG__) console.error("Deposit Submit Error:", err);
                 if(typeof showToast === 'function') showToast('error', "Network error. Please try again.");
                 else alert("Network error. Please try again.");
-                
-                btn.innerHTML = 'Proceed to Payment';
+                btn.innerHTML = 'Submit Deposit Request';
                 btn.disabled = false;
             }
         });

@@ -355,6 +355,14 @@
                 </div>
             </div>
 
+            <!-- Recent Deposits Section -->
+            <div class="deposits-section section-spaced">
+                <h3 class="section-title"><i class="fa-solid fa-money-bill-transfer"></i> Recent Deposits</h3>
+                <div id="recentDepositsContainer" class="panel-card">
+                    <p class="empty-state-muted">Loading deposits...</p>
+                </div>
+            </div>
+
             <h3 class="section-title">Earn & Promote</h3>
             <div class="bottom-grid">
                 <a href="/daily-tasks.html" class="flat-card"><i class="fa-solid fa-clipboard-check"></i><p>Daily Tasks</p></a>
@@ -596,13 +604,48 @@
             alert(message);
         }
 
+        async function loadRecentDeposits() {
+            const container = document.getElementById('recentDepositsContainer');
+            if (!container) return;
+            container.innerHTML = '<p class="empty-state-muted">Loading deposits...</p>';
+            try {
+                const { ok, data } = await window.apiFetchJson('/my-deposits');
+                if (ok && data.success && data.deposits && data.deposits.length > 0) {
+                    const recent = data.deposits.slice(0, 5);
+                    let html = '<ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;">';
+                    recent.forEach(dep => {
+                        let statusColor = '#f39c12';
+                        let statusLabel = 'Pending';
+                        if (dep.status === 'approved') { statusColor = '#2ecc71'; statusLabel = 'Approved'; }
+                        else if (dep.status === 'declined') { statusColor = '#ff4d4d'; statusLabel = 'Declined'; }
+                        html += `<li style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;background:rgba(0,0,0,0.2);border-radius:10px;border:1px solid rgba(255,255,255,0.05);">
+                            <div>
+                                <div style="font-weight:700;">₦${Number(dep.amount).toLocaleString()}</div>
+                                <div style="font-size:12px;color:var(--text-muted);">${new Date(dep.created_at).toLocaleDateString()}</div>
+                            </div>
+                            <span style="padding:5px 11px;border-radius:50px;font-size:11px;font-weight:600;background:${statusColor}22;color:${statusColor};">${statusLabel}</span>
+                        </li>`;
+                    });
+                    html += '</ul>';
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p class="empty-state-muted">No deposits yet. <a href="/deposit.html" style="color:var(--primary-yellow);">Fund your account</a></p>';
+                }
+            } catch (err) {
+                if (window.__AW_DEBUG__) console.error('Recent deposits error:', err);
+                container.innerHTML = '<p class="empty-state-muted">Unable to load deposits.</p>';
+            }
+        }
+
         // --- Global sync listener ---
         window.addEventListener('globalSyncComplete', () => {
             updateBalanceDisplay();
             loadBroadcastNotice();
+            loadRecentDeposits();
         });
         document.addEventListener('DOMContentLoaded', () => {
             loadBroadcastNotice();
+            loadRecentDeposits();
             verifyDeposit(getQueryParam('reference'));
             // Sync latest balance from server on page load
             if (typeof globalSync === 'function') globalSync();
