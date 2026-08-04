@@ -137,8 +137,8 @@
             <a class="nav-item" onclick="switchTab('users', this); loadUsers(); toggleSidebarMobileOnly();"><i class="fa-solid fa-users"></i> User Management</a>
             
             <div class="nav-label">Finance & Payouts</div>
-            <a class="nav-item pos-relative" onclick="switchTab('deposits', this); loadDeposits(); toggleSidebarMobileOnly();">
-                <i class="fa-solid fa-money-bill-transfer"></i> Offline Deposit Requests
+            <a class="nav-item pos-relative" onclick="switchTab('deposits', this); loadDeposits('pending'); toggleSidebarMobileOnly();">
+                <i class="fa-solid fa-money-bill-transfer"></i> Deposit Review
                 <span class="badge warning badge-right" id="badgeDeposits">0</span>
             </a>
             <a class="nav-item pos-relative" onclick="switchTab('withdrawals', this); loadAllWithdrawals('pending'); toggleSidebarMobileOnly();">
@@ -200,12 +200,18 @@
         </div>
 
         <div id="deposits" class="admin-section">
-            <div class="page-header"><div><h1>Offline Deposit Requests</h1><p>Review manually submitted payment requests. Squad deposits are credited automatically.</p></div></div>
+            <div class="page-header"><div><h1>Deposit Review</h1><p>Review manual bank-transfer deposit requests. View the uploaded receipt, then approve to credit the user's wallet or decline.</p></div></div>
             <div class="card">
+                <div class="toolbar-wrap">
+                    <button class="action-btn filter-btn filter-pending" onclick="loadDeposits('pending')">Pending</button>
+                    <button class="action-btn filter-btn filter-approved" onclick="loadDeposits('approved')">Approved</button>
+                    <button class="action-btn filter-btn filter-declined" onclick="loadDeposits('declined')">Declined</button>
+                    <button class="action-btn filter-btn filter-all" onclick="loadDeposits('all')">All</button>
+                </div>
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th>Date</th><th>User</th><th>Amount</th><th>Payment Method</th><th>Status</th><th>Action</th></tr></thead>
-                        <tbody id="depositTableBody"><tr><td colspan="6" class="text-center">Loading deposits</td></tr></tbody>
+                        <thead><tr><th>Date</th><th>User</th><th>Sender</th><th>Amount</th><th>Method</th><th>Reference</th><th>Status</th><th>Receipt</th><th>Action</th></tr></thead>
+                        <tbody id="depositTableBody"><tr><td colspan="9" class="text-center">Loading deposits</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -350,7 +356,7 @@
             loadUsers();
             loadPlanOptions();
             loadSiteSettings();
-            loadDeposits();
+            loadDeposits('pending');
             loadAllWithdrawals('pending');
             loadTaskSubmissions();
         };
@@ -591,33 +597,79 @@
         // ==========================================
         // DEPOSITS
         // ==========================================
-        async function loadDeposits() {
+        async function loadDeposits(status = 'pending') {
             const tbody = document.getElementById('depositTableBody');
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center">Loading deposits</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center">Loading deposits</td></tr>';
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/deposits');
+                const { ok, data } = await window.apiFetchJson(`/admin/deposits?status=${status}&t=${Date.now()}`);
                 if (ok && data.success) {
                     tbody.innerHTML = '';
-                    if(data.deposits.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="text-center">No pending deposits.</td></tr>'; return; }
+                    if(data.deposits.length === 0) { tbody.innerHTML = `<tr><td colspan="9" class="text-center">No ${status === 'all' ? '' : status} deposits found.</td></tr>`; return; }
                     data.deposits.forEach(dep => {
+                        let statusBadge = '<span class="badge warning">⏳ Pending</span>';
+                        if (dep.status === 'approved') statusBadge = '<span class="badge success">✅ Approved</span>';
+                        else if (dep.status === 'declined') statusBadge = '<span class="badge danger">❌ Declined</span>';
+                        const methodLabel = (dep.payment_method || 'bank_transfer').replace(/_/g, ' ').toUpperCase();
+                        const receiptCell = dep.has_receipt
+                            ? `<button class="action-btn" onclick="viewDepositReceipt(${dep.id})">View</button>`
+                            : '<span style="opacity:.6;">None</span>';
+                        let actions = '';
+                        if (dep.status === 'pending') {
+                            actions = `<button class="action-btn action-approve" onclick="approveDeposit(${dep.id})">Approve</button>
+                                       <button class="action-btn action-decline" onclick="declineDeposit(${dep.id})">Decline</button>`;
+                        } else {
+                            actions = '<span style="opacity:.6;">—</span>';
+                        }
                         tbody.innerHTML += `<tr>
                             <td>${new Date(dep.created_at).toLocaleDateString()}</td>
                             <td><strong>${dep.username}</strong></td>
-                            <td class="font-bold">₦${dep.amount.toLocaleString()}</td>
-                            <td>${dep.payment_method || 'Bank Transfer'}</td>
-                            <td><span class="badge warning">Pending</span></td>
-                            <td><button class="action-btn action-approve" onclick="approveDeposit(${dep.id})">Approve</button></td>
+                            <td>${dep.sender_name || '-'}</td>
+                            <td class="font-bold">₦${Number(dep.amount).toLocaleString()}</td>
+                            <td>${methodLabel}</td>
+                            <td>${dep.transaction_ref || '-'}</td>
+                            <td>${statusBadge}${dep.admin_note ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${dep.admin_note}</div>` : ''}</td>
+                            <td>${receiptCell}</td>
+                            <td>${actions}</td>
                         </tr>`;
                     });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="9" class="text-center">${data.error || 'Failed to load deposits.'}</td></tr>`;
                 }
-            } catch (error) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-error">Connection Error.</td></tr>'; }
+            } catch (error) { tbody.innerHTML = '<tr><td colspan="9" class="text-center text-error">Connection Error.</td></tr>'; }
+        }
+
+        function viewDepositReceipt(id) {
+            const url = API_BASE_URL + `/admin/deposit/${id}/receipt`;
+            const token = localStorage.getItem('token');
+            fetch(url, { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(res => {
+                    if (!res.ok) throw new Error('Could not load receipt');
+                    return res.blob();
+                })
+                .then(blob => {
+                    const objectUrl = URL.createObjectURL(blob);
+                    window.open(objectUrl, '_blank');
+                })
+                .catch(err => {
+                    if (typeof showToast === 'function') showToast('error', err.message);
+                    else alert(err.message);
+                });
         }
 
         async function approveDeposit(id) {
-            if(!confirm("Approve this deposit?")) return;
+            if(!confirm("Approve this deposit and credit the user's wallet?")) return;
             try {
                 const { ok, data } = await window.apiFetchJson('/admin/approve-deposit', { method: 'POST', body: JSON.stringify({ depositId: id }) });
-                if(ok && data.success) { showToast('success', "Deposit Approved!"); loadDeposits(); loadDashboardStats(); loadUsers(); } else alert(data.error);
+                if(ok && data.success) { showToast('success', data.message || "Deposit Approved!"); loadDeposits(); loadDashboardStats(); loadUsers(); } else alert(data.error);
+            } catch(e) { alert("Server Error."); }
+        }
+
+        async function declineDeposit(id) {
+            const note = prompt("Enter a reason for declining this deposit (optional):", "Your deposit was declined. Please contact support.");
+            if (note === null) return;
+            try {
+                const { ok, data } = await window.apiFetchJson('/admin/decline-deposit', { method: 'POST', body: JSON.stringify({ depositId: id, note: note || 'Your deposit was declined. Please contact support.' }) });
+                if(ok && data.success) { showToast('success', "Deposit declined."); loadDeposits(); loadDashboardStats(); loadUsers(); } else alert(data.error);
             } catch(e) { alert("Server Error."); }
         }
 
