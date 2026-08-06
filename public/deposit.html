@@ -478,19 +478,33 @@
             btn.style.pointerEvents = 'none';
 
             try {
-                // Build multipart/form-data payload
-                const formData = new FormData();
-                formData.append('amount', amount);
-                formData.append('sender_name', senderName);
-                formData.append('transaction_ref', transactionRef);
-                formData.append('payment_method', 'bank_transfer');
-                formData.append('receipt', receiptFile);
+                // The backend expects a JSON body containing the receipt as a base64 data URL.
+                const receiptDataUrl = await handleReceiptFile(receiptFile);
+                if (!receiptDataUrl) {
+                    isSubmittingDeposit = false;
+                    btn.innerHTML = 'Submit Deposit Request';
+                    btn.disabled = false;
+                    btn.style.pointerEvents = 'auto';
+                    return;
+                }
 
-                const { ok, data, error } = await window.apiFetchMultipart('/request-deposit', formData);
+                const payload = {
+                    amount: Number(amount),
+                    sender_name: senderName,
+                    transaction_ref: transactionRef,
+                    payment_method: 'bank_transfer',
+                    receipt: receiptDataUrl
+                };
 
-                if (ok && data.success) {
-                    if(typeof showToast === 'function') showToast('success', data.message || 'Deposit request submitted!');
-                    else alert(data.message || 'Deposit request submitted!');
+                const { ok, data, error } = await window.apiFetchJson('/request-deposit', {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+
+                const requestSucceeded = ok && (data.success === undefined || data.success === true);
+                if (requestSucceeded) {
+                    if(typeof showToast === 'function') showToast('success', data.message || data.success_message || 'Deposit request submitted!');
+                    else alert(data.message || data.success_message || 'Deposit request submitted!');
                     document.getElementById('depositForm').reset();
                     document.getElementById('receiptPreview').style.display = 'none';
                     if (uploadBox) {
@@ -506,8 +520,9 @@
                 }
             } catch (err) {
                 if (window.__AW_DEBUG__) console.error("Deposit Submit Error:", err);
-                if(typeof showToast === 'function') showToast('error', "Network error. Please try again.");
-                else alert("Network error. Please try again.");
+                    const errorMessage = err.message ? `Server error. Please try again. (${err.message})` : "Server error. Please try again.";
+                    if(typeof showToast === 'function') showToast('error', errorMessage);
+                    else alert(errorMessage);
             } finally {
                 isSubmittingDeposit = false;
                 btn.innerHTML = 'Submit Deposit Request';
