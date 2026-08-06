@@ -70,10 +70,10 @@ async function apiFetchMultipart(path, formData, options = {}) {
     let response;
     try {
         response = await fetch(url, {
+            ...options,
             method: options.method || 'POST',
             headers,
-            body: formData,
-            ...options
+            body: formData
         });
     } catch (networkError) {
         return {
@@ -102,7 +102,7 @@ async function apiFetchMultipart(path, formData, options = {}) {
         statusText: response.statusText,
         data,
         success: response.ok && data.success !== false,
-        error: data.error || (!response.ok ? response.statusText || 'API request failed' : null)
+        error: data.error || (!response.ok ? data.message || response.statusText || 'API request failed' : null)
     };
 }
 
