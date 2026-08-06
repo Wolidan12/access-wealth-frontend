@@ -56,6 +56,58 @@ async function apiFetchJson(path, options = {}) {
 window.apiFetch = apiFetch;
 window.apiFetchJson = apiFetchJson;
 
+async function apiFetchMultipart(path, formData, options = {}) {
+    const token = localStorage.getItem('token');
+    const headers = {
+        ...options.headers
+    };
+    
+    if (token && !path.includes('/login') && !path.includes('/register')) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const url = path.startsWith('http') ? path : `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+    let response;
+    try {
+        response = await fetch(url, {
+            method: options.method || 'POST',
+            headers,
+            body: formData,
+            ...options
+        });
+    } catch (networkError) {
+        return {
+            ok: false,
+            status: 0,
+            statusText: networkError.message,
+            json: async () => ({ success: false, error: `Network error: ${networkError.message}` }),
+            text: async () => networkError.message,
+            data: { success: false, error: `Network error: ${networkError.message}` },
+            success: false,
+            error: `Network error: ${networkError.message}`
+        };
+    }
+
+    let data;
+    try {
+        data = await response.json();
+    } catch (_) {
+        data = { success: false, error: 'Unable to parse server response.' };
+    }
+
+    return {
+        response,
+        ok: response.ok,
+        status: response.status,
+        statusText: response.statusText,
+        data,
+        success: response.ok && data.success !== false,
+        error: data.error || (!response.ok ? response.statusText || 'API request failed' : null)
+    };
+}
+
+window.apiFetchMultipart = apiFetchMultipart;
+
 // ==========================================
 // THEME MANAGEMENT (FIXED)
 // ==========================================

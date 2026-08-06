@@ -6,6 +6,7 @@
     <title>Bulk SMS | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
     <style>
         :root { --bg-body: #070d14; --bg-cards: #112A46; --text-main: #ffffff; --text-muted: #8a99af; --primary-yellow: #d4af37; --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); --border-light: rgba(212, 175, 55, 0.15); --sidebar-width: 260px; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -163,11 +164,14 @@
             document.getElementById('sumCost').innerText = `?${finalCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
         }
 
+        let isSubmittingSms = false;
         document.getElementById('smsForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (isSubmittingSms) return;
             if (finalCost <= 0) return alert("Please add recipients and a message.");
 
             const btn = document.getElementById('submitBtn');
+            isSubmittingSms = true;
             btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
 
             try {
@@ -176,11 +180,11 @@
                     body: JSON.stringify({ senderId: document.getElementById('senderId').value, cost: finalCost, count: finalRecipients })
                 });
                 if (ok && data.success) {
-                    alert(`? Bulk SMS Sent Successfully!\n?${finalCost.toLocaleString()} was deducted.`);
+                    alert(`✅ Bulk SMS Sent Successfully!\n₦${finalCost.toLocaleString()} was deducted.`);
                     localStorage.setItem('balance', data.newBalance); window.location.reload();
-                } else { alert(data.error || error); }
+                } else { alert(data?.error || error); }
             } catch (err) { alert("Server error."); } 
-            finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Bulk SMS'; }
+            finally { isSubmittingSms = false; btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Bulk SMS'; }
         });
     </script>
 </body>

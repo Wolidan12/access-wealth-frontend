@@ -539,7 +539,54 @@
     width: 100%;
 }
 
-/* ---------- Responsive Adjustments ---------- */
+/* ---------- Global Portal 3D & Stylish Enhancements ---------- */
+.card, .flat-card, .plan-card, .secure-card, .form-card, .history-card, .stat-box, .auth-card {
+    transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1),
+                box-shadow 0.3s cubic-bezier(0.23, 1, 0.32, 1),
+                border-color 0.3s ease;
+}
+
+.card:hover, .flat-card:hover, .plan-card:hover, .secure-card:hover, .form-card:hover, .stat-box:hover {
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4), 0 0 20px rgba(212, 175, 55, 0.12);
+}
+
+/* 3D Button Depth & Interactive Feel */
+.btn-submit, .btn-activate, .btn-withdraw, .btn-upgrade-sidebar, .btn-spin, .btn-action, .btn-fund {
+    transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative;
+}
+
+.btn-submit:hover, .btn-activate:hover, .btn-withdraw:hover:not(:disabled), .btn-upgrade-sidebar:hover, .btn-spin:hover:not(:disabled), .btn-fund:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.35);
+}
+
+.btn-submit:active, .btn-activate:active, .btn-withdraw:active:not(:disabled), .btn-upgrade-sidebar:active, .btn-spin:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
+}
+
+/* Form Inputs 3D Focus Glow */
+.form-control {
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #d4af37 !important;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Table Row Depth Hover */
+table tbody tr {
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+table tbody tr:hover {
+    background-color: rgba(212, 175, 55, 0.05);
+}
+
+/* Responsive Adjustments */
 @media (prefers-reduced-motion: reduce) {
     .float-3d,
     .orb,
@@ -549,7 +596,14 @@
     
     .card-3d:hover,
     .feature-card-enhanced:hover,
-    .btn-3d:hover {
+    .btn-3d:hover,
+    .card:hover,
+    .flat-card:hover,
+    .plan-card:hover,
+    .secure-card:hover,
+    .form-card:hover,
+    .btn-submit:hover,
+    .btn-activate:hover {
         transform: none;
     }
     

@@ -6,6 +6,7 @@
     <title>Fund Account | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
     <style>
         :root {
             --bg-body: #070d14;
@@ -422,14 +423,19 @@
             }
         }
 
-        // HANDLE MANUAL DEPOSIT SUBMISSION
+        // HANDLE MANUAL DEPOSIT SUBMISSION (MULTIPART / FORM-DATA WITH DOUBLE-SUBMIT GUARD)
+        let isSubmittingDeposit = false;
+
         document.getElementById('depositForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            if (isSubmittingDeposit) return; // Prevent double submission
 
             const amount = document.getElementById('amount').value;
             const senderName = document.getElementById('senderName').value.trim();
             const transactionRef = document.getElementById('transactionRef').value.trim();
             const receiptInput = document.getElementById('receiptInput');
+            const uploadBox = document.getElementById('uploadBox');
             const btn = document.getElementById('submitBtn');
             const token = localStorage.getItem('token');
 
@@ -452,49 +458,61 @@
                 return;
             }
 
+            const receiptFile = receiptInput.files[0];
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp', 'application/pdf'];
+            if (!allowedTypes.includes(receiptFile.type)) {
+                if (typeof showToast === 'function') showToast('error', 'Receipt must be a PNG, JPG, GIF, WEBP or PDF file.');
+                else alert('Receipt must be a PNG, JPG, GIF, WEBP or PDF file.');
+                return;
+            }
+            if (receiptFile.size > 5 * 1024 * 1024) {
+                if (typeof showToast === 'function') showToast('error', 'Receipt file is too large. Maximum size is 5MB.');
+                else alert('Receipt file is too large. Maximum size is 5MB.');
+                return;
+            }
+
+            // Lock double submission
+            isSubmittingDeposit = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting Deposit Request...';
             btn.disabled = true;
+            btn.style.pointerEvents = 'none';
 
             try {
-                const receipt = await handleReceiptFile(receiptInput.files[0]);
-                if (!receipt) {
-                    btn.innerHTML = 'Submit Deposit Request';
-                    btn.disabled = false;
-                    return;
-                }
+                // Build multipart/form-data payload
+                const formData = new FormData();
+                formData.append('amount', amount);
+                formData.append('sender_name', senderName);
+                formData.append('transaction_ref', transactionRef);
+                formData.append('payment_method', 'bank_transfer');
+                formData.append('receipt', receiptFile);
 
-                const { ok, data, error } = await window.apiFetchJson('/request-deposit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        amount,
-                        sender_name: senderName,
-                        transaction_ref: transactionRef,
-                        payment_method: 'bank_transfer',
-                        receipt
-                    })
-                });
+                const { ok, data, error } = await window.apiFetchMultipart('/request-deposit', formData);
 
                 if (ok && data.success) {
                     if(typeof showToast === 'function') showToast('success', data.message || 'Deposit request submitted!');
                     else alert(data.message || 'Deposit request submitted!');
                     document.getElementById('depositForm').reset();
                     document.getElementById('receiptPreview').style.display = 'none';
-                    document.getElementById('uploadBox').querySelector('i').className = 'fa-solid fa-cloud-arrow-up';
+                    if (uploadBox) {
+                        const icon = uploadBox.querySelector('i');
+                        if (icon) icon.className = 'fa-solid fa-cloud-arrow-up';
+                    }
                     loadDepositHistory();
+                    if (typeof globalSync === 'function') globalSync();
                 } else {
-                    const errorMsg = data.error || error || "Failed to submit deposit request.";
+                    const errorMsg = data?.error || error || "Failed to submit deposit request.";
                     if(typeof showToast === 'function') showToast('error', errorMsg);
                     else alert(errorMsg);
-                    btn.innerHTML = 'Submit Deposit Request';
-                    btn.disabled = false;
                 }
             } catch (err) {
                 if (window.__AW_DEBUG__) console.error("Deposit Submit Error:", err);
                 if(typeof showToast === 'function') showToast('error', "Network error. Please try again.");
                 else alert("Network error. Please try again.");
+            } finally {
+                isSubmittingDeposit = false;
                 btn.innerHTML = 'Submit Deposit Request';
                 btn.disabled = false;
+                btn.style.pointerEvents = 'auto';
             }
         });
     </script>

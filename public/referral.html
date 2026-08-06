@@ -6,6 +6,7 @@
     <title>Referrals & Top Earners | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
     <style>
         /* (same styles as before – keep unchanged) */
         :root { --bg-body: #070d14; --bg-cards: #112A46; --text-main: #ffffff; --text-muted: #8a99af; --primary-yellow: #d4af37; --card-gradient: linear-gradient(135deg, #112A46 0%, #0b1a2a 100%); --border-light: rgba(212, 175, 55, 0.15); --sidebar-width: 260px; }
@@ -187,7 +188,8 @@
             const linkInput = document.getElementById('refLinkInput');
             if (!linkInput) return;
             if (refId && refId !== 'undefined' && refId !== 'null') {
-                linkInput.value = `https://accesswealthhq.com/register.html?ref=${encodeURIComponent(refId)}`;\n            } else {
+                linkInput.value = `https://accesswealthhq.com/register.html?ref=${encodeURIComponent(refId)}`;
+            } else {
                 linkInput.value = 'https://accesswealthhq.com/register.html';
             }
         }

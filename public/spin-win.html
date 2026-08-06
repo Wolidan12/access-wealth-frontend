@@ -6,6 +6,7 @@
     <title>Spin & Win | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
     <style>
         :root {
             --bg-body: #070d14;         
@@ -290,9 +291,12 @@
         }
 
         // --- THE SPIN ANIMATION & LOGIC ---
+        let isSpinning = false;
         async function startSpin() {
+            if (isSpinning) return;
             if (spinsUsedToday >= planData.spins) return alert("You have used all your spins for today!");
 
+            isSpinning = true;
             const spinBtn = document.getElementById('spinBtn');
             const display = document.getElementById('prizeAmount');
             
@@ -305,36 +309,39 @@
                 display.innerText = `₦${randomVisual}`;
             }, 50);
 
-            // Wait 2.5 seconds for dramatic effect
-            await new Promise(r => setTimeout(r, 2500));
-            clearInterval(flashInterval);
+            try {
+                // Wait 2.5 seconds for dramatic effect
+                await new Promise(r => setTimeout(r, 2500));
+                clearInterval(flashInterval);
 
-            // Determine final prize
-            const randomPrizeIndex = Math.floor(Math.random() * basePrizes.length);
-            const baseAmount = basePrizes[randomPrizeIndex];
-            const finalAmount = Math.floor(baseAmount * planData.multiplier);
+                // Determine final prize
+                const randomPrizeIndex = Math.floor(Math.random() * basePrizes.length);
+                const baseAmount = basePrizes[randomPrizeIndex];
+                const finalAmount = Math.floor(baseAmount * planData.multiplier);
 
-            // Show result
-            display.innerText = `₦${finalAmount.toFixed(2)}`;
+                // Show result
+                display.innerText = `₦${finalAmount.toFixed(2)}`;
 
-            // Update Data
-            spinsUsedToday++;
-            localStorage.setItem('spinsUsedToday', spinsUsedToday);
+                // Update Data
+                spinsUsedToday++;
+                localStorage.setItem('spinsUsedToday', spinsUsedToday);
 
-            if (finalAmount > 0) {
-                let currentEarnings = parseFloat(localStorage.getItem('taskEarnings')) || 0;
-                localStorage.setItem('taskEarnings', currentEarnings + finalAmount);
-                addHistoryItem(`Won ₦${finalAmount.toFixed(2)} (Base: ₦${baseAmount} x${planData.multiplier})`, true);
-                alert(`🎉 Congratulations! You won ₦${finalAmount.toFixed(2)}!`);
-            } else {
-                addHistoryItem(`Better luck next time! (Won ₦0)`, false);
-                alert(`Aww, you won ₦0. Better luck on your next spin!`);
+                if (finalAmount > 0) {
+                    let currentEarnings = parseFloat(localStorage.getItem('taskEarnings')) || 0;
+                    localStorage.setItem('taskEarnings', currentEarnings + finalAmount);
+                    addHistoryItem(`Won ₦${finalAmount.toFixed(2)} (Base: ₦${baseAmount} x${planData.multiplier})`, true);
+                    alert(`🎉 Congratulations! You won ₦${finalAmount.toFixed(2)}!`);
+                } else {
+                    addHistoryItem(`Better luck next time! (Won ₦0)`, false);
+                    alert(`Aww, you won ₦0. Better luck on your next spin!`);
+                }
+            } finally {
+                isSpinning = false;
+                // Reset UI
+                spinBtn.innerText = "Spin Wheel";
+                updateUI();
+                spinBtn.disabled = (spinsUsedToday >= planData.spins);
             }
-
-            // Reset UI
-            spinBtn.innerText = "Spin Wheel";
-            updateUI();
-            spinBtn.disabled = (spinsUsedToday >= planData.spins);
         }
 
         function addHistoryItem(text, isWin) {

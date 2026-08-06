@@ -6,6 +6,7 @@
     <title>Profile Settings | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
     <style>
         :root {
             --bg-body: #070d14;
@@ -176,41 +177,54 @@
             }
         }
 
+        let isSubmittingProfile = false;
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('profileForm');
             if (form) {
                 form.addEventListener('submit', async (e) => {
                     e.preventDefault();
+                    if (isSubmittingProfile) return;
+
                     const btn = document.getElementById('submitBtn');
                     const alertDiv = document.getElementById('alertMsg');
                     alertDiv.style.display = 'none';
+
+                    isSubmittingProfile = true;
                     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
                     btn.disabled = true;
 
                     const full_name = document.getElementById('fullName').value.trim();
                     const phone = document.getElementById('phone').value.trim();
 
-                    const { ok, data } = await window.apiFetchJson('/user/update-profile', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ full_name, phone })
-                    });
+                    try {
+                        const { ok, data } = await window.apiFetchJson('/user/update-profile', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ full_name, phone })
+                        });
 
-                    if (ok && data.success) {
-                        alertDiv.className = 'alert success';
-                        alertDiv.innerText = data.message || 'Profile updated successfully';
-                        alertDiv.style.display = 'block';
-                        if (typeof window.globalSync === 'function') {
-                            window.globalSync();
+                        if (ok && data.success) {
+                            alertDiv.className = 'alert success';
+                            alertDiv.innerText = data.message || 'Profile updated successfully';
+                            alertDiv.style.display = 'block';
+                            if (typeof window.globalSync === 'function') {
+                                window.globalSync();
+                            }
+                            setTimeout(() => alertDiv.style.display = 'none', 3000);
+                        } else {
+                            alertDiv.className = 'alert error';
+                            alertDiv.innerText = data?.error || 'Failed to update profile';
+                            alertDiv.style.display = 'block';
                         }
-                        setTimeout(() => alertDiv.style.display = 'none', 3000);
-                    } else {
+                    } catch (err) {
                         alertDiv.className = 'alert error';
-                        alertDiv.innerText = data.error || 'Failed to update profile';
+                        alertDiv.innerText = 'Network error. Please try again.';
                         alertDiv.style.display = 'block';
+                    } finally {
+                        isSubmittingProfile = false;
+                        btn.innerHTML = 'Save Changes';
+                        btn.disabled = false;
                     }
-                    btn.innerHTML = 'Save Changes';
-                    btn.disabled = false;
                 });
             }
             loadProfile();

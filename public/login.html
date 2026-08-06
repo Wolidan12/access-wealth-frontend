@@ -6,6 +6,7 @@
     <title>Login | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
     <style>
         :root {
             --bg: #070d14;
@@ -265,15 +266,25 @@
             const form = document.getElementById('loginForm');
             const btn = document.getElementById('loginBtn');
             const errorEl = document.getElementById('errorMsg');
+            let isSubmittingLogin = false;
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                errorEl.style.display = 'none';
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
+                if (isSubmittingLogin) return;
 
                 const username = document.getElementById('loginUsername').value.trim();
                 const password = document.getElementById('loginPassword').value.trim();
+
+                if (!username || !password) {
+                    errorEl.innerText = 'Please enter both username and password.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+
+                isSubmittingLogin = true;
+                errorEl.style.display = 'none';
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
 
                 try {
                     const { ok, data } = await window.apiFetchJson('/login', {
@@ -299,7 +310,7 @@
                             window.location.href = '/dashboard.html';
                         }
                     } else {
-                        errorEl.innerText = data.error || 'Invalid username or password.';
+                        errorEl.innerText = data?.error || 'Invalid username or password.';
                         errorEl.style.display = 'block';
                         btn.disabled = false;
                         btn.innerHTML = 'Login to Dashboard';
@@ -310,6 +321,8 @@
                     errorEl.style.display = 'block';
                     btn.disabled = false;
                     btn.innerHTML = 'Login to Dashboard';
+                } finally {
+                    isSubmittingLogin = false;
                 }
             });
         })();

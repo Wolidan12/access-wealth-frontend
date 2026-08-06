@@ -6,6 +6,7 @@
     <title>Daily Tasks | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
     <style>
         :root {
             --bg-body: #070d14;
@@ -242,9 +243,12 @@
             }
         }
 
-        // ✅ FIXED: Use backend API to claim task
+        // ✅ FIXED: Use backend API to claim task & double-click guard
+        let isClaimingTask = false;
         async function claimTask() {
+            if (isClaimingTask) return;
             const btn = document.getElementById('taskBtn');
+            isClaimingTask = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
             btn.disabled = true;
 
@@ -266,7 +270,7 @@
                     
                     startTimer(24 * 60 * 60 * 1000);
                 } else {
-                    alert(data.error || "Failed to claim task. Please try again.");
+                    alert(data?.error || "Failed to claim task. Please try again.");
                     btn.innerHTML = 'Claim Earnings';
                     btn.disabled = false;
                 }
@@ -275,6 +279,8 @@
                 alert("Server error. Please try again.");
                 btn.innerHTML = 'Claim Earnings';
                 btn.disabled = false;
+            } finally {
+                isClaimingTask = false;
             }
         }
 
