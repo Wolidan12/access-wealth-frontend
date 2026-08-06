@@ -6,6 +6,7 @@
     <title>Upgrade Plan | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
     <style>
         :root { 
             --bg-body: #070d14; 
@@ -233,7 +234,11 @@
             document.getElementById('activationModal').style.display = 'none';
         }
 
+        let isActivatingPackage = false;
+
         async function processActivation() {
+            if (isActivatingPackage) return;
+
             const username = localStorage.getItem('username');
             const token = localStorage.getItem('token');
 
@@ -249,6 +254,7 @@
             }
 
             const btn = document.getElementById('confirmBtn');
+            isActivatingPackage = true;
             btn.innerText = "Activating...";
             btn.disabled = true;
 
@@ -278,6 +284,8 @@
                 alert("Server error. Please try again later.");
                 btn.innerText = "Confirm Upgrade";
                 btn.disabled = false;
+            } finally {
+                isActivatingPackage = false;
             }
         }
 

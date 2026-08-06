@@ -6,6 +6,7 @@
     <title>Buy Airtime | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
     <style>
         :root {
             --bg-body: #070d14;         
@@ -265,9 +266,11 @@
             });
         });
 
-        // FIXED: Correct API endpoint path
+        // FIXED: Correct API endpoint path & double-submit guard
+        let isSubmittingAirtime = false;
         document.getElementById('airtimeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (isSubmittingAirtime) return;
             
             const username = localStorage.getItem('username');
             const phone = document.getElementById('phoneNumber').value;
@@ -280,6 +283,7 @@
                 return alert("Insufficient Balance! Please fund your Account to buy this airtime.");
             }
 
+            isSubmittingAirtime = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
             btn.disabled = true;
 
@@ -309,6 +313,8 @@
                 alert("Server error. Please ensure your backend server is running.");
                 btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Recharge Now';
                 btn.disabled = false;
+            } finally {
+                isSubmittingAirtime = false;
             }
         });
     </script>

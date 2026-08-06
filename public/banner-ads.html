@@ -6,6 +6,7 @@
     <title>Banner Ads | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
     <style>
         :root {
             --bg-body: #070d14;         
@@ -150,10 +151,13 @@
             });
         });
 
+        let isSubmittingAd = false;
         document.getElementById('adForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('launchBtn');
+            if (isSubmittingAd) return;
 
+            const btn = document.getElementById('launchBtn');
+            isSubmittingAd = true;
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
 
@@ -169,15 +173,16 @@
                 });
 
                 if (ok && data.success) {
-                    alert("? Ad Campaign Launched Successfully! Your ad is now live.");
+                    alert("✅ Ad Campaign Launched Successfully! Your ad is now live.");
                     localStorage.setItem('balance', data.newBalance);
                     window.location.reload();
                 } else {
-                    alert(data.error || error || "Failed to launch ad.");
+                    alert(data?.error || error || "Failed to launch ad.");
                 }
             } catch (err) {
                 alert("Server error.");
             } finally {
+                isSubmittingAd = false;
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Launch Campaign';
             }

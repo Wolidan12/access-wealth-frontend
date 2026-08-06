@@ -6,6 +6,7 @@
     <title>Register | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
     <style>
         :root {
             --bg: #070d14;
@@ -260,42 +261,32 @@
             const form = document.getElementById('registerForm');
             const btn = document.getElementById('regBtn');
             const errorEl = document.getElementById('errorMsg');
+            let isSubmittingRegister = false;
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                errorEl.style.display = 'none';
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
+                if (isSubmittingRegister) return;
 
                 const username = document.getElementById('regUsername').value.trim();
                 const password = document.getElementById('regPassword').value.trim();
                 const referred_by = document.getElementById('regReferral').value.trim();
 
-                if (ok && data.success) {
-                    // Store the token and basic user data (including my_referral_id)
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    localStorage.setItem('username', data.user.username);
-                    localStorage.setItem('role', data.user.role);
-                    localStorage.setItem('planActivated', data.user.planActivated || 'false');
-                    localStorage.setItem('my_referral_id', data.user.my_referral_id || '');
-                    
-                    alert("Account created successfully! You are now logged in.");
-                    window.location.href = '/dashboard.html';
-                } else {
-                    errorEl.innerText = data.error || "Registration failed. Username might be taken.";
+                if (!username) {
+                    errorEl.innerText = 'Please enter a username.';
                     errorEl.style.display = 'block';
-                    btn.disabled = false;
-                    btn.innerHTML = 'Create Account';
                     return;
                 }
+
                 if (password.length < 6) {
                     errorEl.innerText = 'Password must be at least 6 characters.';
                     errorEl.style.display = 'block';
-                    btn.disabled = false;
-                    btn.innerHTML = 'Create Account';
                     return;
                 }
+
+                isSubmittingRegister = true;
+                errorEl.style.display = 'none';
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
 
                 try {
                     const { ok, data } = await window.apiFetchJson('/register', {
@@ -306,14 +297,17 @@
 
                     if (ok && data.success) {
                         localStorage.setItem('token', data.token);
-                        localStorage.setItem('username', data.user.username);
-                        localStorage.setItem('role', data.user.role);
-                        localStorage.setItem('planActivated', data.user.planActivated || 'false');
-                        localStorage.setItem('my_referral_id', data.user.my_referral_id || '');
+                        localStorage.setItem('user', JSON.stringify(data.user || { username }));
+                        localStorage.setItem('username', data.user ? data.user.username : username);
+                        localStorage.setItem('role', data.user ? data.user.role : 'user');
+                        localStorage.setItem('planActivated', (data.user && data.user.planActivated) || 'false');
+                        localStorage.setItem('my_referral_id', (data.user && (data.user.my_referral_id || data.user.referralId)) || '');
 
+                        if (typeof showToast === 'function') showToast('success', 'Account created successfully!');
+                        else alert("Account created successfully! You are now logged in.");
                         window.location.href = '/dashboard.html';
                     } else {
-                        errorEl.innerText = data.error || 'Registration failed. Please try again.';
+                        errorEl.innerText = data?.error || 'Registration failed. Username might be taken.';
                         errorEl.style.display = 'block';
                         btn.disabled = false;
                         btn.innerHTML = 'Create Account';
@@ -324,6 +318,8 @@
                     errorEl.style.display = 'block';
                     btn.disabled = false;
                     btn.innerHTML = 'Create Account';
+                } finally {
+                    isSubmittingRegister = false;
                 }
             });
         })();

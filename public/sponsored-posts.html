@@ -6,6 +6,7 @@
     <title>Sponsored Posts | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
     <style>
         :root {
             --bg-body: #070d14;         
@@ -302,8 +303,11 @@
             btn.style.background = 'var(--yellow-gradient)';
         }
 
+        let isSubmittingSponsoredTask = false;
         async function submitTask(postId) {
+            if (isSubmittingSponsoredTask) return;
             const btn = document.getElementById(`submitBtn_${postId}`);
+            isSubmittingSponsoredTask = true;
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
             
@@ -318,7 +322,7 @@
                     btn.innerHTML = '<i class="fa-solid fa-clock"></i> Pending Review';
                     document.getElementById(`status_${postId}`).innerHTML = `<span class="status-badge status-pending">⏳ Submitted for review</span>`;
                 } else {
-                    alert(data.error || 'Failed to submit task');
+                    alert(data?.error || 'Failed to submit task');
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit for Review';
                 }
@@ -326,6 +330,8 @@
                 alert('Server error. Please try again.');
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit for Review';
+            } finally {
+                isSubmittingSponsoredTask = false;
             }
         }
     </script>
