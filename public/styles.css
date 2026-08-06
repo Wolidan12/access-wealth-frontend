@@ -1,0 +1,569 @@
+/* ========================================
+   Access Wealth — 3D & Stylish CSS Enhancements
+   ======================================== */
+
+/* ---------- CSS Custom Properties for 3D ---------- */
+:root {
+    --perspective: 1200px;
+    --tilt-max: 12deg;
+    --glow-gold: rgba(212, 175, 55, 0.45);
+    --glow-gold-strong: rgba(212, 175, 55, 0.7);
+    --glass-bg: rgba(255, 255, 255, 0.06);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --depth-shadow-1: 0 4px 8px rgba(0, 0, 0, 0.3);
+    --depth-shadow-2: 0 8px 24px rgba(0, 0, 0, 0.25);
+    --depth-shadow-3: 0 20px 50px rgba(0, 0, 0, 0.35);
+    --depth-shadow-glow: 0 8px 32px var(--glow-gold);
+    --neon-blue: #4fc3f7;
+    --neon-gold: #ffd54f;
+}
+
+/* ---------- 3D Scene Setup ---------- */
+.scene-3d {
+    perspective: var(--perspective);
+    perspective-origin: center;
+}
+
+/* ---------- 3D Card Tilt Effect ---------- */
+.card-3d {
+    transform-style: preserve-3d;
+    transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+                box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    will-change: transform;
+}
+
+.card-3d:hover {
+    transform: translateZ(20px) rotateX(4deg) rotateY(-4deg);
+    box-shadow: 
+        -8px 8px 20px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(212, 175, 55, 0.15);
+}
+
+/* ---------- 3D Floating Cards ---------- */
+.float-3d {
+    animation: float3d 6s ease-in-out infinite;
+    transform-style: preserve-3d;
+}
+
+@keyframes float3d {
+    0%, 100% {
+        transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+    }
+    25% {
+        transform: translateY(-10px) rotateX(2deg) rotateY(-2deg);
+    }
+    50% {
+        transform: translateY(-5px) rotateX(-1deg) rotateY(1deg);
+    }
+    75% {
+        transform: translateY(-12px) rotateX(1deg) rotateY(2deg);
+    }
+}
+
+/* ---------- 3D Button Effect ---------- */
+.btn-3d {
+    position: relative;
+    transform-style: preserve-3d;
+    transform: perspective(500px) translateZ(0);
+    transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.btn-3d::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(0, 0, 0, 0.25);
+    transform: translateZ(-8px);
+    transition: transform 0.2s ease;
+}
+
+.btn-3d:hover {
+    transform: perspective(500px) translateZ(6px);
+}
+
+.btn-3d:active {
+    transform: perspective(500px) translateZ(-2px);
+}
+
+.btn-3d:active::after {
+    transform: translateZ(-4px);
+}
+
+/* ---------- 3D Press Effect for Primary Buttons ---------- */
+.btn-primary {
+    box-shadow: 
+        0 6px 20px rgba(212, 175, 55, 0.35),
+        0 2px 4px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: translateY(0);
+    transition: all 0.15s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 10px 30px rgba(212, 175, 55, 0.45),
+        0 4px 8px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.btn-primary:active {
+    transform: translateY(1px);
+    box-shadow: 
+        0 2px 8px rgba(212, 175, 55, 0.3),
+        0 1px 2px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* ---------- Glassmorphism Card ---------- */
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px) saturate(1.6);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.glass-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(212, 175, 55, 0.3);
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.35),
+        0 0 20px rgba(212, 175, 55, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    transform: translateY(-4px);
+}
+
+/* ---------- Holographic Shimmer Effect ---------- */
+.holo-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.holo-shimmer::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(212, 175, 55, 0.08) 40%,
+        rgba(255, 255, 255, 0.12) 50%,
+        rgba(212, 175, 55, 0.08) 60%,
+        transparent 70%
+    );
+    transform: rotate(0deg);
+    animation: holoShimmer 4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes holoShimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(25deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(25deg); }
+}
+
+/* ---------- Neon Glow Borders ---------- */
+.neon-border {
+    position: relative;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+}
+
+.neon-border::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, var(--neon-gold), transparent 40%, transparent 60%, var(--neon-gold));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
+}
+
+.neon-border:hover::before {
+    opacity: 0.6;
+    animation: neonPulse 2s ease-in-out infinite;
+}
+
+@keyframes neonPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+}
+
+/* ---------- 3D Hero Image ---------- */
+.hero-3d-image {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    position: relative;
+}
+
+.hero-3d-image img {
+    transform: rotateY(-5deg) rotateX(3deg);
+    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    box-shadow: 
+        20px 20px 60px rgba(0, 0, 0, 0.4),
+        -5px -5px 20px rgba(212, 175, 55, 0.1);
+}
+
+.hero-3d-image:hover img {
+    transform: rotateY(0deg) rotateX(0deg) scale(1.02);
+    box-shadow: 
+        25px 25px 70px rgba(0, 0, 0, 0.5),
+        0 0 40px rgba(212, 175, 55, 0.15);
+}
+
+/* ---------- 3D Text Shadow ---------- */
+.text-3d {
+    text-shadow: 
+        0 1px 0 rgba(212, 175, 55, 0.3),
+        0 2px 0 rgba(212, 175, 55, 0.25),
+        0 3px 0 rgba(212, 175, 55, 0.2),
+        0 4px 0 rgba(212, 175, 55, 0.15),
+        0 5px 10px rgba(0, 0, 0, 0.4);
+}
+
+.text-3d-light {
+    text-shadow: 
+        0 1px 0 rgba(255, 255, 255, 0.1),
+        0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- Gradient Border Animation ---------- */
+.gradient-border-animated {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+.gradient-border-animated::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(
+        var(--border-angle, 0deg),
+        #d4af37,
+        #f0e68c,
+        #b8860b,
+        #ffd700,
+        #d4af37
+    );
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: borderRotate 4s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes borderRotate {
+    0% { --border-angle: 0deg; }
+    100% { --border-angle: 360deg; }
+}
+
+@property --border-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
+/* ---------- Parallax Layers ---------- */
+.parallax-container {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}
+
+.parallax-layer {
+    transition: transform 0.1s ease-out;
+    will-change: transform;
+}
+
+.parallax-layer-1 { transform: translateZ(10px); }
+.parallax-layer-2 { transform: translateZ(20px); }
+.parallax-layer-3 { transform: translateZ(40px); }
+
+/* ---------- 3D Flip Card ---------- */
+.flip-card {
+    perspective: 800px;
+    height: 280px;
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    transform-style: preserve-3d;
+}
+
+.flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+.flip-card-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(17, 42, 70, 0.9));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+/* ---------- Animated Background Orbs ---------- */
+.orb-bg {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+    animation: orbFloat 20s ease-in-out infinite;
+}
+
+.orb-1 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, #d4af37 0%, transparent 70%);
+    top: -100px;
+    right: -100px;
+    animation-delay: 0s;
+}
+
+.orb-2 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, #4fc3f7 0%, transparent 70%);
+    bottom: -150px;
+    left: -150px;
+    animation-delay: -7s;
+}
+
+.orb-3 {
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, #f0e68c 0%, transparent 70%);
+    top: 40%;
+    left: 30%;
+    animation-delay: -14s;
+}
+
+@keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(40px, -30px) scale(1.1); }
+    50% { transform: translate(-20px, 20px) scale(0.95); }
+    75% { transform: translate(30px, 40px) scale(1.05); }
+}
+
+/* ---------- Enhanced Feature Card with Depth ---------- */
+.feature-card-enhanced {
+    position: relative;
+    background: linear-gradient(
+        145deg,
+        rgba(17, 42, 70, 0.7) 0%,
+        rgba(17, 42, 70, 0.4) 100%
+    );
+    backdrop-filter: blur(16px);
+    border-radius: 24px;
+    padding: 32px;
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    transform-style: preserve-3d;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    overflow: hidden;
+}
+
+.feature-card-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.5), transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.feature-card-enhanced::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+        600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(212, 175, 55, 0.06),
+        transparent 40%
+    );
+    pointer-events: none;
+}
+
+.feature-card-enhanced:hover {
+    transform: translateY(-8px) translateZ(10px);
+    border-color: rgba(212, 175, 55, 0.35);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(212, 175, 55, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.feature-card-enhanced:hover::before {
+    opacity: 1;
+}
+
+/* ---------- 3D Icon Container ---------- */
+.icon-3d {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    box-shadow: 
+        0 8px 16px rgba(0, 0, 0, 0.2),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.1),
+        inset 0 2px 4px rgba(255, 255, 255, 0.05);
+    transform: perspective(500px) rotateX(10deg);
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+}
+
+.icon-3d:hover {
+    transform: perspective(500px) rotateX(0deg) scale(1.1);
+    box-shadow: 
+        0 12px 24px rgba(212, 175, 55, 0.2),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.1),
+        inset 0 2px 4px rgba(255, 255, 255, 0.08);
+}
+
+.icon-3d i {
+    color: #d4af37;
+    font-size: 28px;
+    filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.3));
+}
+
+/* ---------- Stats Counter 3D ---------- */
+.stat-3d {
+    text-align: center;
+    padding: 24px;
+    transform-style: preserve-3d;
+}
+
+.stat-3d h2 {
+    font-size: clamp(32px, 6vw, 48px);
+    font-weight: 800;
+    background: linear-gradient(135deg, #d4af37 0%, #ffd700 50%, #b8860b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.3));
+    transform: translateZ(20px);
+}
+
+/* ---------- Scroll Reveal Animation ---------- */
+.reveal-3d {
+    opacity: 0;
+    transform: translateY(40px) rotateX(10deg);
+    transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.reveal-3d.revealed {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg);
+}
+
+/* ---------- Enhanced Navbar ---------- */
+.navbar-enhanced {
+    background: rgba(7, 13, 20, 0.85);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* ---------- Animated Underline ---------- */
+.nav-link-3d {
+    position: relative;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.nav-link-3d::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #d4af37, #ffd700);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+}
+
+.nav-link-3d:hover {
+    color: #d4af37;
+}
+
+.nav-link-3d:hover::after {
+    width: 100%;
+}
+
+/* ---------- Responsive Adjustments ---------- */
+@media (prefers-reduced-motion: reduce) {
+    .float-3d,
+    .orb,
+    .holo-shimmer::before {
+        animation: none;
+    }
+    
+    .card-3d:hover,
+    .feature-card-enhanced:hover,
+    .btn-3d:hover {
+        transform: none;
+    }
+    
+    .flip-card:hover .flip-card-inner {
+        transform: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-3d-image img {
+        transform: none;
+    }
+    
+    .card-3d:hover {
+        transform: translateZ(10px);
+    }
+}
