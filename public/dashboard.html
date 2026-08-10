@@ -187,6 +187,7 @@
         }
     </style>
     <link rel="stylesheet" href="/brand.css">
+    <link rel="stylesheet" href="/dashboard-theme.css">
     <script src="/brand.js" defer></script>
 </head>
 <body>
@@ -204,7 +205,8 @@
     <div class="mobile-header">
         <i class="fa-solid fa-bars-staggered menu-btn" onclick="toggleMobileSidebar()"></i>
         <div class="logo-text">ACCESS <span>WEALTH</span></div>
-        <img src="" class="mobile-avatar" id="mobileAvatar">
+        <button class="aw-theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark theme" title="Change theme"><i class="fa-solid fa-moon"></i></button>
+        <img src="" class="mobile-avatar" id="mobileAvatar" alt="User avatar">
     </div>
     <div class="overlay" id="overlay" onclick="toggleMobileSidebar()"></div>
 
@@ -275,6 +277,7 @@
         <div class="top-header">
             <div class="header-left"><i class="fa-solid fa-bars-staggered" onclick="toggleDesktopSidebar()"></i></div>
             <div class="header-right">
+                <button class="aw-theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark theme" title="Change theme"><i class="fa-solid fa-moon"></i></button>
                 <div class="user-info">
                     <h4 id="displayName">USER</h4>
                     <p id="displayHandle">@user</p>

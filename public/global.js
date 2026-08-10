@@ -131,6 +131,9 @@ function applyTheme(theme) {
             icon.className = next === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
         }
         btn.setAttribute('aria-pressed', next === 'dark' ? 'true' : 'false');
+        const action = next === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+        btn.setAttribute('aria-label', action);
+        btn.setAttribute('title', action);
     });
     return next;
 }
