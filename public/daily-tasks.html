@@ -248,7 +248,7 @@
             try {
                 const { ok, data } = await window.apiFetchJson('/claim-daily-task', {
                     method: 'POST',
-                    body: JSON.stringify({ amount: dailyPayout })
+                    body: JSON.stringify({})
                 });
 
                 if (ok && data.success) {
@@ -263,9 +263,19 @@
                     
                     startTimer(24 * 60 * 60 * 1000);
                 } else {
-                    alert(data?.error || "Failed to claim task. Please try again.");
-                    btn.innerHTML = 'Claim Earnings';
-                    btn.disabled = false;
+                    const alreadyClaimed = data?.already_claimed === true || data?.code === 'already_claimed' || data?.error === 'already_claimed';
+                    if (alreadyClaimed) {
+                        const nextClaimAt = data?.next_claim_at || data?.nextClaimAt;
+                        const remaining = nextClaimAt ? Math.max(0, new Date(nextClaimAt).getTime() - Date.now()) : 24 * 60 * 60 * 1000;
+                        if (typeof showToast === 'function') showToast('info', data?.message || 'Today’s earnings have already been claimed.');
+                        else alert(data?.message || 'Today’s earnings have already been claimed.');
+                        localStorage.setItem('lastTaskClaimTime', String(Date.now() - (24 * 60 * 60 * 1000 - remaining)));
+                        startTimer(remaining);
+                    } else {
+                        alert(data?.error || "Failed to claim task. Please try again.");
+                        btn.innerHTML = 'Claim Earnings';
+                        btn.disabled = false;
+                    }
                 }
             } catch (err) {
                 console.error("Task claim error:", err);
