@@ -54,6 +54,111 @@
     max-height: 116px;
 }
 
+/* -------------------------------------------------------------------------
+   Access Wealth shared visual system: deep navy, electric blue, gold, white
+   This stylesheet is loaded after individual page styles to unify the portal.
+   ------------------------------------------------------------------------- */
+:root {
+    --aw-navy-950: #030c20;
+    --aw-navy-900: #061733;
+    --aw-navy-800: #09264d;
+    --aw-blue: #078de9;
+    --aw-blue-light: #39c7f1;
+    --aw-gold: #e3b83f;
+    --aw-gold-deep: #b9820b;
+    --aw-white: #f7fbff;
+    --aw-muted: #9eb4d1;
+    --bg: var(--aw-navy-950);
+    --bg-body: var(--aw-navy-950);
+    --bg-cards: var(--aw-navy-800);
+    --surface: rgba(9, 38, 77, .94);
+    --surface-strong: var(--aw-navy-800);
+    --text: var(--aw-white);
+    --text-main: var(--aw-white);
+    --text-muted: var(--aw-muted);
+    --muted: var(--aw-muted);
+    --primary-yellow: var(--aw-gold);
+    --accent: var(--aw-gold);
+    --accent-2: var(--aw-gold-deep);
+    --yellow-gradient: linear-gradient(135deg, #f4d063 0%, var(--aw-gold) 48%, var(--aw-gold-deep) 100%);
+    --card-gradient: linear-gradient(145deg, #0d376b 0%, var(--aw-navy-800) 55%, #061b3b 100%);
+    --border-light: rgba(57, 199, 241, .20);
+    --line: rgba(57, 199, 241, .20);
+    --accent-soft: rgba(227, 184, 63, .13);
+    --glow-gold: rgba(227, 184, 63, .45);
+    --neon-blue: var(--aw-blue-light);
+    --neon-gold: #f4d063;
+}
+
+body {
+    background-color: var(--aw-navy-950);
+    background-image: radial-gradient(circle at 88% -10%, rgba(7, 141, 233, .18), transparent 31%), radial-gradient(circle at -8% 96%, rgba(227, 184, 63, .10), transparent 28%);
+    color: var(--aw-white);
+}
+
+/* Core surfaces used throughout the public site and member portal. */
+.sidebar, .mobile-header, .top-header, .navbar, .nav, .auth-card,
+.card, .panel-card, .form-card, .secure-card, .history-card, .stat-box,
+.plan-card, .status-card, .action-card, .flat-card, .content-card,
+.modal-content, .support-card, .ticket-card, .settings-card {
+    border-color: var(--border-light);
+}
+.sidebar, .mobile-header, .top-header, .navbar {
+    background-color: rgba(6, 23, 51, .96);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+}
+.card, .panel-card, .form-card, .secure-card, .history-card, .stat-box,
+.plan-card, .status-card, .action-card, .flat-card, .content-card,
+.auth-card, .support-card, .ticket-card, .settings-card {
+    background-color: var(--bg-cards);
+    box-shadow: 0 14px 34px rgba(0, 5, 18, .24);
+}
+
+h1, h2, h3, h4, h5, h6, strong, .page-title, .section-title { color: var(--aw-white); }
+p, .page-subtitle, .text-sm-muted, .empty-state, .empty-state-muted { color: var(--text-muted); }
+a { color: inherit; }
+
+.btn-primary, .btn-submit, .btn-upgrade-sidebar, .btn-activate-primary,
+.btn-fund, .btn-action, .btn-withdraw-card, .btn-task-submit {
+    background: var(--yellow-gradient);
+    color: #06152e;
+    border-color: transparent;
+    box-shadow: 0 8px 20px rgba(227, 184, 63, .20);
+}
+.btn-outline, .btn-secondary, .btn-activate, .copy-btn {
+    border-color: var(--aw-blue-light);
+    color: var(--aw-white);
+    background: rgba(7, 141, 233, .10);
+}
+.btn-outline:hover, .btn-secondary:hover, .btn-activate:hover, .copy-btn:hover {
+    background: var(--aw-blue);
+    border-color: var(--aw-blue);
+    color: var(--aw-white);
+}
+
+input, select, textarea, .form-control {
+    color: var(--aw-white);
+    background-color: rgba(3, 12, 32, .55);
+    border-color: rgba(57, 199, 241, .20);
+}
+input::placeholder, textarea::placeholder { color: #7892b5; }
+input:focus, select:focus, textarea:focus, .form-control:focus {
+    border-color: var(--aw-blue-light) !important;
+    box-shadow: 0 0 0 3px rgba(57, 199, 241, .15);
+}
+
+table th { color: var(--aw-blue-light); }
+table td { color: var(--aw-white); }
+table tbody tr:hover { background-color: rgba(7, 141, 233, .09); }
+
+.nav-item:hover, .nav-item.active, .sub-item:hover {
+    color: var(--aw-white);
+    background-color: rgba(7, 141, 233, .15);
+}
+.nav-item.active { background: linear-gradient(135deg, var(--aw-blue) 0%, #075eb7 100%); }
+.nav-label, .section-title i, .page-title i { color: var(--aw-gold); }
+
 @media (max-width: 768px) {
     .logo-area.aw-image-brand { min-height: 84px; }
     .logo-area.aw-image-brand .aw-brand-logo { max-height: 62px; }
