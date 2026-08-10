@@ -49,6 +49,11 @@
         .page-header h1 { font-size: 32px; color: var(--primary-yellow); margin-bottom: 10px; }
         .page-header p { color: var(--text-muted); font-size: 15px; max-width: 600px; margin: 0 auto; }
 
+        .active-investment-status { max-width: 760px; margin: -15px auto 30px; padding: 16px 20px; border-radius: 14px; border: 1px solid var(--border-light); background: rgba(212,175,55,.08); color: var(--text-muted); text-align: center; font-size: 14px; }
+        .active-investment-status strong { color: var(--primary-yellow); }
+        .active-investment-status.is-active { border-color: rgba(46,204,113,.4); background: rgba(46,204,113,.08); }
+        .plan-card-current { border-color: #2ecc71; }
+        .plan-card-current .btn-activate { background: rgba(46,204,113,.15); color: #2ecc71; cursor: default; }
         .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
         
         .plan-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; padding: 30px; transition: 0.3s; position: relative; overflow: hidden; display: flex; flex-direction: column; }
@@ -127,6 +132,7 @@
             <p>Upgrade your plan to unlock higher daily earnings, instant affiliate payouts, and massive multipliers.</p>
         </div>
 
+        <div class="active-investment-status" id="activeInvestmentStatus" role="status">Checking your current plan…</div>
         <div class="plans-grid" id="plansGrid"></div>
     </div>
 
@@ -157,6 +163,7 @@
 
         let packages = [];
         let selectedPackage = null;
+        let activeInvestment = null;
 
         function formatNaira(amount) {
             return `₦${Number(amount || 0).toLocaleString()}`;
@@ -192,16 +199,26 @@
                             <li><i class="fa-solid fa-check"></i> Total Payout: ${formatNaira(pkg.total_payout)}</li>
                             <li><i class="fa-solid fa-check"></i> Referral Bonus: ${formatNaira(pkg.referral_bonus)}</li>
                         </ul>
-                        <button class="btn-activate" onclick="openModal('${pkg.id}')">Activate Package</button>
+                        <button class="btn-activate" onclick="openModal('${pkg.id}')" ${isCurrentPackage(pkg) ? 'disabled' : ''}>${isCurrentPackage(pkg) ? 'Current Package' : 'Upgrade Package'}</button>
                     </div>
                 `;
             }).join('');
         }
 
+        function isCurrentPackage(pkg) {
+            if (!activeInvestment || !pkg) return false;
+            const activeId = activeInvestment.package_id || activeInvestment.packageId || activeInvestment.plan_id || activeInvestment.planId || activeInvestment.package?.id;
+            return String(activeId || '') === String(pkg.id);
+        }
+
         function openModal(packageId) {
-            selectedPackage = packages.find((pkg) => pkg.id === packageId);
+            selectedPackage = packages.find((pkg) => String(pkg.id) === String(packageId));
             if (!selectedPackage) {
                 alert('Invalid package selected. Please refresh and try again.');
+                return;
+            }
+            if (isCurrentPackage(selectedPackage)) {
+                if (typeof showToast === 'function') showToast('info', 'This is already your active package.');
                 return;
             }
             
@@ -261,10 +278,9 @@
             btn.disabled = true;
 
             try {
-                // ✅ Use apiFetchJson which automatically adds the JWT token
-                const { ok, data } = await window.apiFetchJson('/activate', {
+                const { ok, data } = await window.apiFetchJson('/upgrade-package', {
                     method: 'POST',
-                    body: JSON.stringify({ package_id: selectedPackage.id })
+                    body: JSON.stringify({ packageId: selectedPackage.id })
                 });
 
                 if (ok && data.success) {
@@ -291,7 +307,36 @@
             }
         }
 
-        async function loadPackages() {
+        function getInvestmentLabel(investment) {
+            return investment?.package_name || investment?.packageName || investment?.package?.name || investment?.plan_name || investment?.planName || 'an active plan';
+        }
+
+        async function loadActiveInvestment() {
+            const status = document.getElementById('activeInvestmentStatus');
+            try {
+                const { ok, data } = await window.apiFetchJson('/active-investment', { method: 'GET' });
+                if (ok && data.success) {
+                    activeInvestment = data.investment || data.activeInvestment || data.active_investment || null;
+                } else {
+                    activeInvestment = null;
+                }
+                if (activeInvestment) {
+                    status.classList.add('is-active');
+                    status.innerHTML = '<i class="fa-solid fa-circle-check"></i> Your current plan: <strong></strong>. Choose a new package below to upgrade.';
+                    status.querySelector('strong').textContent = getInvestmentLabel(activeInvestment);
+                } else {
+                    status.classList.remove('is-active');
+                    status.textContent = 'You do not have an active investment yet. Choose a package to get started.';
+                }
+            } catch (err) {
+                activeInvestment = null;
+                status.textContent = 'Unable to check your current plan. You can still view available packages.';
+                if (window.__AW_DEBUG__) console.error('Active investment load error:', err);
+            }
+        }
+
+        async function loadUpgradeData() {
+            await loadActiveInvestment();
             try {
                 const { ok, data } = await window.apiFetchJson('/packages', { method: 'GET' });
                 if (ok && data.success && Array.isArray(data.packages)) {
@@ -299,15 +344,15 @@
                     renderPlans();
                     return;
                 }
-                alert(data.error || 'Unable to load package list.');
+                throw new Error(data.error || 'Unable to load package list.');
             } catch (err) {
+                document.getElementById('plansGrid').innerHTML = '<p class="plans-empty-state">Unable to load packages. Please refresh and try again.</p>';
                 if (window.__AW_DEBUG__) console.error('Package load error:', err);
-                alert('Unable to load package list. Please refresh and try again.');
             }
         }
 
-        window.addEventListener('globalSyncComplete', loadPackages);
-        document.addEventListener('DOMContentLoaded', loadPackages);
+        window.addEventListener('globalSyncComplete', loadUpgradeData);
+        document.addEventListener('DOMContentLoaded', loadUpgradeData);
     </script>
 </body>
 </html>
