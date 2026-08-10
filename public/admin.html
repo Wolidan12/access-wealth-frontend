@@ -120,6 +120,8 @@
             .page-header h1 { font-size: 24px; }
         }
     </style>
+    <link rel="stylesheet" href="/brand.css">
+    <script src="/brand.js" defer></script>
 </head>
 <body>
 
@@ -506,7 +508,7 @@
                             <td>${statusBadge}</td>
                             <td>
                                 <button class="action-btn" onclick="quickAdjust('${user.username}')">Adjust</button>
-                                <button class="action-btn" onclick="quickAssignPlan('${user.username}')">Plan</button>
+                                <button class="action-btn" onclick="quickAssignPlan('${user.username}')">Change Plan</button>
                                 ${((user.status || 'active').toLowerCase() === 'banned') ? `<button class="action-btn" style="color:var(--success); border-color:var(--success);" onclick="toggleUserStatus('${user.username}', 'active')">Activate</button>` : `<button class="action-btn" style="color:var(--danger); border-color:var(--danger);" onclick="toggleUserStatus('${user.username}', 'banned')">Ban</button>`}
                             </td>
                         </tr>`;

@@ -107,6 +107,8 @@
             .task-amount { font-size: 35px; }
         }
     </style>
+    <link rel="stylesheet" href="/brand.css">
+    <script src="/brand.js" defer></script>
 </head>
 <body>
 
@@ -190,24 +192,28 @@
         function toggleDropdown(dropdownId, element) { element.classList.toggle('open'); document.getElementById(dropdownId).classList.toggle('show'); element.classList.toggle('active'); }
         function logout() { localStorage.clear(); window.location.href = '/login.html'; }
 
-        // --- DYNAMIC PLAN PAYOUTS ---
-        const planDailyEarnings = {
-            'Starter Basic': 5,
-            'Starter Bronze': 15,
-            'Starter Silver': 30,
-            'Starter Gold': 45,
-            'Growth Plus': 120,
-            'Growth Pro': 300,
-            'Growth Max': 600,
-            'Wealth Standard': 1400,
-            'Wealth Premium': 3500,
-            'Elite Vanguard': 7500,
-            'Elite Apex': 15000
-        };
-
+        // Daily payout is sourced from the user's actual active investment, not a browser-side plan map.
         let userPlan = null;
         let dailyPayout = 0;
         let timerInterval;
+
+        async function loadTaskInvestment() {
+            try {
+                const { ok, data } = await window.apiFetchJson('/active-investment');
+                const investment = ok && data.success ? (data.investment || data.activeInvestment || data.active_investment) : null;
+                if (!investment) throw new Error('No active investment');
+                userPlan = investment.package_name || investment.packageName || investment.package?.name || investment.plan_name || investment.planName || 'Active Investment';
+                const rate = Number(investment.daily_rate ?? investment.dailyRate ?? 0);
+                const capital = Number(investment.capital ?? investment.amount ?? investment.invested_amount ?? 0);
+                dailyPayout = Number(investment.daily_earning ?? investment.dailyEarning ?? (capital * (Math.abs(rate) <= 1 ? rate : rate / 100)));
+                if (!Number.isFinite(dailyPayout) || dailyPayout <= 0) throw new Error('Invalid investment earnings');
+                document.getElementById('planNameDisplay').innerText = userPlan;
+                document.getElementById('taskPayoutDisplay').innerText = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 2 }).format(dailyPayout);
+                checkTaskStatus();
+            } catch (_) {
+                document.getElementById('lockScreen').style.display = 'flex';
+            }
+        }
 
         window.onload = () => {
             const user = localStorage.getItem('username') || "Guest";
@@ -216,20 +222,7 @@
             const avatarUrl = `https://ui-avatars.com/api/?name=${user}&background=d4af37&color=112A46&bold=true`;
             document.getElementById('desktopAvatar').src = avatarUrl;
             document.getElementById('mobileAvatar').src = avatarUrl;
-
-            const isActivated = localStorage.getItem('planActivated') === 'true';
-            userPlan = localStorage.getItem('activePackage');
-            
-            if (!isActivated || !userPlan || !planDailyEarnings[userPlan]) {
-                document.getElementById('lockScreen').style.display = 'flex';
-                return;
-            }
-
-            dailyPayout = planDailyEarnings[userPlan];
-            document.getElementById('planNameDisplay').innerText = `${userPlan} Package`;
-            document.getElementById('taskPayoutDisplay').innerText = `₦${dailyPayout.toLocaleString()}`;
-
-            checkTaskStatus();
+            loadTaskInvestment();
         };
 
         function checkTaskStatus() {
@@ -255,7 +248,7 @@
             try {
                 const { ok, data } = await window.apiFetchJson('/claim-daily-task', {
                     method: 'POST',
-                    body: JSON.stringify({ amount: dailyPayout })
+                    body: JSON.stringify({})
                 });
 
                 if (ok && data.success) {
@@ -270,9 +263,19 @@
                     
                     startTimer(24 * 60 * 60 * 1000);
                 } else {
-                    alert(data?.error || "Failed to claim task. Please try again.");
-                    btn.innerHTML = 'Claim Earnings';
-                    btn.disabled = false;
+                    const alreadyClaimed = data?.already_claimed === true || data?.code === 'already_claimed' || data?.error === 'already_claimed';
+                    if (alreadyClaimed) {
+                        const nextClaimAt = data?.next_claim_at || data?.nextClaimAt;
+                        const remaining = nextClaimAt ? Math.max(0, new Date(nextClaimAt).getTime() - Date.now()) : 24 * 60 * 60 * 1000;
+                        if (typeof showToast === 'function') showToast('info', data?.message || 'Today’s earnings have already been claimed.');
+                        else alert(data?.message || 'Today’s earnings have already been claimed.');
+                        localStorage.setItem('lastTaskClaimTime', String(Date.now() - (24 * 60 * 60 * 1000 - remaining)));
+                        startTimer(remaining);
+                    } else {
+                        alert(data?.error || "Failed to claim task. Please try again.");
+                        btn.innerHTML = 'Claim Earnings';
+                        btn.disabled = false;
+                    }
                 }
             } catch (err) {
                 console.error("Task claim error:", err);

@@ -6,107 +6,97 @@ const GLOBAL_SYNC_SKIP_PAGES = ['login.html', 'register.html', 'admin.html', 'su
 window.__AW_DEBUG__ = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
 // ==========================================
-// API HELPERS (unchanged)
+// API HELPERS — token refresh is shared by JSON and multipart requests.
 // ==========================================
+function apiUrl(path) {
+    return path.startsWith('http') ? path : `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+}
+
 async function apiFetch(path, options = {}) {
-    const url = path.startsWith('http') ? path : `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
     try {
-        return await fetch(url, options);
+        return await fetch(apiUrl(path), options);
     } catch (networkError) {
         return {
-            ok: false,
-            status: 0,
-            statusText: networkError.message,
+            ok: false, status: 0, statusText: networkError.message,
             json: async () => ({ success: false, error: `Network error: ${networkError.message}` }),
             text: async () => networkError.message
         };
     }
 }
 
-async function apiFetchJson(path, options = {}) {
-    const token = localStorage.getItem('token');
-    const headers = {
-        'Content-Type': 'application/json',
-        ...options.headers
-    };
-    
-    if (token && !path.includes('/login') && !path.includes('/register')) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    
-    const response = await apiFetch(path, { ...options, headers });
-    let data;
-    try {
-        data = await response.json();
-    } catch (_) {
-        data = { success: false, error: 'Unable to parse server response.' };
-    }
-
-    return {
-        response,
-        ok: response.ok,
-        status: response.status,
-        statusText: response.statusText,
-        data,
-        success: response.ok && data.success !== false,
-        error: data.error || (!response.ok ? response.statusText || 'API request failed' : null)
-    };
+let refreshInFlight = null;
+function isAuthRoute(path) {
+    return /\/(login|register|refresh-token)(?:\?|$)/.test(path);
 }
 
-window.apiFetch = apiFetch;
-window.apiFetchJson = apiFetchJson;
+function redirectToLoginAfterRefreshFailure() {
+    if (window.location.pathname.endsWith('/login.html')) return;
+    localStorage.removeItem('token');
+    window.location.assign('/login.html');
+}
 
-async function apiFetchMultipart(path, formData, options = {}) {
+async function refreshAccessToken() {
+    if (refreshInFlight) return refreshInFlight;
+    refreshInFlight = (async () => {
+        const currentToken = localStorage.getItem('token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (currentToken) headers.Authorization = `Bearer ${currentToken}`;
+        const response = await apiFetch('/refresh-token', { method: 'POST', headers, body: '{}' });
+        let data = {};
+        try { data = await response.json(); } catch (_) {}
+        const token = data.token || data.newToken || data.access_token || data.accessToken || data.data?.token;
+        if (!response.ok || !token) return null;
+        localStorage.setItem('token', token);
+        return token;
+    })();
+    try { return await refreshInFlight; } finally { refreshInFlight = null; }
+}
+
+async function authorizedFetch(path, options = {}, canRefresh = true) {
+    const headers = { ...(options.headers || {}) };
     const token = localStorage.getItem('token');
-    const headers = {
-        ...options.headers
-    };
-    
-    if (token && !path.includes('/login') && !path.includes('/register')) {
-        headers['Authorization'] = `Bearer ${token}`;
+    if (token && !isAuthRoute(path)) headers.Authorization = `Bearer ${token}`;
+    let response = await apiFetch(path, { ...options, headers });
+    if (canRefresh && !isAuthRoute(path) && (response.status === 401 || response.status === 403)) {
+        const freshToken = await refreshAccessToken();
+        if (freshToken) {
+            headers.Authorization = `Bearer ${freshToken}`;
+            response = await apiFetch(path, { ...options, headers }); // exactly one retry
+        } else {
+            redirectToLoginAfterRefreshFailure();
+        }
     }
-    
-    const url = path.startsWith('http') ? path : `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
-    let response;
-    try {
-        response = await fetch(url, {
-            ...options,
-            method: options.method || 'POST',
-            headers,
-            body: formData
-        });
-    } catch (networkError) {
-        return {
-            ok: false,
-            status: 0,
-            statusText: networkError.message,
-            json: async () => ({ success: false, error: `Network error: ${networkError.message}` }),
-            text: async () => networkError.message,
-            data: { success: false, error: `Network error: ${networkError.message}` },
-            success: false,
-            error: `Network error: ${networkError.message}`
-        };
-    }
+    return response;
+}
 
+async function responseResult(response) {
     let data;
-    try {
-        data = await response.json();
-    } catch (_) {
-        data = { success: false, error: 'Unable to parse server response.' };
-    }
-
+    try { data = await response.json(); }
+    catch (_) { data = { success: false, error: 'Unable to parse server response.' }; }
     return {
-        response,
-        ok: response.ok,
-        status: response.status,
-        statusText: response.statusText,
-        data,
+        response, ok: response.ok, status: response.status, statusText: response.statusText, data,
         success: response.ok && data.success !== false,
         error: data.error || (!response.ok ? data.message || response.statusText || 'API request failed' : null)
     };
 }
 
+async function apiFetchJson(path, options = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    return responseResult(await authorizedFetch(path, { ...options, headers }));
+}
+
+async function apiFetchMultipart(path, formData, options = {}) {
+    // Do not set Content-Type here — fetch supplies the multipart boundary.
+    return responseResult(await authorizedFetch(path, {
+        ...options, method: options.method || 'POST', headers: { ...(options.headers || {}) }, body: formData
+    }));
+}
+
+// Public raw-style calls get the same refresh-and-retry behavior as JSON requests.
+window.apiFetch = (path, options = {}) => authorizedFetch(path, options);
+window.apiFetchJson = apiFetchJson;
 window.apiFetchMultipart = apiFetchMultipart;
+window.refreshAccessToken = refreshAccessToken;
 
 // ==========================================
 // THEME MANAGEMENT (FIXED)
@@ -131,6 +121,9 @@ function applyTheme(theme) {
             icon.className = next === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
         }
         btn.setAttribute('aria-pressed', next === 'dark' ? 'true' : 'false');
+        const action = next === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+        btn.setAttribute('aria-label', action);
+        btn.setAttribute('title', action);
     });
     return next;
 }
@@ -223,7 +216,22 @@ async function globalSync() {
         const { ok, data, error } = await apiFetchJson(`/user/${username}?t=${Date.now()}`);
         
         if (ok && data.success) {
-            const u = data.user;
+            // Keep one normalized copy of the complete user payload for every page.
+            const u = data.user || {};
+            const normalizedUser = {
+                ...u,
+                username: u.username || username,
+                profile_complete: u.profile_complete === true || u.profile_complete === 'true',
+                bank_complete: u.bank_complete === true || u.bank_complete === 'true',
+                account_complete: u.account_complete === true || u.account_complete === 'true',
+                planActivated: u.planActivated === true || u.planActivated === 'true' || u.plan_activated === true || u.plan_activated === 'true'
+            };
+            username = normalizedUser.username;
+            localStorage.setItem('username', username);
+            localStorage.setItem('user', JSON.stringify(normalizedUser));
+            localStorage.setItem('profile_complete', normalizedUser.profile_complete ? 'true' : 'false');
+            localStorage.setItem('bank_complete', normalizedUser.bank_complete ? 'true' : 'false');
+            localStorage.setItem('account_complete', normalizedUser.account_complete ? 'true' : 'false');
             const walletBalance = Number(u.wallet_balance ?? u.balance ?? 0);
             
             localStorage.setItem('balance', walletBalance); 
@@ -231,7 +239,7 @@ async function globalSync() {
             localStorage.setItem('taskEarnings', u.taskEarnings || 0); 
             localStorage.setItem('daily_earnings', u.daily_earnings || 0); 
             localStorage.setItem('affiliate_balance', u.affiliate_balance || 0); 
-            localStorage.setItem('planActivated', u.planActivated === true || u.planActivated === 'true' ? 'true' : 'false');
+            localStorage.setItem('planActivated', normalizedUser.planActivated ? 'true' : 'false');
             localStorage.setItem('activePackage', u.activePackage || 'Standard');
             localStorage.setItem('activePackageId', u.activePackageId || '');
             localStorage.setItem('my_referral_id', u.my_referral_id || u.referralId || ''); // ✅ FIX: store referral ID
@@ -253,7 +261,8 @@ async function globalSync() {
 
             safeMoneyUpdate('liveBalanceDisplay', walletBalance); 
 
-            if(u.planActivated === 'true') {
+            // Dashboard access and upgrade state are controlled only by plan activation, never profile flags.
+            if (normalizedUser.planActivated) {
                 safeUpdate('sidebarStatus', `Premium (${u.activePackage})`);
                 safeUpdate('accountStatusText', `Premium account (${u.activePackage})`);
                 
@@ -597,4 +606,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initTheme();
     // Set up toggle buttons
     setupThemeToggle();
+    // Quietly refresh the normalized user/wallet state on every protected page.
+    if (isPageAllowedForSync()) globalSync();
 });

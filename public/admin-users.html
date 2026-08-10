@@ -36,8 +36,22 @@
         .badge.inactive { background: rgba(255, 255, 255, 0.1); color: var(--text-muted); }
         .action-btn { background: transparent; border: 1px solid var(--border-light); color: var(--text-main); padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: 0.3s; font-size: 12px;}
         .action-btn:hover { background: #ff4d4d; border-color: #ff4d4d; color: #fff; }
+        .plan-btn { border-color: var(--primary-yellow); color: var(--primary-yellow); margin-left: 6px; }
+        .plan-btn:hover { background: var(--primary-yellow); border-color: var(--primary-yellow); color: #0b1421; }
+        .plan-modal { display:none; position:fixed; inset:0; z-index:2000; padding:20px; background:rgba(3,12,32,.65); align-items:center; justify-content:center; }
+        .plan-modal.open { display:flex; }
+        .plan-modal-card { width:min(100%, 420px); padding:26px; border-radius:16px; background:var(--bg-cards); border:1px solid var(--border-light); box-shadow:0 20px 50px rgba(0,0,0,.35); }
+        .plan-modal-card h2 { margin-bottom:8px; font-size:20px; }
+        .plan-modal-card p { color:var(--text-muted); margin-bottom:20px; font-size:13px; }
+        .plan-modal-card select { width:100%; padding:12px; border-radius:8px; border:1px solid var(--border-light); background:rgba(0,0,0,.15); color:var(--text-main); margin-bottom:18px; }
+        .plan-modal-actions { display:flex; justify-content:flex-end; gap:10px; }
+        .plan-modal-actions button { padding:10px 15px; border-radius:8px; cursor:pointer; font-weight:600; }
+        .plan-cancel { background:transparent; color:var(--text-main); border:1px solid var(--border-light); }
+        .plan-confirm { background:var(--primary-yellow); color:#0b1421; border:0; }
 
     </style>
+    <link rel="stylesheet" href="/brand.css">
+    <script src="/brand.js" defer></script>
 </head>
 <body>
     <div class="sidebar">
@@ -72,6 +86,18 @@
                         <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading users...</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="plan-modal" id="changePlanModal" role="dialog" aria-modal="true" aria-labelledby="changePlanTitle">
+        <div class="plan-modal-card">
+            <h2 id="changePlanTitle">Change User Plan</h2>
+            <p>Assign a new package to <strong id="changePlanUsername"></strong>. This replaces any active plan.</p>
+            <select id="changePlanPackage" aria-label="Select package"><option value="">Loading packages…</option></select>
+            <div class="plan-modal-actions">
+                <button type="button" class="plan-cancel" onclick="closeChangePlanModal()">Cancel</button>
+                <button type="button" class="plan-confirm" id="changePlanSubmit">Change Plan</button>
             </div>
         </div>
     </div>
@@ -114,7 +140,7 @@
                     <td>₦${(user.affiliate_balance || 0).toLocaleString()}</td>
                     <td>${statusBadge}</td>
                     <td>${joinedDate}</td>
-                    <td><button class="action-btn" onclick="editUser('${user.username}')">Edit Balance</button></td>
+                    <td><button class="action-btn" onclick="editUser('${user.username}')">Edit Balance</button><button class="action-btn plan-btn" onclick='openChangePlanModal(${JSON.stringify(user.username)})'>Change Plan</button></td>
                 </tr>`;
             });
         }
@@ -126,6 +152,60 @@
                 alert('Balance update feature - implement endpoint as needed');
             }
         }
+
+        let selectedPlanUsername = null;
+
+        async function openChangePlanModal(username) {
+            selectedPlanUsername = username;
+            document.getElementById('changePlanUsername').textContent = username;
+            const select = document.getElementById('changePlanPackage');
+            select.innerHTML = '<option value="">Loading packages…</option>';
+            document.getElementById('changePlanModal').classList.add('open');
+            try {
+                const { ok, data } = await window.apiFetchJson('/packages');
+                if (!(ok && data.success && Array.isArray(data.packages))) throw new Error(data.error || 'Unable to load packages.');
+                select.innerHTML = '<option value="">Select a package</option>' + data.packages.map((pkg) => {
+                    const amount = Number(pkg.capital || pkg.price || 0).toLocaleString();
+                    return `<option value="${pkg.id}">${pkg.name} — ₦${amount}</option>`;
+                }).join('');
+            } catch (error) {
+                select.innerHTML = '<option value="">Unable to load packages</option>';
+                if (typeof showToast === 'function') showToast('error', error.message || 'Unable to load packages.');
+            }
+        }
+
+        function closeChangePlanModal() {
+            document.getElementById('changePlanModal').classList.remove('open');
+            selectedPlanUsername = null;
+        }
+
+        document.getElementById('changePlanSubmit').addEventListener('click', async () => {
+            const packageId = document.getElementById('changePlanPackage').value;
+            const button = document.getElementById('changePlanSubmit');
+            if (!selectedPlanUsername || !packageId) {
+                if (typeof showToast === 'function') showToast('error', 'Select a package first.');
+                return;
+            }
+            if (!confirm(`Change ${selectedPlanUsername}'s plan? Any current active plan will be replaced.`)) return;
+            button.disabled = true;
+            button.textContent = 'Changing…';
+            try {
+                const { ok, data } = await window.apiFetchJson('/admin/change-user-plan', {
+                    method: 'POST',
+                    body: JSON.stringify({ username: selectedPlanUsername, packageId })
+                });
+                if (!(ok && data.success)) throw new Error(data.error || 'Unable to change the user plan.');
+                if (typeof showToast === 'function') showToast('success', data.message || 'User plan changed successfully.');
+                closeChangePlanModal();
+                loadUsers();
+            } catch (error) {
+                if (typeof showToast === 'function') showToast('error', error.message || 'Unable to change the user plan.');
+                else alert(error.message || 'Unable to change the user plan.');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Change Plan';
+            }
+        });
 
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
