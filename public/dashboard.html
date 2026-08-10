@@ -124,6 +124,16 @@
         .nav-dot.active i { color: #0b1421; }
 
         .status-card { background: var(--bg-cards); border-radius: 20px; padding: 30px; border: 1px solid var(--border-light); display: flex; flex-direction: column; justify-content: center; }
+        .investment-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; padding: 22px; margin-bottom: 28px; }
+        .investment-card-header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:18px; }
+        .investment-card-header h3 { color:var(--primary-yellow); font-size:18px; }
+        .investment-card-header p { color:var(--text-muted); font-size:12px; margin-top:3px; }
+        .investment-status { color:#2ecc71; font-size:12px; font-weight:600; white-space:nowrap; }
+        .investment-stats { display:grid; grid-template-columns:repeat(5, 1fr); gap:12px; }
+        .investment-stat { padding:13px; border:1px solid var(--border-light); border-radius:12px; background:rgba(212,175,55,.06); }
+        .investment-stat span { color:var(--text-muted); font-size:10px; text-transform:uppercase; letter-spacing:.06em; display:block; }
+        .investment-stat strong { color:var(--text-main); display:block; margin-top:5px; font-size:15px; }
+        .investment-empty { color:var(--text-muted); font-size:14px; text-align:center; padding:10px; }
         .status-title { font-size: 18px; margin-bottom: 5px; color: var(--primary-yellow); }
         .status-percent { font-size: 13px; color: var(--text-main); }
         .progress-track { width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; margin: 15px 0; overflow: hidden; }
@@ -171,7 +181,7 @@
         .flat-card:hover { transform: translateY(-5px); border-color: var(--primary-yellow); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.1); }
         .flat-card i { font-size: 26px; margin-bottom: 12px; color: var(--primary-yellow); }
 
-        @media (max-width: 992px) { .top-grid, .middle-grid { grid-template-columns: 1fr; } .bottom-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 992px) { .top-grid, .middle-grid { grid-template-columns: 1fr; } .bottom-grid { grid-template-columns: 1fr 1fr; } .investment-stats { grid-template-columns:repeat(3, 1fr); } }
         @media (max-width: 768px) {
             .sidebar { left: -260px; width: var(--sidebar-width) !important; }
             .sidebar.active { left: 0; }
@@ -184,6 +194,10 @@
             .content-area { padding: 90px 20px 30px 20px; }
             .bc-center h1 { font-size: 32px; }
             .bottom-grid { grid-template-columns: 1fr 1fr; }
+            .investment-card { padding:18px; }
+            .investment-card-header { flex-direction:column; gap:5px; }
+            .investment-stats { grid-template-columns:repeat(2, 1fr); }
+            .investment-stat:last-child { grid-column:span 2; }
         }
     </style>
     <link rel="stylesheet" href="/brand.css">
@@ -320,6 +334,19 @@
                     <button class="btn-activate" onclick="window.location.href='/activation.html'" id="activateBtn">Activate Plan</button>
                 </div>
             </div>
+
+            <section class="investment-card" id="activeInvestmentCard" aria-labelledby="activeInvestmentHeading">
+                <div class="investment-card-header">
+                    <div>
+                        <h3 id="activeInvestmentHeading"><i class="fa-solid fa-chart-line"></i> Active Investment</h3>
+                        <p id="activeInvestmentName">Checking your investment details…</p>
+                    </div>
+                    <span class="investment-status" id="activeInvestmentStatus">Loading</span>
+                </div>
+                <div class="investment-stats" id="activeInvestmentStats">
+                    <div class="investment-empty">Loading current investment earnings…</div>
+                </div>
+            </section>
 
             <div class="middle-grid">
                 <div class="action-card">
@@ -643,15 +670,68 @@
             }
         }
 
+        function investmentNumber(value) {
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        function investmentNaira(value) {
+            return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(investmentNumber(value));
+        }
+
+        function investmentRate(value) {
+            const rate = investmentNumber(value);
+            const percentage = Math.abs(rate) <= 1 ? rate * 100 : rate;
+            return `${percentage.toLocaleString('en-NG', { maximumFractionDigits: 2 })}%`;
+        }
+
+        async function loadActiveInvestmentEarnings() {
+            const name = document.getElementById('activeInvestmentName');
+            const status = document.getElementById('activeInvestmentStatus');
+            const stats = document.getElementById('activeInvestmentStats');
+            try {
+                const { ok, data } = await window.apiFetchJson('/active-investment');
+                const investment = ok && data.success ? (data.investment || data.activeInvestment || data.active_investment) : null;
+                if (!investment) {
+                    name.textContent = 'No active investment yet.';
+                    status.textContent = 'Not active';
+                    stats.innerHTML = '<div class="investment-empty">Choose a package to start earning daily ROI. <a href="/activation.html" style="color:var(--primary-yellow);">View packages</a></div>';
+                    return;
+                }
+                // Read the rate from the investment itself. This preserves rates on legacy plans.
+                const planName = investment.package_name || investment.packageName || investment.package?.name || investment.plan_name || investment.planName || 'Active investment';
+                const capital = investment.capital ?? investment.amount ?? investment.invested_amount ?? 0;
+                const rate = investment.daily_rate ?? investment.dailyRate ?? 0;
+                const daily = investment.daily_earning ?? investment.dailyEarning ?? (investmentNumber(capital) * (Math.abs(investmentNumber(rate)) <= 1 ? investmentNumber(rate) : investmentNumber(rate) / 100));
+                const days = investment.cycle_days ?? investment.cycleDays ?? investment.duration_days ?? 0;
+                const payout = investment.total_payout ?? investment.totalPayout ?? (investmentNumber(capital) + (investmentNumber(daily) * investmentNumber(days)));
+                name.textContent = planName;
+                status.textContent = 'Active';
+                stats.innerHTML = `
+                    <div class="investment-stat"><span>Capital</span><strong>${investmentNaira(capital)}</strong></div>
+                    <div class="investment-stat"><span>Daily ROI</span><strong>${investmentRate(rate)}</strong></div>
+                    <div class="investment-stat"><span>Daily earning</span><strong>${investmentNaira(daily)}</strong></div>
+                    <div class="investment-stat"><span>Cycle</span><strong>${investmentNumber(days).toLocaleString()} days</strong></div>
+                    <div class="investment-stat"><span>Total payout</span><strong>${investmentNaira(payout)}</strong></div>`;
+            } catch (error) {
+                if (window.__AW_DEBUG__) console.error('Active investment error:', error);
+                name.textContent = 'Investment details unavailable.';
+                status.textContent = 'Unavailable';
+                stats.innerHTML = '<div class="investment-empty">We could not load your active investment right now.</div>';
+            }
+        }
+
         // --- Global sync listener ---
         window.addEventListener('globalSyncComplete', () => {
             updateBalanceDisplay();
             loadBroadcastNotice();
             loadRecentDeposits();
+            loadActiveInvestmentEarnings();
         });
         document.addEventListener('DOMContentLoaded', () => {
             loadBroadcastNotice();
             loadRecentDeposits();
+            loadActiveInvestmentEarnings();
             verifyDeposit(getQueryParam('reference'));
             // Sync latest balance from server on page load
             if (typeof globalSync === 'function') globalSync();

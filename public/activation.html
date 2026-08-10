@@ -49,11 +49,21 @@
         .page-header h1 { font-size: 32px; color: var(--primary-yellow); margin-bottom: 10px; }
         .page-header p { color: var(--text-muted); font-size: 15px; max-width: 600px; margin: 0 auto; }
 
-        .active-investment-status { max-width: 760px; margin: -15px auto 30px; padding: 16px 20px; border-radius: 14px; border: 1px solid var(--border-light); background: rgba(212,175,55,.08); color: var(--text-muted); text-align: center; font-size: 14px; }
+        .active-investment-status { max-width: 760px; margin: -15px auto 22px; padding: 16px 20px; border-radius: 14px; border: 1px solid var(--border-light); background: rgba(212,175,55,.08); color: var(--text-muted); text-align: center; font-size: 14px; }
         .active-investment-status strong { color: var(--primary-yellow); }
         .active-investment-status.is-active { border-color: rgba(46,204,113,.4); background: rgba(46,204,113,.08); }
         .plan-card-current { border-color: #2ecc71; }
         .plan-card-current .btn-activate { background: rgba(46,204,113,.15); color: #2ecc71; cursor: default; }
+        .roi-calculator { max-width: 920px; margin: 0 auto 34px; border: 1px solid var(--border-light); background: var(--bg-cards); border-radius: 18px; padding: 22px; }
+        .roi-calculator h2 { color: var(--primary-yellow); font-size: 18px; margin-bottom: 5px; }
+        .roi-calculator > p { color: var(--text-muted); font-size: 13px; margin-bottom: 18px; }
+        .calculator-controls { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .calculator-controls label { color: var(--text-muted); font-size: 12px; display:flex; flex-direction:column; gap:7px; }
+        .calculator-controls input, .calculator-controls select { width:100%; padding:12px; border:1px solid var(--border-light); border-radius:9px; background:rgba(0,0,0,.14); color:var(--text-main); }
+        .calculator-results { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:18px; }
+        .calculator-result { border-radius:10px; padding:13px; background:rgba(212,175,55,.08); }
+        .calculator-result span { display:block; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; font-size:10px; }
+        .calculator-result strong { display:block; color:var(--primary-yellow); margin-top:4px; font-size:16px; }
         .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
         
         .plan-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; padding: 30px; transition: 0.3s; position: relative; overflow: hidden; display: flex; flex-direction: column; }
@@ -100,7 +110,7 @@
             .sidebar.active { left: 0; }
             .mobile-header { display: flex; }
             .main-content { margin-left: 0; width: 100%; padding: 100px 20px 40px 20px; }
-            .plans-grid { grid-template-columns: 1fr; }
+            .plans-grid, .calculator-controls, .calculator-results { grid-template-columns: 1fr; }
         }
     </style>
     <link rel="stylesheet" href="/brand.css">
@@ -133,6 +143,25 @@
         </div>
 
         <div class="active-investment-status" id="activeInvestmentStatus" role="status">Checking your current plan…</div>
+
+        <section class="roi-calculator" aria-labelledby="roiCalculatorTitle">
+            <h2 id="roiCalculatorTitle"><i class="fa-solid fa-calculator"></i> ROI Calculator</h2>
+            <p>Preview the expected return for any available package. Figures are calculated from the current package data.</p>
+            <div class="calculator-controls">
+                <label>Package
+                    <select id="calculatorPackage" aria-label="Select a package for calculation"><option value="">Loading packages…</option></select>
+                </label>
+                <label>Investment amount (₦)
+                    <input id="calculatorCapital" type="number" min="0" inputmode="decimal" placeholder="Enter an amount">
+                </label>
+            </div>
+            <div class="calculator-results" aria-live="polite">
+                <div class="calculator-result"><span>Daily ROI</span><strong id="calculatorRate">—</strong></div>
+                <div class="calculator-result"><span>Daily earning</span><strong id="calculatorDaily">—</strong></div>
+                <div class="calculator-result"><span>Cycle return</span><strong id="calculatorTotal">—</strong></div>
+            </div>
+        </section>
+
         <div class="plans-grid" id="plansGrid"></div>
     </div>
 
@@ -140,9 +169,12 @@
         <div class="modal-content">
             <h2>Confirm Upgrade</h2>
             <div class="modal-info">
-                <p>Selected Plan: <span id="modalPlanName" class="modal-plan-name">Starter</span></p>
-                <p>Plan Cost: <span id="modalPlanPrice">₦0</span></p>
-                <p class="modal-balance-row">Your Deposit Balance: <span id="modalCurrentBal">₦0</span></p>
+                <p>Selected Plan: <span id="modalPlanName" class="modal-plan-name">—</span></p>
+                <p>Plan Cost: <span id="modalPlanPrice">₦0.00</span></p>
+                <p>Daily ROI: <span id="modalPlanRate">—</span></p>
+                <p>Daily Earning: <span id="modalPlanDaily">₦0.00</span></p>
+                <p>Cycle Return: <span id="modalPlanTotal">₦0.00</span></p>
+                <p class="modal-balance-row">Your Deposit Balance: <span id="modalCurrentBal">₦0.00</span></p>
             </div>
             
             <div class="warning-text" id="modalWarning">
@@ -165,54 +197,82 @@
         let selectedPackage = null;
         let activeInvestment = null;
 
-        function formatNaira(amount) {
-            return `₦${Number(amount || 0).toLocaleString()}`;
+        function asNumber(value) {
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? parsed : 0;
         }
 
-        function getTierBadge(tier) {
-            if (tier === 'Elite') return 'Elite';
-            if (tier === 'Wealth') return 'Premium';
-            return '';
+        function formatNaira(amount) {
+            return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(asNumber(amount));
         }
+
+        // The API may provide daily_rate as 0.03 or 3. Both represent 3%.
+        function percentageValue(rate) {
+            const value = asNumber(rate);
+            return Math.abs(value) <= 1 ? value * 100 : value;
+        }
+
+        function formatPercentage(rate) {
+            return `${percentageValue(rate).toLocaleString('en-NG', { maximumFractionDigits: 2 })}%`;
+        }
+
+        function packageId(pkg) { return pkg.id || pkg.package_id || pkg.packageId; }
+        function packageName(pkg) { return pkg.name || pkg.package_name || pkg.tier || 'Investment Package'; }
 
         function renderPlans() {
             const plansGrid = document.getElementById('plansGrid');
             if (!plansGrid) return;
-
             if (!packages.length) {
                 plansGrid.innerHTML = '<p class="plans-empty-state">No packages available right now.</p>';
                 return;
             }
 
             plansGrid.innerHTML = packages.map((pkg) => {
-                const badge = getTierBadge(pkg.tier);
+                const current = isCurrentPackage(pkg);
                 return `
-                    <div class="plan-card ${pkg.tier === 'Elite' ? 'plan-card-elite' : ''}">
-                        ${badge ? `<div class="badge-premium">${badge}</div>` : ''}
-                        <div class="plan-name">${pkg.name}</div>
+                    <div class="plan-card ${current ? 'plan-card-current' : ''}">
+                        <div class="plan-name">${packageName(pkg)}</div>
                         <div class="plan-price">${formatNaira(pkg.capital)}</div>
                         <ul class="plan-features">
-                            <li><i class="fa-solid fa-check"></i> Tier: ${pkg.tier}</li>
-                            <li><i class="fa-solid fa-check"></i> Daily ROI: ${(pkg.daily_rate * 100).toFixed(1)}%</li>
-                            <li><i class="fa-solid fa-check"></i> Daily Earning: ${formatNaira(pkg.daily_earning)}</li>
-                            <li><i class="fa-solid fa-check"></i> Cycle: ${pkg.cycle_days} days</li>
-                            <li><i class="fa-solid fa-check"></i> Total Payout: ${formatNaira(pkg.total_payout)}</li>
-                            <li><i class="fa-solid fa-check"></i> Referral Bonus: ${formatNaira(pkg.referral_bonus)}</li>
+                            <li><i class="fa-solid fa-chart-line"></i> Daily ROI: ${formatPercentage(pkg.daily_rate)}</li>
+                            <li><i class="fa-solid fa-wallet"></i> Daily Earning: ${formatNaira(pkg.daily_earning)}</li>
+                            <li><i class="fa-solid fa-calendar-days"></i> Cycle: ${asNumber(pkg.cycle_days).toLocaleString()} days</li>
+                            <li><i class="fa-solid fa-coins"></i> Total Payout: ${formatNaira(pkg.total_payout)}</li>
+                            <li><i class="fa-solid fa-user-plus"></i> Referral Bonus: ${formatNaira(pkg.referral_bonus)}</li>
                         </ul>
-                        <button class="btn-activate" onclick="openModal('${pkg.id}')" ${isCurrentPackage(pkg) ? 'disabled' : ''}>${isCurrentPackage(pkg) ? 'Current Package' : 'Upgrade Package'}</button>
+                        <button class="btn-activate" onclick="openModal('${packageId(pkg)}')" ${current ? 'disabled' : ''}>${current ? 'Current Package' : 'Upgrade Package'}</button>
                     </div>
                 `;
             }).join('');
         }
 
+        function populateCalculator() {
+            const select = document.getElementById('calculatorPackage');
+            select.innerHTML = packages.map((pkg) => `<option value="${packageId(pkg)}">${packageName(pkg)} — ${formatPercentage(pkg.daily_rate)} daily</option>`).join('');
+            const capital = document.getElementById('calculatorCapital');
+            if (packages[0] && !capital.value) capital.value = asNumber(packages[0].capital);
+            updateCalculator();
+        }
+
+        function updateCalculator() {
+            const selected = packages.find((pkg) => String(packageId(pkg)) === String(document.getElementById('calculatorPackage').value));
+            if (!selected) return;
+            const capital = Math.max(0, asNumber(document.getElementById('calculatorCapital').value || selected.capital));
+            const dailyRate = percentageValue(selected.daily_rate) / 100;
+            const cycleDays = asNumber(selected.cycle_days);
+            document.getElementById('calculatorRate').textContent = formatPercentage(selected.daily_rate);
+            document.getElementById('calculatorDaily').textContent = formatNaira(capital * dailyRate);
+            document.getElementById('calculatorTotal').textContent = formatNaira(capital + (capital * dailyRate * cycleDays));
+        }
+
         function isCurrentPackage(pkg) {
             if (!activeInvestment || !pkg) return false;
             const activeId = activeInvestment.package_id || activeInvestment.packageId || activeInvestment.plan_id || activeInvestment.planId || activeInvestment.package?.id;
-            return String(activeId || '') === String(pkg.id);
+            return String(activeId || '') === String(packageId(pkg));
         }
 
         function openModal(packageId) {
-            selectedPackage = packages.find((pkg) => String(pkg.id) === String(packageId));
+            selectedPackage = packages.find((pkg) => String(packageId(pkg)) === String(packageId));
             if (!selectedPackage) {
                 alert('Invalid package selected. Please refresh and try again.');
                 return;
@@ -224,9 +284,12 @@
             
             const currentBal = parseFloat(localStorage.getItem('balance') || 0);
             
-            document.getElementById('modalPlanName').innerText = selectedPackage.name;
+            document.getElementById('modalPlanName').innerText = packageName(selectedPackage);
             document.getElementById('modalPlanPrice').innerText = formatNaira(selectedPackage.capital);
-            document.getElementById('modalCurrentBal').innerText = `₦${currentBal.toLocaleString()}`;
+            document.getElementById('modalPlanRate').innerText = formatPercentage(selectedPackage.daily_rate);
+            document.getElementById('modalPlanDaily').innerText = formatNaira(selectedPackage.daily_earning);
+            document.getElementById('modalPlanTotal').innerText = formatNaira(selectedPackage.total_payout);
+            document.getElementById('modalCurrentBal').innerText = formatNaira(currentBal);
 
             const warning = document.getElementById('modalWarning');
             const fundBtn = document.getElementById('btnFund');
@@ -280,15 +343,15 @@
             try {
                 const { ok, data } = await window.apiFetchJson('/upgrade-package', {
                     method: 'POST',
-                    body: JSON.stringify({ packageId: selectedPackage.id })
+                    body: JSON.stringify({ packageId: packageId(selectedPackage) })
                 });
 
                 if (ok && data.success) {
                     alert(`✅ Success! Your account is now upgraded to ${selectedPackage.name}.`);
                     localStorage.setItem('balance', data.newBalance);
                     localStorage.setItem('planActivated', 'true');
-                    localStorage.setItem('activePackage', selectedPackage.name);
-                    localStorage.setItem('activePackageId', selectedPackage.id);
+                    localStorage.setItem('activePackage', packageName(selectedPackage));
+                    localStorage.setItem('activePackageId', packageId(selectedPackage));
                     // Force a refresh of all wallet data
                     if (typeof globalSync === 'function') globalSync();
                     window.location.href = '/dashboard.html';
@@ -342,6 +405,7 @@
                 if (ok && data.success && Array.isArray(data.packages)) {
                     packages = data.packages;
                     renderPlans();
+                    populateCalculator();
                     return;
                 }
                 throw new Error(data.error || 'Unable to load package list.');
@@ -352,7 +416,11 @@
         }
 
         window.addEventListener('globalSyncComplete', loadUpgradeData);
-        document.addEventListener('DOMContentLoaded', loadUpgradeData);
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('calculatorPackage').addEventListener('change', updateCalculator);
+            document.getElementById('calculatorCapital').addEventListener('input', updateCalculator);
+            loadUpgradeData();
+        });
     </script>
 </body>
 </html>

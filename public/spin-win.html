@@ -208,6 +208,7 @@
         </div>
     </div>
 
+    <script src="global.js"></script>
     <script>
         // UI Navigation
         function toggleDesktopSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
@@ -215,68 +216,47 @@
         function toggleDropdown(dropdownId, element) { element.classList.toggle('open'); document.getElementById(dropdownId).classList.toggle('show'); element.classList.toggle('active'); }
         function logout() { localStorage.clear(); window.location.href = '/login.html'; }
 
-        // --- CORE PLAN LOGIC ---
-        // Maps the exact Access Wealth plans to their spin perks
-        const planPerks = {
-            'Starter Basic': { spins: 1, multiplier: 1.0 },
-            'Starter Bronze': { spins: 1, multiplier: 1.0 },
-            'Starter Silver': { spins: 1, multiplier: 1.1 },
-            'Starter Gold': { spins: 1, multiplier: 1.1 },
-            'Growth Plus': { spins: 2, multiplier: 1.2 },
-            'Growth Pro': { spins: 2, multiplier: 1.3 },
-            'Growth Max': { spins: 2, multiplier: 1.4 },
-            'Wealth Standard': { spins: 3, multiplier: 1.8 },
-            'Wealth Premium': { spins: 4, multiplier: 2.0 },
-            'Elite Vanguard': { spins: 5, multiplier: 2.5 },
-            'Elite Apex': { spins: 6, multiplier: 3.0 }
-        };
-
-        // Base prizes on the wheel (before multiplier)
+        // Spin access is tied to the live active investment, so retired package names do not live in the browser.
         const basePrizes = [0, 50, 100, 200, 300, 500, 1000];
-
-        // Variables
         let userPlan = null;
         let planData = null;
         let spinsUsedToday = 0;
 
+        async function loadSpinInvestment() {
+            try {
+                const { ok, data } = await window.apiFetchJson('/active-investment');
+                const investment = ok && data.success ? (data.investment || data.activeInvestment || data.active_investment) : null;
+                if (!investment) throw new Error('No active investment');
+                userPlan = investment.package_name || investment.packageName || investment.package?.name || investment.plan_name || investment.planName || 'Active Investment';
+                planData = {
+                    spins: Math.max(1, Number(investment.spins_per_day ?? investment.daily_spins ?? 1)),
+                    multiplier: Math.max(1, Number(investment.spin_multiplier ?? 1))
+                };
+                const today = new Date().toDateString();
+                const lastSpinDate = localStorage.getItem('lastSpinDate');
+                if (lastSpinDate !== today) {
+                    localStorage.setItem('spinsUsedToday', 0);
+                    localStorage.setItem('lastSpinDate', today);
+                    localStorage.removeItem('spinHistory');
+                    spinsUsedToday = 0;
+                } else {
+                    spinsUsedToday = parseInt(localStorage.getItem('spinsUsedToday')) || 0;
+                }
+                updateUI();
+                loadHistory();
+            } catch (_) {
+                document.getElementById('lockScreen').style.display = 'flex';
+            }
+        }
+
         window.onload = () => {
-            // Setup User Info
             const user = localStorage.getItem('username') || "Guest";
             document.getElementById('displayName').innerText = user.toUpperCase();
             document.getElementById('displayHandle').innerText = "@" + user.toLowerCase().replace(/\s+/g, '');
             const avatarUrl = `https://ui-avatars.com/api/?name=${user}&background=d4af37&color=112A46&bold=true`;
             document.getElementById('desktopAvatar').src = avatarUrl;
             document.getElementById('mobileAvatar').src = avatarUrl;
-
-            // Check Activation
-            const isActivated = localStorage.getItem('planActivated') === 'true';
-            userPlan = localStorage.getItem('activePackage');
-            
-            if (!isActivated || !userPlan || !planPerks[userPlan]) {
-                document.getElementById('lockScreen').style.display = 'flex';
-                return;
-            }
-
-            // Setup Plan Perks
-            planData = planPerks[userPlan];
-            
-            // Handle Daily Reset logic
-            const today = new Date().toDateString();
-            const lastSpinDate = localStorage.getItem('lastSpinDate');
-            
-            if (lastSpinDate !== today) {
-                // It's a new day! Reset spins and history
-                localStorage.setItem('spinsUsedToday', 0);
-                localStorage.setItem('lastSpinDate', today);
-                localStorage.removeItem('spinHistory');
-                spinsUsedToday = 0;
-            } else {
-                spinsUsedToday = parseInt(localStorage.getItem('spinsUsedToday')) || 0;
-            }
-
-            // Update UI
-            updateUI();
-            loadHistory();
+            loadSpinInvestment();
         };
 
         function updateUI() {
