@@ -1,0 +1,62 @@
+/* Shared Access Wealth image branding */
+.aw-brand-logo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+}
+
+.logo-area.aw-image-brand {
+    min-height: 96px;
+    padding: 10px 16px !important;
+    justify-content: center;
+}
+.logo-area.aw-image-brand .aw-brand-logo {
+    max-width: 210px;
+    max-height: 76px;
+}
+.sidebar.collapsed .logo-area.aw-image-brand {
+    padding: 10px 5px !important;
+}
+.sidebar.collapsed .logo-area.aw-image-brand .aw-brand-logo {
+    width: 64px;
+    max-width: 64px;
+    max-height: 64px;
+}
+
+.mobile-header .logo-text.aw-image-brand {
+    display: flex;
+    align-items: center;
+    width: 100px;
+    height: 42px;
+}
+.mobile-header .logo-text.aw-image-brand .aw-brand-logo {
+    max-height: 42px;
+}
+
+.logo.aw-image-brand {
+    display: flex;
+    align-items: center;
+    width: 178px;
+    height: 64px;
+}
+.logo.aw-image-brand .aw-brand-logo { max-height: 64px; }
+
+.auth-brand.aw-image-brand {
+    display: flex;
+    justify-content: center;
+    min-height: 116px;
+    margin-bottom: 20px;
+}
+.auth-brand.aw-image-brand .aw-brand-logo {
+    width: 220px;
+    max-height: 116px;
+}
+
+@media (max-width: 768px) {
+    .logo-area.aw-image-brand { min-height: 84px; }
+    .logo-area.aw-image-brand .aw-brand-logo { max-height: 62px; }
+    .logo.aw-image-brand { width: 128px; height: 48px; }
+    .logo.aw-image-brand .aw-brand-logo { max-height: 48px; }
+}
