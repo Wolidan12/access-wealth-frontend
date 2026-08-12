@@ -219,7 +219,7 @@
 <body>
     <div class="auth-card">
         <!-- Theme toggle button (will be handled by global.js) -->
-        <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
             <i class="fa-solid fa-moon"></i>
         </button>
 
@@ -231,14 +231,14 @@
             <strong>Welcome back.</strong> Login to your dashboard.
         </div>
 
-        <div class="error-msg" id="errorMsg"></div>
+        <div class="error-msg" id="errorMsg" role="alert" aria-live="assertive"></div>
 
         <form id="loginForm" novalidate>
             <div class="form-group">
                 <label>Username or email</label>
                 <div class="input-wrap">
                     <i class="fa-regular fa-user"></i>
-                    <input type="text" id="loginUsername" placeholder="Enter your username or email" required>
+                    <input type="text" id="loginUsername" placeholder="Enter your username or email" autocomplete="username" required>
                 </div>
             </div>
 
@@ -246,7 +246,7 @@
                 <label>Password</label>
                 <div class="input-wrap">
                     <i class="fa-solid fa-lock"></i>
-                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password" required>
                 </div>
             </div>
 
@@ -268,18 +268,67 @@
             const form = document.getElementById('loginForm');
             const btn = document.getElementById('loginBtn');
             const errorEl = document.getElementById('errorMsg');
+            const defaultButtonLabel = 'Login to Dashboard';
             let isSubmittingLogin = false;
+
+            function showError(message) {
+                errorEl.innerText = message;
+                errorEl.style.display = 'block';
+            }
+
+            function resetButton() {
+                btn.disabled = false;
+                btn.innerHTML = defaultButtonLabel;
+            }
+
+            // The current API returns `user`, but accepting the older flat
+            // response shape keeps a successful login from being reported as a
+            // misleading network error during a rolling backend deploy.
+            function normalizeLoginSession(data, submittedUsername) {
+                const payload = data && typeof data === 'object' ? data : {};
+                const suppliedUser = payload.user && typeof payload.user === 'object' ? payload.user : {};
+                const token = [payload.token, payload.accessToken, payload.access_token]
+                    .find((value) => typeof value === 'string' && value.trim());
+                const resolvedUsername = suppliedUser.username || payload.username || submittedUsername;
+
+                if (!token || !resolvedUsername) return null;
+
+                return {
+                    token,
+                    user: {
+                        ...suppliedUser,
+                        username: resolvedUsername,
+                        role: suppliedUser.role || payload.role || 'user',
+                        planActivated: suppliedUser.planActivated ?? suppliedUser.plan_activated ?? payload.planActivated ?? 'false',
+                        activePackage: suppliedUser.activePackage ?? payload.activePackage ?? '',
+                        my_referral_id: suppliedUser.my_referral_id ?? payload.my_referral_id ?? ''
+                    }
+                };
+            }
+
+            function storeLoginSession(session) {
+                const { token, user } = session;
+                const planActivated = user.planActivated === true || user.planActivated === 'true' || user.plan_activated === true || user.plan_activated === 'true';
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(user));
+                localStorage.setItem('username', user.username);
+                localStorage.setItem('role', user.role);
+                localStorage.setItem('planActivated', planActivated ? 'true' : 'false');
+                localStorage.setItem('activePackage', user.activePackage || '');
+                localStorage.setItem('my_referral_id', user.my_referral_id || '');
+            }
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 if (isSubmittingLogin) return;
 
                 const username = document.getElementById('loginUsername').value.trim();
-                const password = document.getElementById('loginPassword').value.trim();
+                // Password whitespace can be intentional, so only use trimming
+                // to test whether it is blank; send the original value to the API.
+                const password = document.getElementById('loginPassword').value;
 
-                if (!username || !password) {
-                    errorEl.innerText = 'Please enter both username and password.';
-                    errorEl.style.display = 'block';
+                if (!username || !password.trim()) {
+                    showError('Please enter both username and password.');
                     return;
                 }
 
@@ -287,44 +336,52 @@
                 errorEl.style.display = 'none';
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
+                let redirecting = false;
 
                 try {
-                    const { ok, data } = await window.apiFetchJson('/login', {
+                    const result = await window.apiFetchJson('/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username, password })
                     });
 
-                    if (ok && data.success) {
-                        localStorage.setItem('token', data.token);
-                        localStorage.setItem('user', JSON.stringify(data.user));
-                        localStorage.setItem('username', data.user.username);
-                        localStorage.setItem('role', data.user.role);
-                        localStorage.setItem('planActivated', data.user.planActivated || 'false');
-                        localStorage.setItem('activePackage', data.user.activePackage || '');
-                        localStorage.setItem('my_referral_id', data.user.my_referral_id || '');
+                    if (result.ok && result.data?.success) {
+                        const session = normalizeLoginSession(result.data, username);
+                        if (!session) {
+                            showError('We could not complete sign-in. Please try again.');
+                            return;
+                        }
 
-                        if (data.user.role === 'admin') {
+                        try {
+                            storeLoginSession(session);
+                        } catch (storageError) {
+                            console.error('Could not save login session:', storageError);
+                            showError('Your browser could not save the sign-in session. Enable site storage and try again.');
+                            return;
+                        }
+
+                        redirecting = true;
+                        if (session.user.role === 'admin') {
                             window.location.href = '/admin.html';
-                        } else if (data.user.role === 'support') {
+                        } else if (session.user.role === 'support') {
                             window.location.href = '/support-agent.html';
                         } else {
                             window.location.href = '/dashboard.html';
                         }
-                    } else {
-                        errorEl.innerText = data?.error || 'Invalid username or password.';
-                        errorEl.style.display = 'block';
-                        btn.disabled = false;
-                        btn.innerHTML = 'Login to Dashboard';
+                        return;
                     }
+
+                    showError(
+                        result.networkError
+                            ? 'We could not reach the sign-in service. Please try again in a moment.'
+                            : result.data?.error || 'Invalid username or password.'
+                    );
                 } catch (err) {
                     console.error('Login error:', err);
-                    errorEl.innerText = 'Network error. Please check your connection.';
-                    errorEl.style.display = 'block';
-                    btn.disabled = false;
-                    btn.innerHTML = 'Login to Dashboard';
+                    showError('We could not complete sign-in. Please try again.');
                 } finally {
                     isSubmittingLogin = false;
+                    if (!redirecting) resetButton();
                 }
             });
         })();

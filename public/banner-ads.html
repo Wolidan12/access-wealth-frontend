@@ -9,13 +9,13 @@
     <link rel="stylesheet" href="/styles.css">
     <style>
         :root {
-            --bg-body: #070d14;         
-            --bg-cards: #112A46;        
-            --text-main: #ffffff;       
-            --text-muted: #8a99af;      
-            --primary-yellow: #d4af37;  
+            --bg-body: #070d14;
+            --bg-cards: #112A46;
+            --text-main: #ffffff;
+            --text-muted: #8a99af;
+            --primary-yellow: #d4af37;
             --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
-            --border-light: rgba(212, 175, 55, 0.15); 
+            --border-light: rgba(212, 175, 55, 0.15);
             --sidebar-width: 260px;
         }
 
@@ -84,8 +84,8 @@
         </div>
 
         <div class="tab-container">
-            <button class="tab-btn active"><i class="fa-solid fa-plus"></i> Create Ad</button>
-            <button class="tab-btn"><i class="fa-regular fa-image"></i> My Ads</button>
+            <button type="button" class="tab-btn active"><i class="fa-solid fa-plus"></i> Create Ad</button>
+            <button type="button" class="tab-btn"><i class="fa-regular fa-image"></i> My Ads</button>
         </div>
 
         <div class="ad-card">
@@ -106,7 +106,7 @@
                     </div>
                 </div>
 
-                <label style="display: block; font-size: 14px; color: var(--text-muted); margin-bottom: 10px;">Select Duration</label>
+                <label class="aw-field-label">Select Duration</label>
                 <div class="duration-grid" id="durationGrid">
                     <div class="duration-item selected" data-price="2000" data-days="1">
                         <h5>1 Day</h5>
@@ -175,14 +175,14 @@
                 });
 
                 if (ok && data.success) {
-                    alert("✅ Ad Campaign Launched Successfully! Your ad is now live.");
+                    if (typeof window.showToast === 'function') window.showToast('success', 'Your ad campaign was created successfully.'); else alert('Your ad campaign was created successfully.');
                     localStorage.setItem('balance', data.newBalance);
                     window.location.reload();
                 } else {
-                    alert(data?.error || error || "Failed to launch ad.");
+                    if (typeof window.showToast === 'function') window.showToast('error', data?.error || error || 'Unable to create the ad campaign.'); else alert(data?.error || error || 'Unable to create the ad campaign.');
                 }
             } catch (err) {
-                alert("Server error.");
+                if (typeof window.showToast === 'function') window.showToast('error', 'Unable to create the ad campaign. Please try again.');
             } finally {
                 isSubmittingAd = false;
                 btn.disabled = false;

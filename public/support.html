@@ -172,7 +172,7 @@
 </head>
 <body>
     <div class="chat-header">
-        <button class="back-btn" title="Back to dashboard" aria-label="Back to dashboard" onclick="window.location.href='/dashboard.html'"><i class="fa-solid fa-arrow-left"></i></button>
+        <button type="button" class="back-btn" title="Back to dashboard" aria-label="Back to dashboard" onclick="window.location.href='/dashboard.html'"><i class="fa-solid fa-arrow-left"></i></button>
         <div>
             <h2><i class="fa-solid fa-headset"></i> Live Support</h2>
             <p>We typically reply within a few minutes</p>
@@ -188,7 +188,7 @@
 
     <div class="input-area">
         <input type="text" id="messageInput" placeholder="Type your message here...">
-        <button id="sendBtn" title="Send message" aria-label="Send message" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+        <button type="button" id="sendBtn" title="Send message" aria-label="Send message" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
     </div>
 
     <script src="global.js"></script>
@@ -217,11 +217,11 @@
             if (!username) return;
 
             try {
-                const { ok, data } = await window.apiFetchJson(`/chat/history/${username}`);
+                const { ok, data } = await window.apiFetchJson(`/chat/history/${window.apiPathParam(username)}`);
                 if (ok && data.success) {
                     const container = document.getElementById('messagesArea');
                     container.innerHTML = '';
-                    
+
                     if (!data.messages || data.messages.length === 0) {
                         container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-comments empty-state-icon"></i>No messages yet. Send a message to start the conversation!</div>';
                     } else {
@@ -248,7 +248,7 @@
             const input = document.getElementById('messageInput');
             const username = localStorage.getItem('username');
             const message = input.value.trim();
-            
+
             if (!message || !username) return;
 
             input.value = '';

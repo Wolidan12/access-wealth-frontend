@@ -9,13 +9,13 @@
     <link rel="stylesheet" href="/styles.css">
     <style>
         :root {
-            --bg-body: #070d14;         
-            --bg-cards: #112A46;        
-            --text-main: #ffffff;       
-            --text-muted: #8a99af;      
-            --primary-yellow: #d4af37;  
+            --bg-body: #070d14;
+            --bg-cards: #112A46;
+            --text-main: #ffffff;
+            --text-muted: #8a99af;
+            --primary-yellow: #d4af37;
             --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
-            --border-light: rgba(212, 175, 55, 0.15); 
+            --border-light: rgba(212, 175, 55, 0.15);
             --sidebar-width: 260px;
         }
 
@@ -71,7 +71,7 @@
         .page-header p { color: var(--text-muted); font-size: 15px; }
 
         .bill-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
+
         .network-label { display: block; font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 15px; }
         .network-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
         .network-option { background: rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px 10px; text-align: center; cursor: pointer; transition: 0.3s; }
@@ -112,7 +112,7 @@
     <div class="mobile-header">
         <i class="fa-solid fa-bars-staggered menu-btn" onclick="toggleMobileSidebar()"></i>
         <div class="logo-text">ACCESS <span>WEALTH</span></div>
-        <img src="" class="avatar" id="mobileAvatar">
+        <img src="/logo192.png" alt="" class="avatar" id="mobileAvatar">
     </div>
     <div class="overlay" id="overlay" onclick="toggleMobileSidebar()"></div>
 
@@ -129,9 +129,9 @@
                 <a href="/daily-tasks.html" class="nav-item sub-item"><i class="fa-regular fa-clipboard main-icon"></i> Daily Tasks</a>
                 <a href="/sponsored-posts.html" class="nav-item sub-item"><i class="fa-solid fa-bullhorn main-icon"></i> Sponsored Posts</a>
             </div>
-            <a href="/spin-win.html" class="nav-item"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
-            
-            <div class="nav-label">BUSINESS & UTILITIES</div>
+            <a href="/spin-win.html" class="nav-item"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin &amp; Win</span></a>
+
+            <div class="nav-label">BUSINESS &amp; UTILITIES</div>
             <div class="nav-item has-dropdown open active" onclick="toggleDropdown('payBillsDropdown', this)">
                 <div class="nav-title-group"><i class="fa-solid fa-file-invoice-dollar main-icon"></i> <span>Pay Bills</span></div>
                 <i class="fa-solid fa-chevron-down chevron"></i>
@@ -140,34 +140,34 @@
                 <a href="/airtime.html" class="nav-item sub-item active"><i class="fa-solid fa-mobile-screen-button main-icon"></i> Airtime</a>
                 <a href="/data.html" class="nav-item sub-item"><i class="fa-solid fa-wifi main-icon"></i> Data</a>
             </div>
-            
+
             <a href="/payment-links.html" class="nav-item"><i class="fa-solid fa-link main-icon"></i> <span>Payment Links</span></a>
             <a href="/invoice.html" class="nav-item"><i class="fa-solid fa-file-lines main-icon"></i> <span>Invoice</span></a>
             <a href="/bulk-sms.html" class="nav-item"><i class="fa-solid fa-message main-icon"></i> <span>Bulk SMS</span></a>
             <a href="/banner-ads.html" class="nav-item"><i class="fa-solid fa-desktop main-icon"></i> <span>Banner Ads</span></a>
-            
+
             <div class="nav-label">MARKETPLACE</div>
             <div class="nav-item has-dropdown" onclick="toggleDropdown('marketplaceDropdown', this)">
                 <div class="nav-title-group"><i class="fa-solid fa-shop main-icon"></i> <span>Marketplace</span></div>
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
             <div class="dropdown-container" id="marketplaceDropdown">
-                <a href="#" class="nav-item sub-item"><i class="fa-solid fa-cart-shopping main-icon"></i> All Markets</a>
-                <a href="#" class="nav-item sub-item"><i class="fa-solid fa-plus main-icon"></i> Add Product</a>
+                <span class="nav-item sub-item aw-feature-unavailable" aria-disabled="true" title="Marketplace is coming soon"><i class="fa-solid fa-cart-shopping main-icon"></i> All Markets (Coming soon)</span>
+                <span class="nav-item sub-item aw-feature-unavailable" aria-disabled="true" title="Marketplace is coming soon"><i class="fa-solid fa-plus main-icon"></i> Add Product (Coming soon)</span>
             </div>
-            
-            <div class="nav-label">WALLET & ACCOUNT</div>
+
+            <div class="nav-label">WALLET &amp; ACCOUNT</div>
             <a href="/deposit.html" class="nav-item"><i class="fa-solid fa-money-bill-transfer main-icon"></i> <span>Fund Account</span></a>
             <a href="/withdraw.html" class="nav-item"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
             <a href="/activation.html" class="nav-item"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
             <a href="/referral.html" class="nav-item"><i class="fa-solid fa-users main-icon"></i> <span>Top Earners</span></a>
-            
-            <a href="https://t.me/accesswealthofficial" target="_blank" class="nav-item" style="color: #0088cc; margin-top: 15px;">
-                <i class="fa-brands fa-telegram main-icon" style="color: #0088cc;"></i> <span>Telegram Community</span>
+
+            <a href="https://t.me/accesswealthofficial" target="_blank" rel="noopener noreferrer" class="nav-item aw-telegram-link">
+                <i class="fa-brands fa-telegram main-icon"></i> <span>Telegram Community</span>
             </a>
-            
-            <button onclick="window.location.href='/activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
-            <a href="#" class="nav-item" onclick="logout()" style="color: #ff4d4d; margin-top: 20px;"><i class="fa-solid fa-power-off main-icon" style="color: #ff4d4d;"></i> <span>Logout</span></a>
+
+            <button type="button" onclick="window.location.href='/activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
+            <a href="#" class="nav-item aw-sidebar-logout aw-sidebar-logout-compact" onclick="logout(); return false;"><i class="fa-solid fa-power-off main-icon"></i> <span>Logout</span></a>
         </div>
     </div>
 
@@ -179,7 +179,7 @@
                     <h4 id="displayName">USER</h4>
                     <p id="displayHandle">@user</p>
                 </div>
-                <img src="" class="avatar" id="desktopAvatar">
+                <img src="/logo192.png" alt="" class="avatar" id="desktopAvatar">
             </div>
         </div>
 
@@ -191,7 +191,7 @@
 
             <div class="bill-card">
                 <form id="airtimeForm">
-                    
+
                     <span class="network-label">Select Network</span>
                     <div class="network-grid">
                         <div class="network-option active" data-network="MTN">
@@ -241,7 +241,7 @@
     <script>
         function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); }
         function toggleDropdown(dropdownId, element) { element.classList.toggle('open'); document.getElementById(dropdownId).classList.toggle('show'); element.classList.toggle('active'); }
-        function logout() { localStorage.clear(); window.location.href = '/login.html'; }
+        function logout() { window.clearAuthSession(); sessionStorage.clear(); window.location.assign('/login.html'); }
 
         let selectedNetwork = "MTN";
         let currentBalance = 0;
@@ -253,8 +253,8 @@
             document.getElementById('displayName').innerText = user.toUpperCase();
             document.getElementById('displayHandle').innerText = "@" + user.toLowerCase().replace(/\s+/g, '');
             document.getElementById('displayBalance').innerText = "₦" + currentBalance.toLocaleString();
-            
-            const avatarUrl = `https://ui-avatars.com/api/?name=${user}&background=d4af37&color=112A46&bold=true`;
+
+            const avatarUrl = window.userAvatarUrl ? window.userAvatarUrl(user) : '';
             document.getElementById('desktopAvatar').src = avatarUrl;
             document.getElementById('mobileAvatar').src = avatarUrl;
         };
@@ -273,14 +273,15 @@
         document.getElementById('airtimeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (isSubmittingAirtime) return;
-            
+
             const username = localStorage.getItem('username');
-            const phone = document.getElementById('phoneNumber').value;
-            const amount = parseFloat(document.getElementById('amount').value);
+            const phone = document.getElementById('phoneNumber').value.replace(/\D/g, '');
+            const amount = Number(document.getElementById('amount').value);
             const btn = document.getElementById('submitBtn');
 
             if (!username) return alert("You must be logged in.");
-            if (phone.length < 11) return alert("Please enter a valid 11-digit phone number.");
+            if (!/^0\d{10}$/.test(phone)) return alert("Please enter a valid 11-digit Nigerian phone number.");
+            if (!Number.isFinite(amount) || amount < 50) return alert("Enter an airtime amount of at least ₦50.");
             if (amount > currentBalance) {
                 return alert("Insufficient Balance! Please fund your Account to buy this airtime.");
             }
@@ -302,19 +303,20 @@
                 });
 
                 if (ok && data.success) {
-                    alert(`✅ Success! ₦${amount} Airtime has been sent to ${phone} (${selectedNetwork}).`);
-                    localStorage.setItem('balance', data.newBalance);
-                    window.location.reload();
+                    currentBalance = Number(data.newBalance);
+                    if (Number.isFinite(currentBalance)) {
+                        localStorage.setItem('balance', String(currentBalance));
+                        document.getElementById('displayBalance').innerText = `₦${currentBalance.toLocaleString()}`;
+                    }
+                    document.getElementById('airtimeForm').reset();
+                    if (typeof window.showToast === 'function') window.showToast('success', `Your ₦${amount.toLocaleString()} airtime request for ${phone} was submitted.`);
                 } else {
-                    alert(data.error || "Failed to process airtime.");
-                    btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Recharge Now';
-                    btn.disabled = false;
+                    const message = data?.error || "Failed to process airtime.";
+                    if (typeof window.showToast === 'function') window.showToast('error', message); else alert(message);
                 }
             } catch (err) {
-                console.error("Airtime Error:", err);
-                alert("Server error. Please ensure your backend server is running.");
-                btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Recharge Now';
-                btn.disabled = false;
+                if (window.__AW_DEBUG__) console.error("Airtime error:", err);
+                if (typeof window.showToast === 'function') window.showToast('error', 'We could not process the airtime request. Please try again.');
             } finally {
                 isSubmittingAirtime = false;
             }

@@ -20,21 +20,21 @@
         .nav-item i.main-icon { margin-right: 15px; width: 20px; text-align: center; }
         .nav-item:hover, .nav-item.active { background: rgba(212, 175, 55, 0.1); color: var(--primary-yellow); }
         .nav-item.active { background: var(--primary-yellow); color: #0b1421; font-weight: 600; }
-        
+
         .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 40px; }
-        
+
         .page-header { margin-bottom: 30px; }
         .page-header h1 { font-size: 28px; color: var(--text-main); }
         .page-header p { color: var(--text-muted); font-size: 14px; }
 
         .layout-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; align-items: start; }
         .form-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; padding: 35px; }
-        
+
         .form-group { margin-bottom: 25px; }
         .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .form-header label { font-size: 14px; font-weight: 600; color: var(--text-muted); }
         .badge { background: rgba(212, 175, 55, 0.1); color: var(--primary-yellow); font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: 600; }
-        
+
         .input-wrapper { position: relative; }
         .input-wrapper i { position: absolute; left: 15px; top: 15px; color: var(--primary-yellow); }
         .form-control { width: 100%; padding: 15px 15px 15px 45px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; font-size: 14px; outline: none; transition: 0.3s;}
@@ -49,7 +49,7 @@
         .summary-card, .guidelines-card { background: var(--bg-cards); border: 1px dashed var(--border-light); border-radius: 20px; padding: 25px; }
         .card-title { font-size: 15px; font-weight: 600; color: var(--text-main); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
         .card-title i { color: var(--primary-yellow); }
-        
+
         .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; color: var(--text-muted); }
         .summary-row.total { margin-top: 10px; color: var(--primary-yellow); font-weight: 600; font-size: 16px; border-bottom: none; }
         .summary-row.total span.val { color: var(--primary-yellow); font-size: 18px; }
@@ -132,19 +132,24 @@
 
         <script src="global.js"></script>
     <script>
-        // STRICT ACTIVATION CHECK
-        window.onload = () => {
-            const isActivated = localStorage.getItem('planActivated') === 'true';
-            if (!isActivated) {
-                alert("Premium Feature Locked! Please activate an account package to use Bulk SMS, Airtime, and Business Utilities.");
-                window.location.href = '/activation.html';
+        // Verify premium access against the server instead of relying on a stale browser flag.
+        window.onload = async () => {
+            try {
+                const { ok, data } = await window.apiFetchJson('/active-investment');
+                const hasActive = ok && data.success && (data.hasActive === true || Boolean(data.investment || data.activeInvestment || data.active_investment));
+                if (ok && data.success && !hasActive) {
+                    if (typeof window.showToast === 'function') window.showToast('info', 'Activate a package to use Bulk SMS.');
+                    window.location.assign('/activation.html');
+                }
+            } catch (error) {
+                if (window.__AW_DEBUG__) console.error('Bulk SMS access check failed:', error);
             }
         };
 
         const unitPrice = 4.00; let finalRecipients = 0; let finalPages = 1; let finalCost = 0;
         const recipientsInput = document.getElementById('recipients');
         const messageInput = document.getElementById('message');
-        
+
         recipientsInput.addEventListener('input', () => {
             const val = recipientsInput.value.trim();
             finalRecipients = val === '' ? 0 : val.split(',').map(n => n.trim()).filter(n => n.length > 0).length;
@@ -163,7 +168,7 @@
             document.getElementById('sumRecipients').innerText = `${finalRecipients} Contact(s)`;
             document.getElementById('sumPages').innerText = `${finalPages} Page(s)`;
             finalCost = finalRecipients * finalPages * unitPrice;
-            document.getElementById('sumCost').innerText = `?${finalCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            document.getElementById('sumCost').innerText = `₦${finalCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
         }
 
         let isSubmittingSms = false;
@@ -182,10 +187,18 @@
                     body: JSON.stringify({ senderId: document.getElementById('senderId').value, cost: finalCost, count: finalRecipients })
                 });
                 if (ok && data.success) {
-                    alert(`✅ Bulk SMS Sent Successfully!\n₦${finalCost.toLocaleString()} was deducted.`);
-                    localStorage.setItem('balance', data.newBalance); window.location.reload();
-                } else { alert(data?.error || error); }
-            } catch (err) { alert("Server error."); } 
+                    const newBalance = Number(data.newBalance);
+                    if (Number.isFinite(newBalance)) localStorage.setItem('balance', String(newBalance));
+                    if (typeof window.showToast === 'function') {
+                        window.showToast('success', `Your bulk SMS request was submitted. ₦${finalCost.toLocaleString()} was deducted.`);
+                    } else alert(`Bulk SMS request submitted. ₦${finalCost.toLocaleString()} was deducted.`);
+                    document.getElementById('smsForm').reset();
+                    finalRecipients = 0; finalPages = 1; updateSummary();
+                } else { alert(data?.error || error || 'Unable to submit the bulk SMS request.'); }
+            } catch (err) {
+                if (window.__AW_DEBUG__) console.error('Bulk SMS error:', err);
+                alert('We could not submit the bulk SMS request. Please try again.');
+            }
             finally { isSubmittingSms = false; btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Bulk SMS'; }
         });
     </script>

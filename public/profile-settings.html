@@ -118,7 +118,7 @@
             <a href="/profile-settings.html" class="nav-item active"><i class="fa-regular fa-user"></i> Profile Setting</a>
             <a href="/bank-details.html" class="nav-item"><i class="fa-solid fa-building-columns"></i> Set Bank Details</a>
             <a href="/reset-password.html" class="nav-item"><i class="fa-solid fa-key"></i> Reset Password</a>
-            <a href="#" class="nav-item" onclick="logout()" style="margin-top: 30px; color: #ff4d4d;"><i class="fa-solid fa-power-off"></i> Logout</a>
+            <a href="#" class="nav-item aw-sidebar-logout" onclick="logout(); return false;"><i class="fa-solid fa-power-off"></i> Logout</a>
         </div>
     </div>
 
@@ -142,14 +142,14 @@
             </div>
         </div>
         <div class="form-card">
-            <div id="alertMsg" class="alert"></div>
+            <div id="alertMsg" class="alert" role="alert" aria-live="assertive"></div>
             <form id="profileForm">
                 <div class="form-group">
-                    <label>Full Name</label>
+                    <label for="fullName">Full Name</label>
                     <input type="text" id="fullName" class="form-control" placeholder="Enter your full name">
                 </div>
                 <div class="form-group">
-                    <label>Phone Number</label>
+                    <label for="phone">Phone Number</label>
                     <input type="tel" id="phone" class="form-control" placeholder="Enter your phone number">
                 </div>
                 <button type="submit" class="btn-submit" id="submitBtn">Save Changes</button>
@@ -167,14 +167,21 @@
         async function loadProfile() {
             const username = localStorage.getItem('username');
             const alertDiv = document.getElementById('alertMsg');
-            if (!username) { window.location.href = '/login.html'; return; }
-            const { ok, data } = await window.apiFetchJson(`/user/profile/${username}`);
-            if (ok && data.success && data.profile) {
-                document.getElementById('fullName').value = data.profile.full_name || '';
-                document.getElementById('phone').value = data.profile.phone || '';
-            } else {
+            if (!username) { window.location.assign('/login.html'); return; }
+            try {
+                const { ok, data, networkError } = await window.apiFetchJson(`/user/profile/${window.apiPathParam(username)}`);
+                if (ok && data.success && data.profile) {
+                    document.getElementById('fullName').value = data.profile.full_name || '';
+                    document.getElementById('phone').value = data.profile.phone || '';
+                    return;
+                }
                 alertDiv.className = 'alert error';
-                alertDiv.innerText = data.error || 'Unable to load your profile right now.';
+                alertDiv.innerText = networkError ? 'We could not reach your profile right now.' : data?.error || 'Unable to load your profile right now.';
+                alertDiv.style.display = 'block';
+            } catch (error) {
+                if (window.__AW_DEBUG__) console.error('Profile load error:', error);
+                alertDiv.className = 'alert error';
+                alertDiv.innerText = 'Unable to load your profile right now.';
                 alertDiv.style.display = 'block';
             }
         }
@@ -220,7 +227,7 @@
                         }
                     } catch (err) {
                         alertDiv.className = 'alert error';
-                        alertDiv.innerText = 'Network error. Please try again.';
+                        alertDiv.innerText = 'We could not save your profile right now. Please try again.';
                         alertDiv.style.display = 'block';
                     } finally {
                         isSubmittingProfile = false;
@@ -230,11 +237,9 @@
                 });
             }
             loadProfile();
-            // Sync latest balance from server on page load
-            if (typeof globalSync === 'function') globalSync();
         });
 
-        function logout() { localStorage.clear(); window.location.href = '/login.html'; }
+        function logout() { window.clearAuthSession(); sessionStorage.clear(); window.location.assign('/login.html'); }
     </script>
 </body>
 </html>

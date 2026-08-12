@@ -8,16 +8,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/styles.css">
     <style>
-        :root { 
-            --bg-body: #070d14; 
-            --bg-cards: #112A46; 
-            --text-main: #ffffff; 
-            --text-muted: #8a99af; 
-            --primary-yellow: #d4af37; 
-            --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); 
-            --card-gradient: linear-gradient(135deg, #112A46 0%, #0b1a2a 100%); 
-            --border-light: rgba(212, 175, 55, 0.15); 
-            --sidebar-width: 260px; 
+        :root {
+            --bg-body: #070d14;
+            --bg-cards: #112A46;
+            --text-main: #ffffff;
+            --text-muted: #8a99af;
+            --primary-yellow: #d4af37;
+            --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+            --card-gradient: linear-gradient(135deg, #112A46 0%, #0b1a2a 100%);
+            --border-light: rgba(212, 175, 55, 0.15);
+            --sidebar-width: 260px;
             --success: #2ecc71;
             --danger: #ff4d4d;
         }
@@ -57,7 +57,7 @@
         .text-primary-yellow { color: var(--primary-yellow); }
 
         .withdraw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-        
+
         .withdraw-box { background: var(--bg-cards); border-radius: 20px; padding: 30px; border: 1px solid var(--border-light); position: relative; overflow: hidden; }
         .withdraw-box-highlight { border-color: var(--primary-yellow); }
         .box-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
@@ -126,7 +126,7 @@
     <div class="mobile-header">
         <i class="fa-solid fa-bars-staggered menu-btn" onclick="toggleMobileSidebar()"></i>
         <div class="logo-text">ACCESS <span>WEALTH</span></div>
-        <img src="" class="mobile-avatar" id="mobileAvatar">
+        <img src="/logo192.png" alt="" class="mobile-avatar" id="mobileAvatar">
     </div>
     <div class="overlay" id="overlay" onclick="toggleMobileSidebar()"></div>
 
@@ -149,9 +149,9 @@
 
         <div class="balances-wrapper">
             <div class="bal-card">
-                <h3>Task & Daily Earnings</h3>
+                <h3>Task Earnings</h3>
                 <h2 id="dispTaskBal">₦0.00</h2>
-                <p><i class="fa-solid fa-calendar-check"></i> Pays on 15th & 29th</p>
+                <p><i class="fa-solid fa-calendar-check"></i> Available from your task-earnings wallet</p>
             </div>
             <div class="bal-card bal-card-highlight">
                 <h3>Affiliate Earnings</h3>
@@ -161,7 +161,7 @@
         </div>
 
         <div class="withdraw-grid">
-            
+
             <div class="withdraw-box withdraw-box-highlight">
                 <div class="box-header">
                     <div class="box-icon"><i class="fa-solid fa-bolt"></i></div>
@@ -178,7 +178,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Amount (Min: ₦3,000)</label>
+                    <label for="withdrawAmount">Amount (Min: ₦3,000)</label>
                     <div class="input-wrap">
                         <i class="fa-solid fa-naira-sign"></i>
                         <input type="number" id="withdrawAmount" class="form-control" placeholder="0.00">
@@ -186,7 +186,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Select Wallet</label>
+                    <label for="walletType">Select Wallet</label>
                     <div class="input-wrap">
                         <i class="fa-solid fa-wallet"></i>
                         <select id="walletType" class="form-control" title="Select wallet" aria-label="Select wallet">
@@ -197,7 +197,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Bank Name</label>
+                    <label for="bankName">Bank Name</label>
                     <div class="input-wrap">
                         <i class="fa-solid fa-building-columns"></i>
                         <input type="text" id="bankName" class="form-control" placeholder="e.g., GTBank">
@@ -205,22 +205,22 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Account Number</label>
+                    <label for="accountNumber">Account Number</label>
                     <div class="input-wrap">
                         <i class="fa-solid fa-credit-card"></i>
-                        <input type="text" id="accountNumber" class="form-control" placeholder="10-digit account number">
+                        <input type="text" id="accountNumber" class="form-control" placeholder="10-digit account number" inputmode="numeric" maxlength="10" autocomplete="off">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Account Holder Name</label>
+                    <label for="accountHolder">Account Holder Name</label>
                     <div class="input-wrap">
                         <i class="fa-solid fa-user"></i>
                         <input type="text" id="accountHolder" class="form-control" placeholder="Name on account">
                     </div>
                 </div>
 
-                <button class="btn-withdraw btn-instant" id="withdrawBtn" onclick="requestWithdrawal()">
+                <button type="button" class="btn-withdraw btn-instant" id="withdrawBtn" onclick="requestWithdrawal()">
                     <i class="fa-solid fa-money-bill-transfer"></i> Request Withdrawal
                 </button>
             </div>
@@ -249,7 +249,7 @@
                     </div>
                 </div>
 
-                <button class="btn-withdraw btn-locked" disabled>
+                <button type="button" class="btn-withdraw btn-locked" disabled>
                     <i class="fa-solid fa-lock"></i> Portal Locked
                 </button>
             </div>
@@ -271,10 +271,8 @@
 
         function updateDisplayBalances() {
             const task = parseFloat(localStorage.getItem('taskEarnings') || 0);
-            const daily = parseFloat(localStorage.getItem('daily_earnings') || 0);
-            const totalTask = task + daily;
             const aff = parseFloat(localStorage.getItem('affiliate_balance') || 0);
-            document.getElementById('dispTaskBal').innerText = `₦${totalTask.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            document.getElementById('dispTaskBal').innerText = `₦${task.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
             document.getElementById('dispAffiliateBal').innerText = `₦${aff.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
         }
 
@@ -287,7 +285,7 @@
         async function loadWithdrawalHistory() {
             const container = document.getElementById('withdrawalHistory');
             container.innerHTML = '<p class="history-empty">Loading history...</p>';
-            
+
             try {
                 const { ok, data } = await window.apiFetchJson('/user/withdrawals');
                 if (ok && data.success) {
@@ -295,26 +293,29 @@
                         container.innerHTML = '<p class="history-empty">No withdrawal history yet.</p>';
                         return;
                     }
-                    
+
                     container.innerHTML = '';
                     data.withdrawals.forEach(w => {
                         let statusClass = 'pending';
                         let statusText = '⏳ Pending';
                         if (w.status === 'approved') { statusClass = 'approved'; statusText = '✅ Approved'; }
+                        else if (w.status === 'processing') { statusClass = 'pending'; statusText = '⏳ Processing'; }
                         else if (w.status === 'declined') { statusClass = 'declined'; statusText = '❌ Declined'; }
-                        
+
                         const note = w.admin_note || '';
-                        const date = new Date(w.created_at).toLocaleString();
-                        
+                        const parsedDate = new Date(w.created_at);
+                        const date = Number.isNaN(parsedDate.getTime()) ? '—' : parsedDate.toLocaleString();
+                        const amount = Number(w.amount) || 0;
+
                         const div = document.createElement('div');
                         div.className = `history-item status-${statusClass}`;
                         div.innerHTML = `
                             <div class="hdr">
-                                <span class="amount">₦${w.amount.toLocaleString()}</span>
+                                <span class="amount">₦${amount.toLocaleString()}</span>
                                 <span class="status ${statusClass}">${statusText}</span>
                             </div>
-                            ${note ? `<div class="note">📝 ${note}</div>` : ''}
-                            <div class="date">${date}</div>
+                            ${note ? `<div class="note">📝 ${window.escapeHtml(note)}</div>` : ''}
+                            <div class="date">${window.escapeHtml(date)}</div>
                         `;
                         container.appendChild(div);
                     });
@@ -368,8 +369,16 @@
                 return;
             }
 
+            bank_details.bank_name = bank_details.bank_name.trim();
+            bank_details.account_number = bank_details.account_number.replace(/\D/g, '');
+            bank_details.account_holder = bank_details.account_holder.trim();
             if (!bank_details.bank_name || !bank_details.account_number || !bank_details.account_holder) {
                 errBox.innerText = "Please fill in all bank details";
+                errBox.style.display = 'block';
+                return;
+            }
+            if (!/^\d{10}$/.test(bank_details.account_number)) {
+                errBox.innerText = 'Enter a valid 10-digit account number.';
                 errBox.style.display = 'block';
                 return;
             }
@@ -378,7 +387,7 @@
             if (wallet_type === 'affiliate') {
                 currentBalance = parseFloat(localStorage.getItem('affiliate_balance') || 0);
             } else {
-                currentBalance = parseFloat(localStorage.getItem('taskEarnings') || 0) + parseFloat(localStorage.getItem('daily_earnings') || 0);
+                currentBalance = parseFloat(localStorage.getItem('taskEarnings') || 0);
             }
 
             if (amount > currentBalance) {
@@ -424,6 +433,21 @@
             }
         }
 
+        async function loadSavedBankDetails() {
+            const username = localStorage.getItem('username');
+            if (!username) return;
+            try {
+                const { ok, data } = await window.apiFetchJson(`/user/profile/${window.apiPathParam(username)}`);
+                if (!(ok && data.success && data.profile)) return;
+                const profile = data.profile;
+                if (!document.getElementById('bankName').value) document.getElementById('bankName').value = profile.bank_name || '';
+                if (!document.getElementById('accountNumber').value) document.getElementById('accountNumber').value = profile.bank_account_number || '';
+                if (!document.getElementById('accountHolder').value) document.getElementById('accountHolder').value = profile.bank_account_holder || '';
+            } catch (error) {
+                if (window.__AW_DEBUG__) console.error('Saved bank detail load error:', error);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date();
             const day = today.getDate();
@@ -433,8 +457,7 @@
             }
             checkPendingWithdrawal();
             loadWithdrawalHistory();
-            // Sync latest balance from server on page load
-            if (typeof globalSync === 'function') globalSync();
+            loadSavedBankDetails();
         });
 
         window.addEventListener('globalSyncComplete', () => {

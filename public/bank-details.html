@@ -70,7 +70,7 @@
             <a href="/profile-settings.html" class="nav-item"><i class="fa-regular fa-user"></i> Profile Setting</a>
             <a href="/bank-details.html" class="nav-item active"><i class="fa-solid fa-building-columns"></i> Set Bank Details</a>
             <a href="/reset-password.html" class="nav-item"><i class="fa-solid fa-key"></i> Reset Password</a>
-            <a href="#" class="nav-item" onclick="logout()" style="margin-top: 30px; color: #ff4d4d;"><i class="fa-solid fa-power-off"></i> Logout</a>
+            <a href="#" class="nav-item aw-sidebar-logout" onclick="logout(); return false;"><i class="fa-solid fa-power-off"></i> Logout</a>
         </div>
     </div>
 
@@ -94,18 +94,18 @@
             </div>
         </div>
         <div class="form-card">
-            <div id="alertMsg" class="alert"></div>
+            <div id="alertMsg" class="alert" role="alert" aria-live="assertive"></div>
             <form id="bankForm">
                 <div class="form-group">
-                    <label>Bank Name</label>
+                    <label for="bankName">Bank Name</label>
                     <input type="text" id="bankName" class="form-control" placeholder="e.g., GTBank, Access Bank, UBA" required>
                 </div>
                 <div class="form-group">
-                    <label>Account Number</label>
-                    <input type="text" id="accountNumber" class="form-control" placeholder="10-digit account number" required>
+                    <label for="accountNumber">Account Number</label>
+                    <input type="text" id="accountNumber" class="form-control" placeholder="10-digit account number" inputmode="numeric" autocomplete="off" maxlength="10" required>
                 </div>
                 <div class="form-group">
-                    <label>Account Holder Name</label>
+                    <label for="accountHolder">Account Holder Name</label>
                     <input type="text" id="accountHolder" class="form-control" placeholder="Name on bank account" required>
                 </div>
                 <button type="submit" class="btn-submit" id="submitBtn">Save Bank Details</button>
@@ -122,12 +122,24 @@
     <script>
         async function loadBankDetails() {
             const username = localStorage.getItem('username');
-            if (!username) { window.location.href = '/login.html'; return; }
-            const { ok, data } = await window.apiFetchJson(`/user/profile/${username}`);
-            if (ok && data.success && data.profile) {
-                document.getElementById('bankName').value = data.profile.bank_name || '';
-                document.getElementById('accountNumber').value = data.profile.bank_account_number || '';
-                document.getElementById('accountHolder').value = data.profile.bank_account_holder || '';
+            const alertDiv = document.getElementById('alertMsg');
+            if (!username) { window.location.assign('/login.html'); return; }
+            try {
+                const { ok, data, networkError } = await window.apiFetchJson(`/user/profile/${window.apiPathParam(username)}`);
+                if (ok && data.success && data.profile) {
+                    document.getElementById('bankName').value = data.profile.bank_name || '';
+                    document.getElementById('accountNumber').value = data.profile.bank_account_number || '';
+                    document.getElementById('accountHolder').value = data.profile.bank_account_holder || '';
+                    return;
+                }
+                alertDiv.className = 'alert error';
+                alertDiv.textContent = networkError ? 'We could not reach your bank profile right now.' : data?.error || 'Unable to load bank details.';
+                alertDiv.style.display = 'block';
+            } catch (error) {
+                if (window.__AW_DEBUG__) console.error('Bank detail load error:', error);
+                alertDiv.className = 'alert error';
+                alertDiv.textContent = 'Unable to load bank details.';
+                alertDiv.style.display = 'block';
             }
         }
 
@@ -140,13 +152,19 @@
             const alertDiv = document.getElementById('alertMsg');
             alertDiv.style.display = 'none';
 
-            const bank_name = document.getElementById('bankName').value;
-            const account_number = document.getElementById('accountNumber').value;
-            const account_holder = document.getElementById('accountHolder').value;
+            const bank_name = document.getElementById('bankName').value.trim();
+            const account_number = document.getElementById('accountNumber').value.replace(/\D/g, '');
+            const account_holder = document.getElementById('accountHolder').value.trim();
 
             if (!bank_name || !account_number || !account_holder) {
                 alertDiv.className = 'alert error';
                 alertDiv.innerText = 'Please fill in all bank fields.';
+                alertDiv.style.display = 'block';
+                return;
+            }
+            if (!/^\d{10}$/.test(account_number)) {
+                alertDiv.className = 'alert error';
+                alertDiv.innerText = 'Enter a valid 10-digit account number.';
                 alertDiv.style.display = 'block';
                 return;
             }
@@ -174,7 +192,7 @@
                 }
             } catch (err) {
                 alertDiv.className = 'alert error';
-                alertDiv.innerText = 'Network error saving bank details.';
+                alertDiv.innerText = 'We could not save your bank details right now. Please try again.';
                 alertDiv.style.display = 'block';
             } finally {
                 isSubmittingBank = false;
@@ -184,7 +202,7 @@
         });
 
         window.onload = () => { loadBankDetails(); };
-        function logout() { localStorage.clear(); window.location.href = '/login.html'; }
+        function logout() { window.clearAuthSession(); sessionStorage.clear(); window.location.assign('/login.html'); }
     </script>
 </body>
 </html>

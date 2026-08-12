@@ -54,9 +54,38 @@
     max-height: 116px;
 }
 
+/* Small shared utility classes used by static pages. Keeping them here avoids
+   inline styles and makes repeated status/navigation treatments consistent. */
+.aw-sidebar-logout { margin-top: 30px; color: #ff4d4d !important; }
+.aw-sidebar-logout.aw-sidebar-logout-compact { margin-top: 20px; }
+.aw-sidebar-logout .main-icon { color: #ff4d4d !important; }
+.aw-sidebar-logout-admin { margin-top: 50px; }
+.aw-muted-icon { color: var(--text-muted, #8a99af); }
+.aw-table-loading { text-align: center; color: var(--text-muted, #8a99af); }
+.aw-telegram-link { color: #0088cc !important; margin-top: 15px; }
+.aw-telegram-link .main-icon { color: #0088cc !important; }
+.aw-field-label { display: block; font-size: 14px; color: var(--text-muted, #8a99af); margin-bottom: 10px; }
+.aw-network-label { display: block; font-size: 13px; color: var(--text-muted, #8a99af); margin-bottom: 10px; }
+.aw-optional-copy { font-weight: 400; opacity: .7; }
+.aw-upload-hint { font-size: 11px; color: var(--text-muted, #8a99af); margin-top: 8px; }
+.aw-history-icon { color: var(--primary-yellow, #d4af37); }
+.aw-footer-tagline { margin-top: 6px; }
+.aw-stat-icon-success { color: #4caf50; background: rgba(76, 175, 80, .1); }
+.aw-stat-icon-purple { color: #9c27b0; background: rgba(156, 39, 176, .1); }
+.aw-plan-status-label { color: var(--primary-yellow, #d4af37); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+.aw-broadcast-notice { display: none; margin-bottom: 20px; background: rgba(212, 175, 55, .08); border: 1px solid var(--border-light, rgba(212, 175, 55, .15)); border-radius: 16px; padding: 16px 18px; }
+.aw-loading-state { text-align: center; padding: 40px; color: var(--text-muted, #8a99af); }
+.aw-loading-state-icon { font-size: 30px; margin-bottom: 15px; display: block; }
+.aw-empty-chat-icon { font-size: 40px; opacity: .3; margin-bottom: 10px; display: block; }
+
 @media (max-width: 768px) {
     .logo-area.aw-image-brand { min-height: 84px; }
     .logo-area.aw-image-brand .aw-brand-logo { max-height: 62px; }
     .logo.aw-image-brand { width: 128px; height: 48px; }
     .logo.aw-image-brand .aw-brand-logo { max-height: 48px; }
+}
+.aw-feature-unavailable {
+    opacity: .62;
+    cursor: not-allowed;
+    pointer-events: none;
 }

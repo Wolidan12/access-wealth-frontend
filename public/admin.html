@@ -8,16 +8,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/styles.css">
     <style>
-        :root { 
-            --bg-body: #070d14; 
-            --bg-cards: #112A46; 
-            --text-main: #ffffff; 
-            --text-muted: #8a99af; 
-            --primary-yellow: #d4af37; 
-            --border-light: rgba(212, 175, 55, 0.15); 
-            --sidebar-width: 260px; 
-            --danger: #ff4d4d; 
-            --success: #2ecc71; 
+        :root {
+            --bg-body: #070d14;
+            --bg-cards: #112A46;
+            --text-main: #ffffff;
+            --text-muted: #8a99af;
+            --primary-yellow: #d4af37;
+            --border-light: rgba(212, 175, 55, 0.15);
+            --sidebar-width: 260px;
+            --danger: #ff4d4d;
+            --success: #2ecc71;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden;}
@@ -49,7 +49,7 @@
         .page-header { margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px;}
         .page-header h1 { font-size: 28px; color: var(--text-main); margin-bottom: 5px; }
         .page-header p { color: var(--text-muted); font-size: 14px; }
-        
+
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: var(--bg-cards); border: 1px solid var(--border-light); padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         .stat-card h3 { color: var(--text-muted); font-size: 13px; text-transform: uppercase; margin-bottom: 10px; }
@@ -67,12 +67,12 @@
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; white-space: nowrap; }
         th { color: var(--text-muted); font-weight: 500; background: rgba(0,0,0,0.2); text-transform: uppercase; font-size: 11px; letter-spacing: 1px;}
-        
+
         .badge { padding: 5px 10px; border-radius: 50px; font-size: 11px; font-weight: 600; }
         .badge.success { background: rgba(46, 204, 113, 0.1); color: var(--success); }
         .badge.warning { background: rgba(243, 156, 18, 0.1); color: #f39c12; }
         .badge.danger { background: rgba(255, 77, 77, 0.1); color: var(--danger); }
-        
+
         .action-btn { background: transparent; border: 1px solid var(--text-muted); color: var(--text-main); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: 0.3s; margin-right: 5px;}
         .action-btn:hover { background: var(--primary-yellow); border-color: var(--primary-yellow); color: #0b1421; }
         .toolbar-wrap { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
@@ -101,7 +101,7 @@
         .form-control { width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; outline: none; font-size: 14px;}
         .form-control:focus { border-color: var(--primary-yellow); }
         select.form-control { cursor: pointer; }
-        
+
         .btn-submit { padding: 12px 25px; border-radius: 8px; background: var(--primary-yellow); color: #0b1421; font-weight: 600; border: none; cursor: pointer; transition: 0.3s; width: 100%; }
         .btn-submit:hover { background: #fff; }
         textarea.form-control { resize: vertical; }
@@ -138,8 +138,8 @@
             <div class="nav-label">Core</div>
             <a class="nav-item active" onclick="switchTab('dashboard', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-chart-line"></i> Overview</a>
             <a class="nav-item" onclick="switchTab('users', this); loadUsers(); toggleSidebarMobileOnly();"><i class="fa-solid fa-users"></i> User Management</a>
-            
-            <div class="nav-label">Finance & Payouts</div>
+
+            <div class="nav-label">Finance &amp; Payouts</div>
             <a class="nav-item pos-relative" onclick="switchTab('deposits', this); loadDeposits('pending'); toggleSidebarMobileOnly();">
                 <i class="fa-solid fa-money-bill-transfer"></i> Deposit Review
                 <span class="badge warning badge-right" id="badgeDeposits">0</span>
@@ -149,24 +149,24 @@
                 <span class="badge danger badge-right" id="badgeWithdrawals">0</span>
             </a>
             <a class="nav-item" onclick="switchTab('financials', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-wallet"></i> Manual Credit</a>
-            
+
             <div class="nav-label">Communication</div>
             <a class="nav-item" onclick="switchTab('broadcast', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-bullhorn"></i> Broadcast</a>
             <a class="nav-item" onclick="switchTab('sponsored', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-ad"></i> Sponsored Posts</a>
             <a class="nav-item" onclick="switchTab('settings', this); loadSiteSettings(); toggleSidebarMobileOnly();"><i class="fa-solid fa-sliders"></i> Site Settings</a>
-            
+
             <div class="nav-label">Task Reviews</div>
             <a class="nav-item" onclick="switchTab('task-reviews', this); loadTaskSubmissions(); toggleSidebarMobileOnly();"><i class="fa-solid fa-check-double"></i> Sponsored Submissions</a>
-            
+
             <div class="nav-label">Support</div>
-            <a href="/support-agent.html" class="nav-item" target="_blank"><i class="fa-solid fa-headset"></i> Support Portal</a>
+            <a href="/support-agent.html" class="nav-item" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-headset"></i> Support Portal</a>
 
             <a href="javascript:void(0)" class="nav-item nav-item-logout" onclick="logout()"><i class="fa-solid fa-power-off"></i> Logout</a>
         </div>
     </div>
 
     <div class="main-content">
-        
+
         <div id="dashboard" class="admin-section active">
             <div class="page-header"><div><h1>Platform Overview</h1><p>Welcome back, Administrator.</p></div></div>
             <div class="stats-grid">
@@ -179,13 +179,13 @@
             <div class="card">
                 <div class="card-title"><i class="fa-solid fa-boxes-stacked"></i> Investment Packages</div>
                 <p class="package-helper-text">Reseed all fixed investment packages from server configuration into the database.</p>
-                <button class="btn-submit btn-reseed-packages" id="btnReseedPackages" onclick="reseedPackages()">Reseed Package Catalog</button>
+                <button type="button" class="btn-submit btn-reseed-packages" id="btnReseedPackages" onclick="reseedPackages()">Reseed Package Catalog</button>
             </div>
 
             <div class="card">
                 <div class="card-title"><i class="fa-solid fa-database"></i> Legacy Plan Reset (One-Time)</div>
                 <p class="package-helper-text">Cancels legacy active plans, refunds original capital to wallet balance, and clears legacy ROI trackers.</p>
-                <button class="btn-submit btn-legacy-migration" id="btnRunLegacyMigration" onclick="runLegacyPlanMigration()">Run Legacy Reset Migration</button>
+                <button type="button" class="btn-submit btn-legacy-migration" id="btnRunLegacyMigration" onclick="runLegacyPlanMigration()">Run Legacy Reset Migration</button>
                 <p class="migration-status" id="legacyMigrationStatus">Checking migration status...</p>
             </div>
         </div>
@@ -195,7 +195,7 @@
             <div class="card">
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th>Username</th><th>Total Bal</th><th>Deposit</th><th>Engage</th><th>Daily</th><th>Affiliate</th><th>Plan Status</th><th>Actions</th></tr></thead>
+                        <thead><tr><th scope="col">Username</th><th scope="col">Total Bal</th><th scope="col">Deposit</th><th scope="col">Engage</th><th scope="col">Daily</th><th scope="col">Affiliate</th><th scope="col">Plan Status</th><th scope="col">Actions</th></tr></thead>
                         <tbody id="userTableBody"><tr><td colspan="8" class="text-center">Loading users</td></tr></tbody>
                     </table>
                 </div>
@@ -206,14 +206,14 @@
             <div class="page-header"><div><h1>Deposit Review</h1><p>Review manual bank-transfer deposit requests. View the uploaded receipt, then approve to credit the user's wallet or decline.</p></div></div>
             <div class="card">
                 <div class="toolbar-wrap">
-                    <button class="action-btn filter-btn filter-pending" onclick="loadDeposits('pending')">Pending</button>
-                    <button class="action-btn filter-btn filter-approved" onclick="loadDeposits('approved')">Approved</button>
-                    <button class="action-btn filter-btn filter-declined" onclick="loadDeposits('declined')">Declined</button>
-                    <button class="action-btn filter-btn filter-all" onclick="loadDeposits('all')">All</button>
+                    <button type="button" class="action-btn filter-btn filter-pending" onclick="loadDeposits('pending')">Pending</button>
+                    <button type="button" class="action-btn filter-btn filter-approved" onclick="loadDeposits('approved')">Approved</button>
+                    <button type="button" class="action-btn filter-btn filter-declined" onclick="loadDeposits('declined')">Declined</button>
+                    <button type="button" class="action-btn filter-btn filter-all" onclick="loadDeposits('all')">All</button>
                 </div>
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th>Date</th><th>User</th><th>Sender</th><th>Amount</th><th>Method</th><th>Reference</th><th>Status</th><th>Receipt</th><th>Action</th></tr></thead>
+                        <thead><tr><th scope="col">Date</th><th scope="col">User</th><th scope="col">Sender</th><th scope="col">Amount</th><th scope="col">Method</th><th scope="col">Reference</th><th scope="col">Status</th><th scope="col">Receipt</th><th scope="col">Action</th></tr></thead>
                         <tbody id="depositTableBody"><tr><td colspan="9" class="text-center">Loading deposits</td></tr></tbody>
                     </table>
                 </div>
@@ -224,14 +224,14 @@
             <div class="page-header"><div><h1>Withdrawal Requests</h1><p>Approve or decline user withdrawal requests</p></div></div>
             <div class="card">
                 <div class="toolbar-wrap">
-                    <button class="action-btn filter-btn filter-pending" onclick="loadAllWithdrawals('pending')">Pending</button>
-                    <button class="action-btn filter-btn filter-approved" onclick="loadAllWithdrawals('approved')">Approved</button>
-                    <button class="action-btn filter-btn filter-declined" onclick="loadAllWithdrawals('declined')">Declined</button>
-                    <button class="action-btn filter-btn filter-all" onclick="loadAllWithdrawals('all')">All</button>
+                    <button type="button" class="action-btn filter-btn filter-pending" onclick="loadAllWithdrawals('pending')">Pending</button>
+                    <button type="button" class="action-btn filter-btn filter-approved" onclick="loadAllWithdrawals('approved')">Approved</button>
+                    <button type="button" class="action-btn filter-btn filter-declined" onclick="loadAllWithdrawals('declined')">Declined</button>
+                    <button type="button" class="action-btn filter-btn filter-all" onclick="loadAllWithdrawals('all')">All</button>
                 </div>
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th>Date</th><th>User</th><th>Amount</th><th>Wallet</th><th>Bank Details</th><th>Status</th><th>Note</th><th>Action</th></tr></thead>
+                        <thead><tr><th scope="col">Date</th><th scope="col">User</th><th scope="col">Amount</th><th scope="col">Wallet</th><th scope="col">Bank Details</th><th scope="col">Status</th><th scope="col">Note</th><th scope="col">Action</th></tr></thead>
                         <tbody id="withdrawalTableBody"><tr><td colspan="8" class="text-center">Loading withdrawals...</td></tr></tbody>
                     </table>
                 </div>
@@ -257,8 +257,8 @@
                         <div class="form-group"><label>Wallet to Adjust</label><select id="adjustWallet" class="form-control"><option value="balance">Deposit Wallet</option><option value="taskEarnings">Engagements Wallet</option><option value="daily_earnings">Daily Earnings Wallet</option><option value="affiliate_balance">Affiliates Wallet</option></select></div>
                         <div class="form-group"><label>Amount (₦)</label><input type="number" id="adjustAmount" class="form-control" required></div>
                         <div class="toolbar-wrap">
-                            <button type="button" id="btnAdd" class="btn-submit btn-credit btn-flex" onclick="adjustBalance('add')">Add Funds</button>
-                            <button type="button" id="btnSubtract" class="btn-submit btn-subtract btn-flex" onclick="adjustBalance('subtract')">Subtract Funds</button>
+                            <button type="submit" id="btnAdd" class="btn-submit btn-credit btn-flex" data-action="add">Add Funds</button>
+                            <button type="submit" id="btnSubtract" class="btn-submit btn-subtract btn-flex" data-action="subtract">Subtract Funds</button>
                         </div>
                     </form>
                 </div>
@@ -329,7 +329,7 @@
             <div class="card">
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th>User</th><th>Post Title</th><th>Reward</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead>
+                        <thead><tr><th scope="col">User</th><th scope="col">Post Title</th><th scope="col">Reward</th><th scope="col">Submitted</th><th scope="col">Status</th><th scope="col">Action</th></tr></thead>
                         <tbody id="taskSubmissionsTable"><tr><td colspan="6" class="text-center">Loading submissions...</td></tr></tbody>
                     </table>
                 </div>
@@ -345,15 +345,15 @@
         function switchTab(tabId, element) {
             document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
             document.querySelectorAll('.admin-section').forEach(sec => sec.classList.remove('active'));
-            element.classList.add('active'); 
+            element.classList.add('active');
             document.getElementById(tabId).classList.add('active');
             window.scrollTo(0, 0);
         }
-        function logout() { localStorage.clear(); window.location.href = '/login.html'; }
+        function logout() { window.clearAuthSession(); sessionStorage.clear(); window.location.assign('/login.html'); }
 
         window.onload = () => {
             const role = localStorage.getItem('role');
-            if (role !== 'admin') { window.location.href = '/login.html'; return; }
+            if (role !== 'admin' || !localStorage.getItem('token')) { window.location.assign('/login.html'); return; }
             loadDashboardStats();
             loadLegacyMigrationStatus();
             loadUsers();
@@ -487,56 +487,108 @@
         // ==========================================
         // USER MANAGEMENT
         // ==========================================
+        function adminAmount(value) {
+            const amount = Number(value);
+            return `₦${(Number.isFinite(amount) ? amount : 0).toLocaleString()}`;
+        }
+
+        function appendAdminCell(row, value, className = '') {
+            const cell = document.createElement('td');
+            if (className) cell.className = className;
+            if (value instanceof Node) cell.appendChild(value);
+            else cell.textContent = value;
+            row.appendChild(cell);
+            return cell;
+        }
+
         async function loadUsers() {
             const tbody = document.getElementById('userTableBody');
             tbody.innerHTML = '<tr><td colspan="8" class="text-center">Loading users</td></tr>';
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/users');
-                if (ok && data.success) {
-                    tbody.innerHTML = '';
-                    data.users.forEach(user => {
-                        const total = (user.balance || 0) + (user.taskEarnings || 0) + (user.daily_earnings || 0) + (user.affiliate_balance || 0);
-                        const statusBadge = user.planActivated === 'true' ? `<span class="badge success">${user.activePackage || 'Premium'}</span>` : '<span class="badge warning">No Plan</span>';
-                        const accountStatus = (user.status || 'active').toLowerCase() === 'banned' ? '<span class="badge danger">Banned</span>' : '<span class="badge success">Active</span>';
-                        tbody.innerHTML += `<tr>
-                            <td><strong>${user.username}</strong></td>
-                            <td class="font-bold">₦${total.toLocaleString()}</td>
-                            <td>₦${(user.balance || 0).toLocaleString()}</td>
-                            <td>₦${(user.taskEarnings || 0).toLocaleString()}</td>
-                            <td>₦${(user.daily_earnings || 0).toLocaleString()}</td>
-                            <td>₦${(user.affiliate_balance || 0).toLocaleString()}</td>
-                            <td>${statusBadge}</td>
-                            <td>
-                                <button class="action-btn" onclick="quickAdjust('${user.username}')">Adjust</button>
-                                <button class="action-btn" onclick="quickAssignPlan('${user.username}')">Change Plan</button>
-                                ${((user.status || 'active').toLowerCase() === 'banned') ? `<button class="action-btn" style="color:var(--success); border-color:var(--success);" onclick="toggleUserStatus('${user.username}', 'active')">Activate</button>` : `<button class="action-btn" style="color:var(--danger); border-color:var(--danger);" onclick="toggleUserStatus('${user.username}', 'banned')">Ban</button>`}
-                            </td>
-                        </tr>`;
-                    });
+                const { ok, data, networkError } = await window.apiFetchJson('/admin/users');
+                if (!(ok && data.success && Array.isArray(data.users))) {
+                    const message = networkError ? 'Unable to reach the user service.' : data?.error || 'Unable to load users.';
+                    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-error">${window.escapeHtml(message)}</td></tr>`;
+                    return;
                 }
-            } catch (error) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-error">Connection Error.</td></tr>'; }
+                tbody.replaceChildren();
+                data.users.forEach((user) => {
+                    const row = document.createElement('tr');
+                    const username = String(user.username || 'Unknown user');
+                    const total = ['balance', 'taskEarnings', 'daily_earnings', 'affiliate_balance']
+                        .reduce((sum, key) => sum + (Number(user[key]) || 0), 0);
+                    const userCell = document.createElement('strong');
+                    userCell.textContent = username;
+                    appendAdminCell(row, userCell);
+                    appendAdminCell(row, adminAmount(total), 'font-bold');
+                    appendAdminCell(row, adminAmount(user.balance));
+                    appendAdminCell(row, adminAmount(user.taskEarnings));
+                    appendAdminCell(row, adminAmount(user.daily_earnings));
+                    appendAdminCell(row, adminAmount(user.affiliate_balance));
+
+                    const planCell = document.createElement('td');
+                    const planBadge = document.createElement('span');
+                    const active = user.planActivated === true || user.planActivated === 'true';
+                    planBadge.className = `badge ${active ? 'success' : 'warning'}`;
+                    planBadge.textContent = active ? (user.activePackage || 'Premium') : 'No Plan';
+                    planCell.appendChild(planBadge);
+                    row.appendChild(planCell);
+
+                    const actionCell = document.createElement('td');
+                    const adjustButton = document.createElement('button');
+                    adjustButton.type = 'button';
+                    adjustButton.className = 'action-btn';
+                    adjustButton.textContent = 'Adjust';
+                    adjustButton.addEventListener('click', () => quickAdjust(username));
+                    actionCell.appendChild(adjustButton);
+                    const planButton = document.createElement('button');
+                    planButton.type = 'button';
+                    planButton.className = 'action-btn';
+                    planButton.textContent = 'Change Plan';
+                    planButton.addEventListener('click', () => quickAssignPlan(username));
+                    actionCell.appendChild(planButton);
+                    const statusButton = document.createElement('button');
+                    const banned = String(user.status || 'active').toLowerCase() === 'banned';
+                    statusButton.type = 'button';
+                    statusButton.className = 'action-btn';
+                    statusButton.style.color = banned ? 'var(--success)' : 'var(--danger)';
+                    statusButton.style.borderColor = banned ? 'var(--success)' : 'var(--danger)';
+                    statusButton.textContent = banned ? 'Activate' : 'Ban';
+                    statusButton.addEventListener('click', () => toggleUserStatus(username, banned ? 'active' : 'banned'));
+                    actionCell.appendChild(statusButton);
+                    row.appendChild(actionCell);
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-error">Unable to load users.</td></tr>';
+            }
         }
 
         function quickAdjust(username) {
-            document.getElementById('adjustUsername').value = username;
-            document.getElementById('adjustUsername').scrollIntoView();
+            const input = document.getElementById('adjustUsername');
+            input.value = username;
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            input.focus();
         }
 
         function quickAssignPlan(username) {
-            document.getElementById('planUsername').value = username;
-            document.getElementById('planUsername').scrollIntoView();
+            const input = document.getElementById('planUsername');
+            input.value = username;
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            input.focus();
         }
 
         async function loadPlanOptions() {
             const select = document.getElementById('planPackage');
             try {
                 const { ok, data } = await window.apiFetchJson('/packages');
-                if (!(ok && data.success)) throw new Error('Unable to load plans');
-                select.innerHTML = '<option value="">Select a plan</option>' + (data.packages || []).map((pkg) =>
-                    `<option value="${pkg.id}">${pkg.name} — ₦${Number(pkg.capital || 0).toLocaleString()}</option>`
-                ).join('');
+                if (!(ok && data.success && Array.isArray(data.packages))) throw new Error(data?.error || 'Unable to load plans.');
+                select.replaceChildren(new Option('Select a plan', ''));
+                data.packages.forEach((pkg) => {
+                    select.appendChild(new Option(`${pkg.name || 'Package'} — ${adminAmount(pkg.capital)}`, pkg.id || ''));
+                });
             } catch (_) {
-                select.innerHTML = '<option value="">Unable to load plans</option>';
+                select.replaceChildren(new Option('Unable to load plans', ''));
             }
         }
 
@@ -551,10 +603,10 @@
                     loadUsers();
                     loadDashboardStats();
                 } else {
-                    alert(data.error || 'Failed to update user status');
+                    window.showToast('error', data?.error || 'Failed to update user status');
                 }
             } catch (error) {
-                alert('Server error while updating user status');
+                window.showToast('error', 'Unable to update user status.');
             }
         }
 
@@ -587,10 +639,10 @@
                 if (ok && data.success) {
                     showToast('success', 'Site settings updated');
                 } else {
-                    alert(data.error || 'Failed to save settings');
+                    window.showToast('error', data?.error || 'Failed to save settings');
                 }
             } catch (error) {
-                alert('Server error while saving settings');
+                window.showToast('error', 'Unable to save settings.');
             } finally {
                 btn.innerHTML = 'Save Settings';
                 btn.disabled = false;
@@ -600,71 +652,133 @@
         // ==========================================
         // DEPOSITS
         // ==========================================
+        function adminDate(value, includeTime = false) {
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '—';
+            return includeTime ? date.toLocaleString() : date.toLocaleDateString();
+        }
+
         async function loadDeposits(status = 'pending') {
             const tbody = document.getElementById('depositTableBody');
             tbody.innerHTML = '<tr><td colspan="9" class="text-center">Loading deposits</td></tr>';
             try {
-                const { ok, data } = await window.apiFetchJson(`/admin/deposits?status=${status}&t=${Date.now()}`);
-                if (ok && data.success) {
-                    tbody.innerHTML = '';
-                    if(data.deposits.length === 0) { tbody.innerHTML = `<tr><td colspan="9" class="text-center">No ${status === 'all' ? '' : status} deposits found.</td></tr>`; return; }
-                    data.deposits.forEach(dep => {
-                        let statusBadge = '<span class="badge warning">⏳ Pending</span>';
-                        if (dep.status === 'approved') statusBadge = '<span class="badge success">✅ Approved</span>';
-                        else if (dep.status === 'declined') statusBadge = '<span class="badge danger">❌ Declined</span>';
-                        const methodLabel = (dep.payment_method || 'bank_transfer').replace(/_/g, ' ').toUpperCase();
-                        const receiptCell = dep.has_receipt
-                            ? `<button class="action-btn" onclick="viewDepositReceipt(${dep.id})">View</button>`
-                            : '<span style="opacity:.6;">None</span>';
-                        let actions = '';
-                        if (dep.status === 'pending') {
-                            actions = `<button class="action-btn action-approve" onclick="approveDeposit(${dep.id})">Approve</button>
-                                       <button class="action-btn action-decline" onclick="declineDeposit(${dep.id})">Decline</button>`;
-                        } else {
-                            actions = '<span style="opacity:.6;">—</span>';
-                        }
-                        tbody.innerHTML += `<tr>
-                            <td>${new Date(dep.created_at).toLocaleDateString()}</td>
-                            <td><strong>${dep.username}</strong></td>
-                            <td>${dep.sender_name || '-'}</td>
-                            <td class="font-bold">₦${Number(dep.amount).toLocaleString()}</td>
-                            <td>${methodLabel}</td>
-                            <td>${dep.transaction_ref || '-'}</td>
-                            <td>${statusBadge}${dep.admin_note ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${dep.admin_note}</div>` : ''}</td>
-                            <td>${receiptCell}</td>
-                            <td>${actions}</td>
-                        </tr>`;
-                    });
-                } else {
-                    tbody.innerHTML = `<tr><td colspan="9" class="text-center">${data.error || 'Failed to load deposits.'}</td></tr>`;
+                const { ok, data, networkError } = await window.apiFetchJson(`/admin/deposits?status=${encodeURIComponent(status)}&t=${Date.now()}`);
+                if (!(ok && data.success && Array.isArray(data.deposits))) {
+                    const message = networkError ? 'Unable to reach the deposit service.' : data?.error || 'Failed to load deposits.';
+                    tbody.innerHTML = `<tr><td colspan="9" class="text-center text-error">${window.escapeHtml(message)}</td></tr>`;
+                    return;
                 }
-            } catch (error) { tbody.innerHTML = '<tr><td colspan="9" class="text-center text-error">Connection Error.</td></tr>'; }
+                tbody.replaceChildren();
+                if (data.deposits.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="9" class="text-center">No ${status === 'all' ? '' : window.escapeHtml(status)} deposits found.</td></tr>`;
+                    return;
+                }
+                data.deposits.forEach((deposit) => {
+                    const row = document.createElement('tr');
+                    const id = Number(deposit.id);
+                    appendAdminCell(row, adminDate(deposit.created_at));
+                    const username = document.createElement('strong');
+                    username.textContent = deposit.username || '—';
+                    appendAdminCell(row, username);
+                    appendAdminCell(row, deposit.sender_name || '—');
+                    appendAdminCell(row, adminAmount(deposit.amount), 'font-bold');
+                    appendAdminCell(row, String(deposit.payment_method || 'bank_transfer').replace(/_/g, ' ').toUpperCase());
+                    appendAdminCell(row, deposit.transaction_ref || '—');
+
+                    const statusCell = document.createElement('td');
+                    const badge = document.createElement('span');
+                    const statusClass = deposit.status === 'approved' ? 'success' : deposit.status === 'declined' ? 'danger' : 'warning';
+                    const statusText = deposit.status === 'approved' ? '✅ Approved' : deposit.status === 'declined' ? '❌ Declined' : '⏳ Pending';
+                    badge.className = `badge ${statusClass}`;
+                    badge.textContent = statusText;
+                    statusCell.appendChild(badge);
+                    if (deposit.admin_note) {
+                        const note = document.createElement('div');
+                        note.style.cssText = 'font-size:11px;color:var(--text-muted);margin-top:4px;';
+                        note.textContent = deposit.admin_note;
+                        statusCell.appendChild(note);
+                    }
+                    row.appendChild(statusCell);
+
+                    const receiptCell = document.createElement('td');
+                    if (deposit.has_receipt && Number.isSafeInteger(id)) {
+                        const receiptButton = document.createElement('button');
+                        receiptButton.type = 'button';
+                        receiptButton.className = 'action-btn';
+                        receiptButton.textContent = 'View';
+                        receiptButton.addEventListener('click', () => viewDepositReceipt(id));
+                        receiptCell.appendChild(receiptButton);
+                    } else {
+                        receiptCell.textContent = 'None';
+                        receiptCell.style.opacity = '0.6';
+                    }
+                    row.appendChild(receiptCell);
+
+                    const actionCell = document.createElement('td');
+                    if (deposit.status === 'pending' && Number.isSafeInteger(id)) {
+                        const approveButton = document.createElement('button');
+                        approveButton.type = 'button';
+                        approveButton.className = 'action-btn action-approve';
+                        approveButton.textContent = 'Approve';
+                        approveButton.addEventListener('click', () => approveDeposit(id));
+                        actionCell.appendChild(approveButton);
+                        const declineButton = document.createElement('button');
+                        declineButton.type = 'button';
+                        declineButton.className = 'action-btn action-decline';
+                        declineButton.textContent = 'Decline';
+                        declineButton.addEventListener('click', () => declineDeposit(id));
+                        actionCell.appendChild(declineButton);
+                    } else {
+                        actionCell.textContent = '—';
+                        actionCell.style.opacity = '0.6';
+                    }
+                    row.appendChild(actionCell);
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center text-error">Unable to load deposits.</td></tr>';
+            }
         }
 
-        function viewDepositReceipt(id) {
-            const url = API_BASE_URL + `/admin/deposit/${id}/receipt`;
-            const token = localStorage.getItem('token');
-            fetch(url, { headers: { 'Authorization': `Bearer ${token}` } })
-                .then(res => {
-                    if (!res.ok) throw new Error('Could not load receipt');
-                    return res.blob();
-                })
-                .then(blob => {
-                    const objectUrl = URL.createObjectURL(blob);
-                    window.open(objectUrl, '_blank');
-                })
-                .catch(err => {
-                    if (typeof showToast === 'function') showToast('error', err.message);
-                    else alert(err.message);
-                });
+        async function viewDepositReceipt(id) {
+            if (!Number.isSafeInteger(Number(id))) return;
+            // Open synchronously while this click is still trusted by the browser;
+            // populate it after the authenticated request completes.
+            const preview = window.open('', '_blank');
+            try {
+                const response = await window.apiFetch(`/admin/deposit/${id}/receipt`);
+                if (!response.ok) {
+                    let message = 'Could not load the receipt.';
+                    try { message = (await response.json()).error || message; } catch (_) {}
+                    throw new Error(message);
+                }
+                const objectUrl = URL.createObjectURL(await response.blob());
+                if (preview) {
+                    preview.opener = null;
+                    preview.location.replace(objectUrl);
+                } else {
+                    const link = document.createElement('a');
+                    link.href = objectUrl;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                }
+                setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+            } catch (error) {
+                if (preview && !preview.closed) preview.close();
+                if (typeof window.showToast === 'function') window.showToast('error', error.message || 'Could not load the receipt.');
+            }
         }
 
         async function approveDeposit(id) {
             if(!confirm("Approve this deposit and credit the user's wallet?")) return;
             try {
                 const { ok, data } = await window.apiFetchJson('/admin/approve-deposit', { method: 'POST', body: JSON.stringify({ depositId: id }) });
-                if(ok && data.success) { showToast('success', data.message || "Deposit Approved!"); loadDeposits(); loadDashboardStats(); loadUsers(); } else alert(data.error);
-            } catch(e) { alert("Server Error."); }
+                if(ok && data.success) { window.showToast('success', data.message || 'Deposit approved.'); loadDeposits(); loadDashboardStats(); loadUsers(); }
+                else window.showToast('error', data?.error || 'Unable to approve deposit.');
+            } catch(e) { window.showToast('error', 'Unable to approve deposit.'); }
         }
 
         async function declineDeposit(id) {
@@ -672,8 +786,9 @@
             if (note === null) return;
             try {
                 const { ok, data } = await window.apiFetchJson('/admin/decline-deposit', { method: 'POST', body: JSON.stringify({ depositId: id, note: note || 'Your deposit was declined. Please contact support.' }) });
-                if(ok && data.success) { showToast('success', "Deposit declined."); loadDeposits(); loadDashboardStats(); loadUsers(); } else alert(data.error);
-            } catch(e) { alert("Server Error."); }
+                if(ok && data.success) { window.showToast('success', 'Deposit declined.'); loadDeposits(); loadDashboardStats(); loadUsers(); }
+                else window.showToast('error', data?.error || 'Unable to decline deposit.');
+            } catch(e) { window.showToast('error', 'Unable to decline deposit.'); }
         }
 
         // ==========================================
@@ -685,93 +800,71 @@
             currentWithdrawalsFilter = status;
             const tbody = document.getElementById('withdrawalTableBody');
             tbody.innerHTML = '<tr><td colspan="8" class="text-center">Loading withdrawals...</td></tr>';
-            
             try {
-                let url = '/admin/withdrawals';
-                if (status === 'all') {
-                    url = '/admin/all-withdrawals';
-                } else {
-                    url = `/admin/withdrawals?status=${status}`;
+                const url = status === 'all' ? '/admin/all-withdrawals' : `/admin/withdrawals?status=${encodeURIComponent(status)}`;
+                const { ok, data, networkError } = await window.apiFetchJson(url);
+                if (!(ok && data.success && Array.isArray(data.withdrawals))) {
+                    const message = networkError ? 'Unable to reach the withdrawal service.' : data?.error || 'Unable to load withdrawals.';
+                    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-error">${window.escapeHtml(message)}</td></tr>`;
+                    return;
                 }
-                
-                const { ok, data } = await window.apiFetchJson(url);
-                if (ok && data.success) {
-                    tbody.innerHTML = '';
-                    if (data.withdrawals.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="8" class="text-center">No ${status} withdrawals.</td></tr>`;
-                        return;
+                tbody.replaceChildren();
+                if (!data.withdrawals.length) {
+                    tbody.innerHTML = `<tr><td colspan="8" class="text-center">No ${window.escapeHtml(status)} withdrawals.</td></tr>`;
+                    return;
+                }
+                data.withdrawals.forEach((withdrawal) => {
+                    const id = Number(withdrawal.id);
+                    let bank = {};
+                    try { bank = JSON.parse(withdrawal.bank_details || '{}') || {}; } catch (_) { bank = {}; }
+                    const bankInfo = `${window.escapeHtml(bank.bank_name || '—')} - ${window.escapeHtml(bank.account_number || '—')}<br><small>${window.escapeHtml(bank.account_holder || '')}</small>`;
+                    const status = String(withdrawal.status || 'pending');
+                    const statusBadge = status === 'success'
+                        ? '<span class="badge success">✅ Success</span>'
+                        : status === 'declined' || status === 'failed'
+                            ? `<span class="badge danger">${status === 'declined' ? '❌ Declined' : '❌ Failed'}</span>`
+                            : status === 'processing'
+                                ? '<span class="badge info" style="background:#3498db;">🔄 Processing</span>'
+                                : status === 'approved'
+                                    ? '<span class="badge warning">⏳ Approved</span>'
+                                    : '<span class="badge warning">⏳ Pending</span>';
+                    let actions = `<span class="review-meta">Reviewed by ${window.escapeHtml(withdrawal.reviewed_by || 'Admin')}</span>`;
+                    if (status === 'pending' && Number.isSafeInteger(id)) {
+                        actions = `<button type="button" class="action-btn action-approve" data-withdrawal-id="${id}" data-withdrawal-action="approve">Approve</button><button type="button" class="action-btn action-decline" data-withdrawal-id="${id}" data-withdrawal-action="decline">Decline</button>`;
+                    } else if (status === 'processing') {
+                        actions = '<span style="color:#3498db; font-weight:bold;">🔄 Processing...</span>';
+                    } else if (status === 'success') {
+                        actions = '<span style="color:var(--success); font-size:11px;">✅ Completed</span>';
+                    } else if (status === 'failed') {
+                        actions = '<span style="color:var(--danger); font-size:11px;">❌ Transfer Failed</span>';
                     }
-                    
-                    data.withdrawals.forEach(w => {
-                        let bankInfo = '';
-                        try {
-                            const bank = JSON.parse(w.bank_details || '{}');
-                            bankInfo = `${bank.bank_name || ''} - ${bank.account_number || ''}<br><small>${bank.account_holder || ''}</small>`;
-                        } catch(e) { bankInfo = w.bank_details || ''; }
-                        
-                        // Updated status badges to include processing, success, failed
-                        let statusBadge = '';
-                        if (w.status === 'pending') statusBadge = '<span class="badge warning">⏳ Pending</span>';
-                        else if (w.status === 'approved') statusBadge = '<span class="badge warning">⏳ Approved</span>';
-                        else if (w.status === 'processing') statusBadge = '<span class="badge info" style="background:#3498db;">🔄 Processing</span>';
-                        else if (w.status === 'success') statusBadge = '<span class="badge success">✅ Success</span>';
-                        else if (w.status === 'failed') statusBadge = '<span class="badge danger">❌ Failed</span>';
-                        else if (w.status === 'declined') statusBadge = '<span class="badge danger">❌ Declined</span>';
-                        
-                        // Approve/Decline buttons only shown for pending status
-                        let actions = '';
-                        if (w.status === 'pending') {
-                            actions = `
-                                <button class="action-btn action-approve" onclick="openWithdrawalAction(${w.id}, 'approve')">Approve</button>
-                                <button class="action-btn action-decline" onclick="openWithdrawalAction(${w.id}, 'decline')">Decline</button>
-                            `;
-                        } else if (w.status === 'processing') {
-                            actions = `<span style="color:#3498db; font-weight:bold;">🔄 Processing...</span>`;
-                        } else if (w.status === 'success') {
-                            actions = `<span style="color:var(--success); font-size:11px;">✅ Completed</span>`;
-                        } else if (w.status === 'failed') {
-                            actions = `<span style="color:var(--danger); font-size:11px;">❌ Transfer Failed</span>`;
-                        } else {
-                            actions = `<span class="review-meta">Reviewed by ${w.reviewed_by || 'Admin'}</span>`;
-                        }
-                        
-                        const note = w.admin_note || '-';
-                        
-                        // Build transfer info row if applicable
-                        let transferInfo = '-';
-                        if (w.transfer_reference) {
-                            transferInfo = `<strong>Ref:</strong> ${w.transfer_reference}<br>`;
-                            if (w.transfer_date) {
-                                transferInfo += `<small>Date: ${new Date(w.transfer_date).toLocaleString()}</small><br>`;
-                            }
-                            if (w.transfer_failure_reason) {
-                                transferInfo += `<small style="color:var(--danger);">❌ Reason: ${w.transfer_failure_reason}</small>`;
-                            }
-                        }
-                        
-                        tbody.innerHTML += `<tr>
-                            <td>${new Date(w.created_at).toLocaleString()}</td>
-                            <td><strong>${w.username}</strong></td>
-                            <td class="font-bold">₦${w.amount.toLocaleString()}</td>
-                            <td>${w.wallet_type || 'affiliate'}</td>
-                            <td class="cell-sm">${bankInfo}</td>
-                            <td>${statusBadge}</td>
-                            <td class="cell-note">${note}</td>
-                            <td>${actions}</td>
-                        </tr>`;
+                    const amount = Number(withdrawal.amount) || 0;
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${window.escapeHtml(adminDate(withdrawal.created_at, true))}</td>
+                        <td><strong>${window.escapeHtml(withdrawal.username || '—')}</strong></td>
+                        <td class="font-bold">₦${amount.toLocaleString()}</td>
+                        <td>${window.escapeHtml(withdrawal.wallet_type || 'affiliate')}</td>
+                        <td class="cell-sm">${bankInfo}</td>
+                        <td>${statusBadge}</td>
+                        <td class="cell-note">${window.escapeHtml(withdrawal.admin_note || '—')}</td>
+                        <td>${actions}</td>`;
+                    row.querySelectorAll('[data-withdrawal-action]').forEach((button) => {
+                        button.addEventListener('click', () => openWithdrawalAction(id, button.dataset.withdrawalAction));
                     });
-                }
+                    tbody.appendChild(row);
+                });
             } catch (error) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-error">Connection Error.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-error">Unable to load withdrawals.</td></tr>';
             }
         }
 
         function openWithdrawalAction(id, action) {
             const note = prompt(`Enter a note for ${action === 'approve' ? 'approval' : 'declination'}:\n\n${action === 'approve' ? 'Default: Withdrawal approved for processing' : 'Default: Your withdrawal was declined. Please contact support.'}`);
             if (note === null) return; // cancelled
-            
+
             const finalNote = note || (action === 'approve' ? 'Withdrawal approved for processing' : 'Your withdrawal was declined. Please contact support for assistance.');
-            
+
             if (action === 'approve') {
                 approveWithdrawalWithNote(id, finalNote);
             } else {
@@ -779,80 +872,36 @@
             }
         }
 
-        // New function to initiate approval (shows processing state)
-        async function approveWithdrawalStart(id) {
-            const note = prompt('Enter an optional note for this approval:');
-            if (note === null) return; // cancelled
-            
-            const finalNote = note || 'Withdrawal approved for processing';
-            
-            if(!confirm("Approve this withdrawal for processing?")) return;
-            
-            // Show processing state on button
-            const btn = document.getElementById(`approveBtn_${id}`);
-            const declineBtn = document.getElementById(`declineBtn_${id}`);
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
-            btn.disabled = true;
-            if (declineBtn) declineBtn.disabled = true;
-            
-            try {
-                const { ok, data } = await window.apiFetchJson('/admin/approve-withdrawal', { 
-                    method: 'POST', 
-                    body: JSON.stringify({ id, note: finalNote }) 
-                });
-                
-                if(ok && data.success) { 
-                    showToast('success', 'Withdrawal Approved! Transfer initiated: ' + (data.transfer_reference || 'tracking...')); 
-                    // Refresh in 2 seconds to show updated status
-                    setTimeout(() => {
-                        loadAllWithdrawals(currentWithdrawalsFilter); 
-                        loadDashboardStats(); 
-                        loadUsers(); 
-                    }, 2000);
-                } else {
-                    showToast('error', data.error || 'Failed to approve withdrawal');
-                    btn.innerHTML = 'Approve';
-                    btn.disabled = false;
-                    if (declineBtn) declineBtn.disabled = false;
-                }
-            } catch(e) { 
-                showToast('error', 'Server Error: ' + e.message);
-                btn.innerHTML = 'Approve';
-                btn.disabled = false;
-                if (declineBtn) declineBtn.disabled = false;
-            }
-        }
-
         async function approveWithdrawalWithNote(id, note) {
             if(!confirm("Approve this withdrawal?")) return;
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/approve-withdrawal', { 
-                    method: 'POST', 
-                    body: JSON.stringify({ id, note }) 
+                const { ok, data } = await window.apiFetchJson('/admin/approve-withdrawal', {
+                    method: 'POST',
+                    body: JSON.stringify({ id, note })
                 });
-                if(ok && data.success) { 
-                    showToast('success', 'Withdrawal Approved!'); 
-                    loadAllWithdrawals(currentWithdrawalsFilter); 
-                    loadDashboardStats(); 
-                    loadUsers(); 
-                } else alert(data.error);
-            } catch(e) { alert("Server Error."); }
+                if(ok && data.success) {
+                    showToast('success', 'Withdrawal Approved!');
+                    loadAllWithdrawals(currentWithdrawalsFilter);
+                    loadDashboardStats();
+                    loadUsers();
+                } else window.showToast('error', data?.error || 'Unable to approve withdrawal.');
+            } catch(e) { window.showToast('error', 'Unable to approve withdrawal.'); }
         }
 
         async function declineWithdrawalWithNote(id, note) {
             if(!confirm("Decline this withdrawal? User will be refunded.")) return;
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/decline-withdrawal', { 
-                    method: 'POST', 
-                    body: JSON.stringify({ id, note }) 
+                const { ok, data } = await window.apiFetchJson('/admin/decline-withdrawal', {
+                    method: 'POST',
+                    body: JSON.stringify({ id, note })
                 });
-                if(ok && data.success) { 
-                    showToast('warning', 'Withdrawal Declined. User refunded.'); 
-                    loadAllWithdrawals(currentWithdrawalsFilter); 
-                    loadDashboardStats(); 
-                    loadUsers(); 
-                } else alert(data.error);
-            } catch(e) { alert("Server Error."); }
+                if(ok && data.success) {
+                    showToast('warning', 'Withdrawal Declined. User refunded.');
+                    loadAllWithdrawals(currentWithdrawalsFilter);
+                    loadDashboardStats();
+                    loadUsers();
+                } else window.showToast('error', data?.error || 'Unable to decline withdrawal.');
+            } catch(e) { window.showToast('error', 'Unable to decline withdrawal.'); }
         }
 
         async function loadWithdrawals() {
@@ -872,24 +921,24 @@
             const payload = { username, amount: parseFloat(amount), walletType };
             try {
                 const { ok, data, status } = await window.apiFetchJson('/admin/manual-credit', { method: 'POST', body: JSON.stringify(payload) });
-                if (ok && data.success) { 
-                    showToast('success', data.message || "Credit successful!"); 
-                    document.getElementById('manualCreditForm').reset(); 
+                if (ok && data.success) {
+                    showToast('success', data.message || "Credit successful!");
+                    document.getElementById('manualCreditForm').reset();
                     // Add slight delay to ensure database write is committed, then refresh
                     setTimeout(() => {
-                        loadUsers(); 
+                        loadUsers();
                         loadDashboardStats();
                     }, 500);
-                } else { 
-                    if (window.__AW_DEBUG__) console.error('Manual credit error:', data.error);
-                    alert(data.error || 'Failed to process credit'); 
+                } else {
+                    if (window.__AW_DEBUG__) console.error('Manual credit error:', data?.error);
+                    window.showToast('error', data?.error || 'Failed to process credit.');
                 }
-            } catch (err) { 
+            } catch (err) {
                 if (window.__AW_DEBUG__) console.error('Manual credit request failed:', err);
-                alert("Server error: " + err.message); 
-            } finally { 
-                btn.innerText = "Credit User Now"; 
-                btn.disabled = false; 
+                window.showToast('error', 'Unable to process the credit request.');
+            } finally {
+                btn.innerText = "Credit User Now";
+                btn.disabled = false;
             }
         });
 
@@ -899,28 +948,34 @@
         async function adjustBalance(action) {
             const btn = document.getElementById(action === 'add' ? 'btnAdd' : 'btnSubtract');
             btn.innerText = "Processing..."; btn.disabled = true;
-            
+
             const username = document.getElementById('adjustUsername').value;
             const amount = document.getElementById('adjustAmount').value;
             const walletType = document.getElementById('adjustWallet').value;
-            
+
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/adjust-balance', { 
-                    method: 'POST', 
-                    body: JSON.stringify({ username, amount, walletType, action }) 
+                const { ok, data } = await window.apiFetchJson('/admin/adjust-balance', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, amount, walletType, action })
                 });
-                if (ok && data.success) { 
-                    showToast('success', data.message); 
-                    document.getElementById('adjustBalanceForm').reset(); 
+                if (ok && data.success) {
+                    showToast('success', data.message);
+                    document.getElementById('adjustBalanceForm').reset();
                     // Add slight delay to ensure database write is committed, then refresh
                     setTimeout(() => {
-                        loadUsers(); 
+                        loadUsers();
                         loadDashboardStats();
                     }, 500);
-                } else alert(data.error);
-            } catch (err) { alert("Server error."); } 
+                } else window.showToast('error', data?.error || 'Unable to adjust the balance.');
+            } catch (err) { window.showToast('error', 'Unable to adjust the balance.'); }
             finally { btn.innerText = action === 'add' ? 'Add Funds' : 'Subtract Funds'; btn.disabled = false; }
         }
+
+        document.getElementById('adjustBalanceForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const action = event.submitter?.dataset.action || 'add';
+            adjustBalance(action);
+        });
 
         document.getElementById('changePlanForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -978,39 +1033,69 @@
         // ==========================================
         // BROADCAST
         // ==========================================
-        document.getElementById('broadcastForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const title = document.getElementById('broadcastTitle').value;
-            const message = document.getElementById('broadcastMessage').value;
-            const btn = e.target.querySelector('button');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
-            btn.disabled = true;
-            const { ok, data } = await window.apiFetchJson('/admin/broadcast', { method: 'POST', body: JSON.stringify({ title, message }) });
-            if (ok && data.success) { showToast('success', 'Broadcast sent!'); document.getElementById('broadcastForm').reset(); } else alert(data.error || 'Failed');
-            btn.innerHTML = 'Send Broadcast';
-            btn.disabled = false;
+        document.getElementById('broadcastForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const title = document.getElementById('broadcastTitle').value.trim();
+            const message = document.getElementById('broadcastMessage').value.trim();
+            if (!message) {
+                window.showToast('error', 'Enter a broadcast message first.');
+                return;
+            }
+            const button = event.target.querySelector('button[type="submit"]');
+            button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+            button.disabled = true;
+            try {
+                const { ok, data, networkError } = await window.apiFetchJson('/admin/broadcast', {
+                    method: 'POST',
+                    body: JSON.stringify({ title, message })
+                });
+                if (!(ok && data.success)) throw new Error(networkError ? 'Unable to reach the broadcast service.' : data?.error || 'Unable to send broadcast.');
+                window.showToast('success', data.message || 'Broadcast sent!');
+                event.target.reset();
+            } catch (error) {
+                window.showToast('error', error.message || 'Unable to send broadcast.');
+            } finally {
+                button.textContent = 'Send Broadcast';
+                button.disabled = false;
+            }
         });
 
         // ==========================================
         // SPONSORED POSTS
         // ==========================================
-        document.getElementById('sponsoredPostForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        document.getElementById('sponsoredPostForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const rewardAmount = Number(document.getElementById('postReward').value);
+            if (!Number.isFinite(rewardAmount) || rewardAmount <= 0) {
+                window.showToast('error', 'Enter a valid reward amount.');
+                return;
+            }
             const postData = {
-                title: document.getElementById('postTitle').value,
-                description: document.getElementById('postDescription').value,
-                reward_amount: document.getElementById('postReward').value,
-                required_plan: document.getElementById('postRequiredPlan').value,
-                image_url: document.getElementById('postImage').value,
-                link: document.getElementById('postLink').value
+                title: document.getElementById('postTitle').value.trim(),
+                description: document.getElementById('postDescription').value.trim(),
+                reward_amount: rewardAmount,
+                required_plan: document.getElementById('postRequiredPlan').value.trim() || 'all',
+                image_url: document.getElementById('postImage').value.trim(),
+                link: document.getElementById('postLink').value.trim()
             };
-            const btn = e.target.querySelector('button');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
-            btn.disabled = true;
-            const { ok, data } = await window.apiFetchJson('/admin/sponsored-post', { method: 'POST', body: JSON.stringify(postData) });
-            if (ok && data.success) { showToast('success', 'Sponsored post created!'); document.getElementById('sponsoredPostForm').reset(); } else alert(data.error || 'Failed');
-            btn.innerHTML = 'Create Sponsored Post';
-            btn.disabled = false;
+            const button = event.target.querySelector('button[type="submit"]');
+            button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
+            button.disabled = true;
+            try {
+                const { ok, data, networkError } = await window.apiFetchJson('/admin/sponsored-post', {
+                    method: 'POST',
+                    body: JSON.stringify(postData)
+                });
+                if (!(ok && data.success)) throw new Error(networkError ? 'Unable to reach the sponsored-post service.' : data?.error || 'Unable to create sponsored post.');
+                window.showToast('success', data.message || 'Sponsored post created!');
+                event.target.reset();
+                document.getElementById('postRequiredPlan').value = 'all';
+            } catch (error) {
+                window.showToast('error', error.message || 'Unable to create sponsored post.');
+            } finally {
+                button.textContent = 'Create Sponsored Post';
+                button.disabled = false;
+            }
         });
 
         // ==========================================
@@ -1020,43 +1105,58 @@
             const tbody = document.getElementById('taskSubmissionsTable');
             tbody.innerHTML = '<tr><td colspan="6" class="text-center">Loading submissions...</td></tr>';
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/sponsored-submissions');
-                if (ok && data.success) {
-                    tbody.innerHTML = '';
-                    if (data.submissions.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="6" class="text-center">No pending submissions.</td></tr>';
-                        return;
-                    }
-                    data.submissions.forEach(sub => {
-                        tbody.innerHTML += `<tr>
-                            <td><strong>${sub.username}</strong></td>
-                            <td>${sub.title}</td>
-                            <td class="font-bold">₦${sub.reward_amount}</td>
-                            <td>${new Date(sub.submitted_at).toLocaleDateString()}</td>
-                            <td><span class="badge warning">Pending Review</span></td>
-                            <td><button class="action-btn action-approve" onclick="approveSubmission(${sub.id})">Approve & Credit</button></td>
-                        </tr>`;
-                    });
+                const { ok, data, networkError } = await window.apiFetchJson('/admin/sponsored-submissions');
+                if (!(ok && data.success && Array.isArray(data.submissions))) {
+                    const message = networkError ? 'Unable to reach the submission service.' : data?.error || 'Unable to load submissions.';
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-error">${window.escapeHtml(message)}</td></tr>`;
+                    return;
                 }
+                tbody.replaceChildren();
+                if (!data.submissions.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">No pending submissions.</td></tr>';
+                    return;
+                }
+                data.submissions.forEach((submission) => {
+                    const id = Number(submission.id);
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${window.escapeHtml(submission.username || '—')}</strong></td>
+                        <td>${window.escapeHtml(submission.title || '—')}</td>
+                        <td class="font-bold">₦${(Number(submission.reward_amount) || 0).toLocaleString()}</td>
+                        <td>${window.escapeHtml(adminDate(submission.submitted_at))}</td>
+                        <td><span class="badge warning">Pending Review</span></td>
+                        <td></td>`;
+                    if (Number.isSafeInteger(id)) {
+                        const button = document.createElement('button');
+                        button.type = 'button';
+                        button.className = 'action-btn action-approve';
+                        button.textContent = 'Approve & Credit';
+                        button.addEventListener('click', () => approveSubmission(id));
+                        row.lastElementChild.appendChild(button);
+                    } else {
+                        row.lastElementChild.textContent = '—';
+                    }
+                    tbody.appendChild(row);
+                });
             } catch (error) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-error">Connection Error.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-error">Unable to load submissions.</td></tr>';
             }
         }
 
         async function approveSubmission(id) {
             if(!confirm("Approve this submission and credit the user?")) return;
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/approve-sponsored-submission', { 
-                    method: 'POST', 
-                    body: JSON.stringify({ submission_id: id }) 
+                const { ok, data } = await window.apiFetchJson('/admin/approve-sponsored-submission', {
+                    method: 'POST',
+                    body: JSON.stringify({ submission_id: id })
                 });
-                if(ok && data.success) { 
-                    showToast('success', 'Submission approved and user credited!'); 
-                    loadTaskSubmissions(); 
-                    loadDashboardStats(); 
-                    loadUsers(); 
-                } else alert(data.error);
-            } catch(e) { alert("Server Error."); }
+                if(ok && data.success) {
+                    showToast('success', 'Submission approved and user credited!');
+                    loadTaskSubmissions();
+                    loadDashboardStats();
+                    loadUsers();
+                } else window.showToast('error', data?.error || 'Unable to approve submission.');
+            } catch(e) { window.showToast('error', 'Unable to approve submission.'); }
         }
     </script>
 </body>

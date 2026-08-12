@@ -163,7 +163,7 @@
     <div class="mobile-header">
         <i class="fa-solid fa-bars-staggered menu-btn" onclick="toggleMobileSidebar()"></i>
         <div class="logo-text">Access <span>WEALTH</span></div>
-        <img src="" class="avatar" id="mobileAvatar" alt="Mobile profile avatar">
+        <img src="/logo192.png" class="avatar" id="mobileAvatar" alt="Mobile profile avatar">
     </div>
     <div class="overlay-menu" id="overlayMenu" onclick="toggleMobileSidebar()"></div>
 
@@ -180,13 +180,13 @@
                 <a href="/sponsored-posts.html" class="nav-item sub-item"><i class="fa-solid fa-bullhorn main-icon"></i> Sponsored Posts</a>
             </div>
             <a href="/activation.html" class="nav-item" title="Account Activation"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
-            <a href="/spin-win.html" class="nav-item" title="Spin and Win"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
+            <a href="/spin-win.html" class="nav-item" title="Spin and Win"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin &amp; Win</span></a>
 
             <a href="/deposit.html" class="nav-item active" title="Fund Account"><i class="fa-solid fa-money-bill-transfer main-icon"></i> <span>Fund Account</span></a>
             <a href="/withdraw.html" class="nav-item" title="Withdraw"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
             <a href="/referral.html" class="nav-item" title="Top Earners"><i class="fa-solid fa-users main-icon"></i> <span>Top Earners</span></a>
-            <button onclick="window.location.href='/activation.html'" class="btn-upgrade-sidebar" title="Upgrade Account"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
-            <a href="#" class="nav-item nav-item-logout" onclick="logout()" title="Logout"><i class="fa-solid fa-power-off main-icon"></i> <span>Logout</span></a>
+            <button type="button" onclick="window.location.href='/activation.html'" class="btn-upgrade-sidebar" title="Upgrade Account"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
+            <a href="#" class="nav-item nav-item-logout" onclick="logout(); return false;" title="Logout"><i class="fa-solid fa-power-off main-icon"></i> <span>Logout</span></a>
         </div>
     </div>
 
@@ -195,7 +195,7 @@
             <div class="header-left"><i class="fa-solid fa-bars-staggered" onclick="toggleDesktopSidebar()"></i></div>
             <div class="header-right">
                 <div class="user-info"><h4 id="displayName">USER</h4><p id="displayHandle">@user</p></div>
-                <img src="" class="avatar" id="desktopAvatar" alt="Desktop profile avatar">
+                <img src="/logo192.png" class="avatar" id="desktopAvatar" alt="Desktop profile avatar">
             </div>
         </div>
 
@@ -252,7 +252,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Sender Name <span style="font-weight:400;opacity:.7;">(optional)</span></label>
+                            <label>Sender Name <span class="aw-optional-copy">(optional)</span></label>
                             <div class="input-wrapper">
                                 <i class="fa-regular fa-user"></i>
                                 <input type="text" id="senderName" class="form-control" placeholder="Name used for the transfer">
@@ -260,7 +260,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Transaction Reference <span style="font-weight:400;opacity:.7;">(optional)</span></label>
+                            <label>Transaction Reference <span class="aw-optional-copy">(optional)</span></label>
                             <div class="input-wrapper">
                                 <i class="fa-solid fa-fingerprint"></i>
                                 <input type="text" id="transactionRef" class="form-control" placeholder="Transfer reference / narration">
@@ -278,7 +278,7 @@
                             </div>
                             <div class="upload-status" id="uploadStatus" role="status" aria-live="polite"></div>
                             <div class="receipt-preview" id="receiptPreview"></div>
-                            <p style="font-size:11px;color:var(--text-muted);margin-top:8px;">Images are optimized automatically for faster mobile uploads. PDFs: max 3.5MB.</p>
+                            <p class="aw-upload-hint">Images are optimized automatically for faster mobile uploads. PDFs: max 3.5MB.</p>
                         </div>
 
                         <button type="submit" class="btn-submit" id="submitBtn">Submit Deposit Request</button>
@@ -291,7 +291,7 @@
                 <div class="history-card">
                     <table>
                         <thead>
-                            <tr><th>Date</th><th>Amount</th><th>Sender</th><th>Reference</th><th>Status</th><th>Admin Note</th></tr>
+                            <tr><th scope="col">Date</th><th scope="col">Amount</th><th scope="col">Sender</th><th scope="col">Reference</th><th scope="col">Status</th><th scope="col">Admin Note</th></tr>
                         </thead>
                         <tbody id="depositHistoryBody">
                             <tr><td colspan="6" class="empty-state">Loading your deposit history...</td></tr>
@@ -310,7 +310,7 @@
         function toggleDesktopSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
         function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlayMenu').classList.toggle('active'); }
         function toggleDropdown(dropdownId, element) { element.classList.toggle('open'); document.getElementById(dropdownId).classList.toggle('show'); element.classList.toggle('active'); }
-        function logout() { localStorage.clear(); window.location.href = '/login.html'; }
+        function logout() { window.clearAuthSession(); sessionStorage.clear(); window.location.assign('/login.html'); }
 
         // Load User Details from global sync
         window.addEventListener('globalSyncComplete', () => {
@@ -319,13 +319,25 @@
             document.getElementById('displayHandle').innerText = "@" + user.toLowerCase().replace(/\s+/g, '');
         });
 
-        function copyAccountNumber() {
-            const val = document.getElementById('infoAccountNumber').innerText;
-            navigator.clipboard.writeText(val).then(() => {
-                if (typeof showToast === 'function') showToast('success', 'Account number copied!');
-            }).catch(() => {
-                if (typeof showToast === 'function') showToast('info', 'Account number: ' + val);
-            });
+        async function copyAccountNumber() {
+            const value = document.getElementById('infoAccountNumber').innerText.trim();
+            try {
+                if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(value);
+                else {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = value;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    const copied = document.execCommand('copy');
+                    textarea.remove();
+                    if (!copied) throw new Error('Copy unavailable');
+                }
+                if (typeof window.showToast === 'function') window.showToast('success', 'Account number copied!');
+            } catch (_) {
+                if (typeof window.showToast === 'function') window.showToast('info', `Account number: ${value}`);
+            }
         }
 
         // Load manual payment info
@@ -464,10 +476,10 @@
                         tbody.innerHTML += `<tr>
                             <td>${new Date(dep.created_at).toLocaleDateString()}</td>
                             <td class="font-bold">₦${Number(dep.amount).toLocaleString()}</td>
-                            <td>${dep.sender_name || '-'}</td>
-                            <td>${dep.transaction_ref || '-'}</td>
+                            <td>${window.escapeHtml(dep.sender_name || '-')}</td>
+                            <td>${window.escapeHtml(dep.transaction_ref || '-')}</td>
                             <td>${badge}</td>
-                            <td>${dep.admin_note || '-'}</td>
+                            <td>${window.escapeHtml(dep.admin_note || '-')}</td>
                         </tr>`;
                     });
                 } else {
@@ -557,9 +569,9 @@
                 }
             } catch (err) {
                 if (window.__AW_DEBUG__) console.error("Deposit Submit Error:", err);
-                    const errorMessage = err.message ? `Server error. Please try again. (${err.message})` : "Server error. Please try again.";
-                    if(typeof showToast === 'function') showToast('error', errorMessage);
-                    else alert(errorMessage);
+                const errorMessage = 'We could not submit the deposit request. Please try again.';
+                if(typeof showToast === 'function') showToast('error', errorMessage);
+                else alert(errorMessage);
             } finally {
                 isSubmittingDeposit = false;
                 btn.innerHTML = 'Submit Deposit Request';

@@ -204,7 +204,7 @@
 <body>
     <div class="auth-card">
         <!-- Theme toggle button (will be handled by global.js) -->
-        <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
             <i class="fa-solid fa-moon"></i>
         </button>
 
@@ -216,14 +216,14 @@
             <strong>Create your account.</strong> Start earning today.
         </div>
 
-        <div class="error-msg" id="errorMsg"></div>
+        <div class="error-msg" id="errorMsg" role="alert" aria-live="assertive"></div>
 
         <form id="registerForm" novalidate>
             <div class="form-group">
                 <label>Username or email</label>
                 <div class="input-wrap">
                     <i class="fa-regular fa-user"></i>
-                    <input type="text" id="regUsername" placeholder="Choose a unique username" required>
+                    <input type="text" id="regUsername" placeholder="Choose a unique username" autocomplete="username" required>
                 </div>
             </div>
 
@@ -231,7 +231,7 @@
                 <label>Password</label>
                 <div class="input-wrap">
                     <i class="fa-solid fa-lock"></i>
-                    <input type="password" id="regPassword" placeholder="Create a strong password" required>
+                    <input type="password" id="regPassword" placeholder="Create a strong password" autocomplete="new-password" required>
                 </div>
             </div>
 
@@ -270,7 +270,7 @@
                 if (isSubmittingRegister) return;
 
                 const username = document.getElementById('regUsername').value.trim();
-                const password = document.getElementById('regPassword').value.trim();
+                const password = document.getElementById('regPassword').value;
                 const referred_by = document.getElementById('regReferral').value.trim();
 
                 if (!username) {
@@ -279,7 +279,7 @@
                     return;
                 }
 
-                if (password.length < 6) {
+                if (!password.trim() || password.length < 6) {
                     errorEl.innerText = 'Password must be at least 6 characters.';
                     errorEl.style.display = 'block';
                     return;
@@ -291,13 +291,14 @@
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
 
                 try {
-                    const { ok, data } = await window.apiFetchJson('/register', {
+                    const result = await window.apiFetchJson('/register', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username, password, referred_by })
                     });
 
-                    if (ok && data.success) {
+                    if (result.ok && result.data?.success) {
+                        const data = result.data;
                         localStorage.setItem('token', data.token);
                         localStorage.setItem('user', JSON.stringify(data.user || { username }));
                         localStorage.setItem('username', data.user ? data.user.username : username);
@@ -309,14 +310,16 @@
                         else alert("Account created successfully! You are now logged in.");
                         window.location.href = '/dashboard.html';
                     } else {
-                        errorEl.innerText = data?.error || 'Registration failed. Username might be taken.';
+                        errorEl.innerText = result.networkError
+                            ? 'We could not reach the account service. Please try again in a moment.'
+                            : result.data?.error || 'Registration failed. Username might be taken.';
                         errorEl.style.display = 'block';
                         btn.disabled = false;
                         btn.innerHTML = 'Create Account';
                     }
                 } catch (err) {
                     console.error('Registration error:', err);
-                    errorEl.innerText = 'Network error. Please check your connection.';
+                    errorEl.innerText = 'We could not complete account creation. Please try again.';
                     errorEl.style.display = 'block';
                     btn.disabled = false;
                     btn.innerHTML = 'Create Account';
