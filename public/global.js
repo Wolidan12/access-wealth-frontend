@@ -1,9 +1,17 @@
 // global.js - Master Sync Engine + Theme Toggle (FULLY CORRECTED)
 
+// Keep browser API calls on the same origin in production. Netlify rewrites
+// /api/* to the Railway service (see netlify.toml), preventing a browser CORS
+// failure when visitors use a Netlify domain, a deploy preview, or the custom
+// domain. Local/file development continues to call Railway directly.
 const BACKEND_HOST = 'https://access-wealth-backend-production.up.railway.app';
-const API_BASE_URL = `${BACKEND_HOST}/api`;
+const hostname = window.location.hostname.toLowerCase();
+const isLocalApiSession = window.location.protocol === 'file:' || hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+const isNetlifySession = hostname.endsWith('.netlify.app') || hostname === 'accesswealthhq.com' || hostname === 'www.accesswealthhq.com';
+const API_BASE_URL = !isLocalApiSession && isNetlifySession ? '/api' : `${BACKEND_HOST}/api`;
 const GLOBAL_SYNC_SKIP_PAGES = ['login.html', 'register.html', 'admin.html', 'support-agent.html', 'forgot-password.html', 'reset-password.html'];
-window.__AW_DEBUG__ = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+window.__AW_DEBUG__ = isLocalApiSession;
+window.ACCESS_WEALTH_API_BASE_URL = API_BASE_URL;
 
 // ==========================================
 // API HELPERS — token refresh is shared by JSON and multipart requests.
@@ -16,10 +24,17 @@ async function apiFetch(path, options = {}) {
     try {
         return await fetch(apiUrl(path), options);
     } catch (networkError) {
+        const message = networkError?.message || 'Unable to reach the service.';
+        // Keep a fetch failure shaped like a Response so callers can use the
+        // same result path, while preserving enough context for a useful UI
+        // message instead of incorrectly calling every failure a bad password.
         return {
-            ok: false, status: 0, statusText: networkError.message,
-            json: async () => ({ success: false, error: `Network error: ${networkError.message}` }),
-            text: async () => networkError.message
+            ok: false,
+            status: 0,
+            statusText: message,
+            networkError: true,
+            json: async () => ({ success: false, error: 'We could not reach the service. Please try again in a moment.' }),
+            text: async () => message
         };
     }
 }
@@ -74,7 +89,12 @@ async function responseResult(response) {
     try { data = await response.json(); }
     catch (_) { data = { success: false, error: 'Unable to parse server response.' }; }
     return {
-        response, ok: response.ok, status: response.status, statusText: response.statusText, data,
+        response,
+        ok: response.ok,
+        status: response.status,
+        statusText: response.statusText,
+        networkError: response.networkError === true,
+        data,
         success: response.ok && data.success !== false,
         error: data.error || (!response.ok ? data.message || response.statusText || 'API request failed' : null)
     };

@@ -291,13 +291,14 @@
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
 
                 try {
-                    const { ok, data } = await window.apiFetchJson('/register', {
+                    const result = await window.apiFetchJson('/register', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username, password, referred_by })
                     });
 
-                    if (ok && data.success) {
+                    if (result.ok && result.data?.success) {
+                        const data = result.data;
                         localStorage.setItem('token', data.token);
                         localStorage.setItem('user', JSON.stringify(data.user || { username }));
                         localStorage.setItem('username', data.user ? data.user.username : username);
@@ -309,14 +310,16 @@
                         else alert("Account created successfully! You are now logged in.");
                         window.location.href = '/dashboard.html';
                     } else {
-                        errorEl.innerText = data?.error || 'Registration failed. Username might be taken.';
+                        errorEl.innerText = result.networkError
+                            ? 'We could not reach the account service. Please try again in a moment.'
+                            : result.data?.error || 'Registration failed. Username might be taken.';
                         errorEl.style.display = 'block';
                         btn.disabled = false;
                         btn.innerHTML = 'Create Account';
                     }
                 } catch (err) {
                     console.error('Registration error:', err);
-                    errorEl.innerText = 'Network error. Please check your connection.';
+                    errorEl.innerText = 'We could not complete account creation. Please try again.';
                     errorEl.style.display = 'block';
                     btn.disabled = false;
                     btn.innerHTML = 'Create Account';
