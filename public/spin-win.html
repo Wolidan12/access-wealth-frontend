@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spin & Win | Access Wealth</title>
+    <title>Spin &amp; Win | Access Wealth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/styles.css">
     <style>
         :root {
-            --bg-body: #070d14;         
-            --bg-cards: #112A46;        
-            --text-main: #ffffff;       
-            --text-muted: #8a99af;      
-            --primary-yellow: #d4af37;  
+            --bg-body: #070d14;
+            --bg-cards: #112A46;
+            --text-main: #ffffff;
+            --text-muted: #8a99af;
+            --primary-yellow: #d4af37;
             --yellow-gradient: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
-            --border-light: rgba(212, 175, 55, 0.15); 
+            --border-light: rgba(212, 175, 55, 0.15);
             --sidebar-width: 260px;
             --sidebar-collapsed-width: 80px;
         }
@@ -97,13 +97,15 @@
 
         /* DIGITAL SPINNER AREA */
         .spinner-container { background: linear-gradient(180deg, #112A46 0%, #070d14 100%); border: 1px solid var(--primary-yellow); border-radius: 24px; padding: 50px 30px; text-align: center; box-shadow: 0 15px 40px rgba(212, 175, 55, 0.15); position: relative; overflow: hidden; }
-        
+
         .digital-display { background: rgba(0,0,0,0.4); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 15px; width: 100%; max-width: 350px; margin: 0 auto 30px auto; padding: 30px 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
         .digital-display h1 { font-family: monospace; font-size: 55px; color: var(--primary-yellow); letter-spacing: 2px; text-shadow: 0 0 15px rgba(212, 175, 55, 0.6); margin: 0; }
-        
+
         .btn-spin { background: var(--yellow-gradient); color: #0b1421; border: none; padding: 18px 50px; border-radius: 50px; font-size: 18px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3); transition: 0.3s; }
         .btn-spin:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(212, 175, 55, 0.5); }
         .btn-spin:disabled { background: #333; color: #777; box-shadow: none; cursor: not-allowed; transform: none; }
+        .feature-notice { max-width: 620px; margin: 0 auto 24px; padding: 14px 16px; border: 1px solid rgba(212,175,55,.28); border-radius: 12px; background: rgba(212,175,55,.08); color: var(--text-muted); line-height: 1.55; text-align: center; }
+        .feature-notice strong { color: var(--primary-yellow); }
 
         .spin-history { margin-top: 40px; background: var(--bg-cards); border-radius: 15px; padding: 25px; border: 1px solid var(--border-light); }
         .spin-history h3 { font-size: 16px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
@@ -130,7 +132,7 @@
     <div class="mobile-header">
         <i class="fa-solid fa-bars-staggered menu-btn" onclick="toggleMobileSidebar()"></i>
         <div class="logo-text">ACCESS <span>WEALTH</span></div>
-        <img src="" class="avatar" id="mobileAvatar">
+        <img src="/logo192.png" alt="" class="avatar" id="mobileAvatar">
     </div>
     <div class="overlay-menu" id="overlayMenu" onclick="toggleMobileSidebar()"></div>
 
@@ -146,10 +148,10 @@
                 <a href="/daily-tasks.html" class="nav-item sub-item"><i class="fa-regular fa-clipboard main-icon"></i> Daily Tasks</a>
             </div>
             <a href="/activation.html" class="nav-item"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
-            <a href="/spin-win.html" class="nav-item active"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
+            <a href="/spin-win.html" class="nav-item active"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin &amp; Win</span></a>
             <a href="/withdraw.html" class="nav-item"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
-            <button onclick="window.location.href='/activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
-            <a href="#" class="nav-item" onclick="logout()" style="color: #ff4d4d; margin-top: 30px;"><i class="fa-solid fa-power-off main-icon" style="color: #ff4d4d;"></i> <span>Logout</span></a>
+            <button type="button" onclick="window.location.href='/activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
+            <a href="#" class="nav-item aw-sidebar-logout" onclick="logout(); return false;"><i class="fa-solid fa-power-off main-icon"></i> <span>Logout</span></a>
         </div>
     </div>
 
@@ -158,7 +160,7 @@
             <div class="header-left"><i class="fa-solid fa-bars-staggered" onclick="toggleDesktopSidebar()"></i></div>
             <div class="header-right">
                 <div class="user-info"><h4 id="displayName">USER</h4><p id="displayHandle">@user</p></div>
-                <img src="" class="avatar" id="desktopAvatar">
+                <img src="/logo192.png" alt="" class="avatar" id="desktopAvatar">
             </div>
         </div>
 
@@ -167,13 +169,13 @@
             <div class="lock-overlay" id="lockScreen">
                 <i class="fa-solid fa-lock"></i>
                 <h2>Activation Required</h2>
-                <p>You must activate an Access Wealth plan to unlock the daily Spin & Win wheel.</p>
-                <button onclick="window.location.href='/activation.html'">Activate Now</button>
+                <p>You must activate an Access Wealth plan to access account earning features.</p>
+                <button type="button" onclick="window.location.href='/activation.html'">Activate Now</button>
             </div>
-            
+
             <div class="page-header">
-                <h1 class="page-title">Spin & Win</h1>
-                <p class="page-subtitle">Try your luck! Your spins and multipliers are based on your active package.</p>
+                <h1 class="page-title">Spin &amp; Win</h1>
+                <p class="page-subtitle">Spin &amp; Win will return after secure server-side prize verification is available.</p>
             </div>
 
             <div class="spin-stats">
@@ -183,25 +185,28 @@
                 </div>
                 <div class="stat-box">
                     <p>Current Multiplier</p>
-                    <h3 id="multiplierDisplay">x1.0</h3>
+                    <h3 id="multiplierDisplay">—</h3>
                 </div>
                 <div class="stat-box">
                     <p>Spins Remaining Today</p>
-                    <h3 id="spinsLeftDisplay">0 <span>/ 0</span></h3>
+                    <h3 id="spinsLeftDisplay">—</h3>
                 </div>
             </div>
 
+            <div class="feature-notice" id="spinFeatureNotice" role="status">
+                <strong>Spin &amp; Win is temporarily unavailable.</strong> Prize outcomes and wallet credits must be verified by the server before they can be shown in your account.
+            </div>
             <div class="spinner-container">
                 <div class="digital-display">
-                    <h1 id="prizeAmount">₦0.00</h1>
+                    <h1 id="prizeAmount">—</h1>
                 </div>
-                <button class="btn-spin" id="spinBtn" onclick="startSpin()">Spin Wheel</button>
+                <button class="btn-spin" id="spinBtn" type="button" onclick="startSpin()" disabled>Temporarily Unavailable</button>
             </div>
 
             <div class="spin-history">
-                <h3><i class="fa-solid fa-clock-rotate-left"></i> Today's Spin History</h3>
+                <h3><i class="fa-solid fa-shield-halved"></i> Feature Status</h3>
                 <ul class="history-list" id="historyList">
-                    <li>No spins used today.</li>
+                    <li>No verified spin activity is available.</li>
                 </ul>
             </div>
 
@@ -210,145 +215,48 @@
 
     <script src="global.js"></script>
     <script>
-        // UI Navigation
         function toggleDesktopSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
-        function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlayMenu').classList.toggle('active'); }
-        function toggleDropdown(dropdownId, element) { element.classList.toggle('open'); document.getElementById(dropdownId).classList.toggle('show'); element.classList.toggle('active'); }
-        function logout() { localStorage.clear(); window.location.href = '/login.html'; }
+        function toggleMobileSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlayMenu').classList.toggle('active');
+        }
+        function toggleDropdown(dropdownId, element) {
+            element.classList.toggle('open');
+            document.getElementById(dropdownId).classList.toggle('show');
+            element.classList.toggle('active');
+        }
+        function logout() { window.clearAuthSession(); sessionStorage.clear(); window.location.assign('/login.html'); }
 
-        // Spin access is tied to the live active investment, so retired package names do not live in the browser.
-        const basePrizes = [0, 50, 100, 200, 300, 500, 1000];
-        let userPlan = null;
-        let planData = null;
-        let spinsUsedToday = 0;
+        function setAvatar(username) {
+            const url = window.userAvatarUrl ? window.userAvatarUrl(username) : '';
+            document.getElementById('desktopAvatar').src = url;
+            document.getElementById('mobileAvatar').src = url;
+        }
 
-        async function loadSpinInvestment() {
+        async function loadSpinFeatureStatus() {
             try {
                 const { ok, data } = await window.apiFetchJson('/active-investment');
                 const investment = ok && data.success ? (data.investment || data.activeInvestment || data.active_investment) : null;
                 if (!investment) throw new Error('No active investment');
-                userPlan = investment.package_name || investment.packageName || investment.package?.name || investment.plan_name || investment.planName || 'Active Investment';
-                planData = {
-                    spins: Math.max(1, Number(investment.spins_per_day ?? investment.daily_spins ?? 1)),
-                    multiplier: Math.max(1, Number(investment.spin_multiplier ?? 1))
-                };
-                const today = new Date().toDateString();
-                const lastSpinDate = localStorage.getItem('lastSpinDate');
-                if (lastSpinDate !== today) {
-                    localStorage.setItem('spinsUsedToday', 0);
-                    localStorage.setItem('lastSpinDate', today);
-                    localStorage.removeItem('spinHistory');
-                    spinsUsedToday = 0;
-                } else {
-                    spinsUsedToday = parseInt(localStorage.getItem('spinsUsedToday')) || 0;
-                }
-                updateUI();
-                loadHistory();
+                document.getElementById('planNameDisplay').textContent = investment.package_name || investment.packageName || investment.package?.name || 'Active Investment';
+                document.getElementById('multiplierDisplay').textContent = '—';
+                document.getElementById('spinsLeftDisplay').textContent = '—';
             } catch (_) {
                 document.getElementById('lockScreen').style.display = 'flex';
             }
         }
 
         window.onload = () => {
-            const user = localStorage.getItem('username') || "Guest";
-            document.getElementById('displayName').innerText = user.toUpperCase();
-            document.getElementById('displayHandle').innerText = "@" + user.toLowerCase().replace(/\s+/g, '');
-            const avatarUrl = `https://ui-avatars.com/api/?name=${user}&background=d4af37&color=112A46&bold=true`;
-            document.getElementById('desktopAvatar').src = avatarUrl;
-            document.getElementById('mobileAvatar').src = avatarUrl;
-            loadSpinInvestment();
+            const username = localStorage.getItem('username') || 'User';
+            document.getElementById('displayName').textContent = username.toUpperCase();
+            document.getElementById('displayHandle').textContent = `@${username.toLowerCase().replace(/\s+/g, '')}`;
+            setAvatar(username);
+            loadSpinFeatureStatus();
         };
 
-        function updateUI() {
-            const spinsLeft = planData.spins - spinsUsedToday;
-            document.getElementById('planNameDisplay').innerText = userPlan;
-            document.getElementById('multiplierDisplay').innerText = `x${planData.multiplier.toFixed(1)}`;
-            document.getElementById('spinsLeftDisplay').innerHTML = `${spinsLeft} <span>/ ${planData.spins}</span>`;
-
-            if (spinsLeft <= 0) {
-                const btn = document.getElementById('spinBtn');
-                btn.disabled = true;
-                btn.innerText = "Come Back Tomorrow";
-            }
-        }
-
-        // --- THE SPIN ANIMATION & LOGIC ---
-        let isSpinning = false;
-        async function startSpin() {
-            if (isSpinning) return;
-            if (spinsUsedToday >= planData.spins) return alert("You have used all your spins for today!");
-
-            isSpinning = true;
-            const spinBtn = document.getElementById('spinBtn');
-            const display = document.getElementById('prizeAmount');
-            
-            spinBtn.disabled = true;
-            spinBtn.innerText = "Spinning";
-
-            // Digital flashing animation
-            let flashInterval = setInterval(() => {
-                const randomVisual = Math.floor(Math.random() * 2000);
-                display.innerText = `₦${randomVisual}`;
-            }, 50);
-
-            try {
-                // Wait 2.5 seconds for dramatic effect
-                await new Promise(r => setTimeout(r, 2500));
-                clearInterval(flashInterval);
-
-                // Determine final prize
-                const randomPrizeIndex = Math.floor(Math.random() * basePrizes.length);
-                const baseAmount = basePrizes[randomPrizeIndex];
-                const finalAmount = Math.floor(baseAmount * planData.multiplier);
-
-                // Show result
-                display.innerText = `₦${finalAmount.toFixed(2)}`;
-
-                // Update Data
-                spinsUsedToday++;
-                localStorage.setItem('spinsUsedToday', spinsUsedToday);
-
-                if (finalAmount > 0) {
-                    let currentEarnings = parseFloat(localStorage.getItem('taskEarnings')) || 0;
-                    localStorage.setItem('taskEarnings', currentEarnings + finalAmount);
-                    addHistoryItem(`Won ₦${finalAmount.toFixed(2)} (Base: ₦${baseAmount} x${planData.multiplier})`, true);
-                    alert(`🎉 Congratulations! You won ₦${finalAmount.toFixed(2)}!`);
-                } else {
-                    addHistoryItem(`Better luck next time! (Won ₦0)`, false);
-                    alert(`Aww, you won ₦0. Better luck on your next spin!`);
-                }
-            } finally {
-                isSpinning = false;
-                // Reset UI
-                spinBtn.innerText = "Spin Wheel";
-                updateUI();
-                spinBtn.disabled = (spinsUsedToday >= planData.spins);
-            }
-        }
-
-        function addHistoryItem(text, isWin) {
-            const history = JSON.parse(localStorage.getItem('spinHistory')) || [];
-            const time = new Date().toLocaleTimeString();
-            history.unshift({ time, text, isWin }); // Add to beginning
-            localStorage.setItem('spinHistory', JSON.stringify(history));
-            loadHistory();
-        }
-
-        function loadHistory() {
-            const history = JSON.parse(localStorage.getItem('spinHistory')) || [];
-            const list = document.getElementById('historyList');
-            
-            if (history.length === 0) {
-                list.innerHTML = "<li>No spins used today.</li>";
-                return;
-            }
-
-            list.innerHTML = "";
-            history.forEach(item => {
-                const li = document.createElement('li');
-                li.innerHTML = `<span>${item.time}</span> <span class="${item.isWin ? 'win' : ''}">${item.text}</span>`;
-                list.appendChild(li);
-            });
+        function startSpin() {
+            const message = 'Spin & Win is temporarily unavailable while secure server-side prize verification is being completed.';
+            if (typeof window.showToast === 'function') window.showToast('info', message);
         }
     </script>
 </body>

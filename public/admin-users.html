@@ -23,7 +23,7 @@
         .page-header { margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
         .page-header h1 { font-size: 28px; color: var(--text-main); }
         .page-header p { color: var(--text-muted); font-size: 14px; }
-        
+
         .search-bar { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 50px; display: flex; align-items: center; width: 300px;}
         .search-bar input { background: transparent; border: none; outline: none; color: #fff; width: 100%; margin-left: 10px; font-family: 'Poppins', sans-serif;}
 
@@ -59,8 +59,8 @@
         <div class="nav-menu">
             <a href="/admin.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Overview</a>
             <a href="/admin-users.html" class="nav-item active"><i class="fa-solid fa-users"></i> Manage Users</a>
-            <a href="/admin-support.html" class="nav-item"><i class="fa-solid fa-headset"></i> Support Desk</a>
-            <a href="/login.html" class="nav-item" style="margin-top: 50px;"><i class="fa-solid fa-power-off"></i> Logout</a>
+            <a href="/support-agent.html" class="nav-item"><i class="fa-solid fa-headset"></i> Support Desk</a>
+            <a href="/login.html" class="nav-item aw-sidebar-logout-admin" onclick="window.logout(); return false;"><i class="fa-solid fa-power-off"></i> Logout</a>
         </div>
     </div>
 
@@ -71,7 +71,7 @@
                 <p>View, edit, or ban registered users.</p>
             </div>
             <div class="search-bar">
-                <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+                <i class="fa-solid fa-magnifying-glass aw-muted-icon"></i>
                 <input type="text" id="searchInput" placeholder="Search username">
             </div>
         </div>
@@ -80,10 +80,10 @@
             <div class="table-responsive">
                 <table id="usersTable">
                     <thead>
-                        <tr><th>Username</th><th>Deposit Bal</th><th>Task Earnings</th><th>Affiliate Bal</th><th>Plan Status</th><th>Joined</th><th>Actions</th></tr>
+                        <tr><th scope="col">Username</th><th scope="col">Deposit Bal</th><th scope="col">Task Earnings</th><th scope="col">Affiliate Bal</th><th scope="col">Plan Status</th><th scope="col">Joined</th><th scope="col">Actions</th></tr>
                     </thead>
                     <tbody id="usersTableBody">
-                        <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading users...</td></tr>
+                        <tr><td colspan="7" class="aw-table-loading">Loading users...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -105,72 +105,135 @@
     <script src="global.js"></script>
     <script>
         let allUsers = [];
+        let selectedPlanUsername = null;
+
+        function formatAmount(value) {
+            const amount = Number(value);
+            return `₦${(Number.isFinite(amount) ? amount : 0).toLocaleString()}`;
+        }
+
+        function showPageMessage(type, message) {
+            if (typeof window.showToast === 'function') window.showToast(type, message);
+            else alert(message);
+        }
+
+        function createCell(row, content, className = '') {
+            const cell = document.createElement('td');
+            if (className) cell.className = className;
+            if (content instanceof Node) cell.appendChild(content);
+            else cell.textContent = content;
+            row.appendChild(cell);
+            return cell;
+        }
 
         async function loadUsers() {
             const tbody = document.getElementById('usersTableBody');
             tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading users...</td></tr>';
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/users');
-                if (ok && data.success) {
-                    allUsers = data.users;
-                    displayUsers(allUsers);
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Error loading users</td></tr>';
+                const { ok, data, networkError } = await window.apiFetchJson('/admin/users');
+                if (!(ok && data.success && Array.isArray(data.users))) {
+                    const message = networkError ? 'Unable to reach the user service.' : data?.error || 'Unable to load users.';
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#ff6b6b;">${window.escapeHtml(message)}</td></tr>`;
+                    return;
                 }
+                allUsers = data.users;
+                displayUsers(allUsers);
             } catch (error) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Connection Error</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#ff6b6b;">Unable to load users.</td></tr>';
             }
         }
 
         function displayUsers(users) {
             const tbody = document.getElementById('usersTableBody');
-            tbody.innerHTML = '';
-            if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No users found</td></tr>';
+            tbody.replaceChildren();
+            if (!users.length) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No users found.</td></tr>';
                 return;
             }
-            users.forEach(user => {
-                const total = (user.balance || 0) + (user.taskEarnings || 0) + (user.daily_earnings || 0) + (user.affiliate_balance || 0);
-                const statusBadge = user.planActivated === 'true' ? `<span class="badge active">${user.activePackage || 'Active'}</span>` : '<span class="badge inactive">No Plan</span>';
-                const joinedDate = new Date(user.created_at).toLocaleDateString();
-                tbody.innerHTML += `<tr>
-                    <td><strong>${user.username}</strong></td>
-                    <td>₦${(user.balance || 0).toLocaleString()}</td>
-                    <td>₦${(user.taskEarnings || 0).toLocaleString()}</td>
-                    <td>₦${(user.affiliate_balance || 0).toLocaleString()}</td>
-                    <td>${statusBadge}</td>
-                    <td>${joinedDate}</td>
-                    <td><button class="action-btn" onclick="editUser('${user.username}')">Edit Balance</button><button class="action-btn plan-btn" onclick='openChangePlanModal(${JSON.stringify(user.username)})'>Change Plan</button></td>
-                </tr>`;
+
+            users.forEach((user) => {
+                const row = document.createElement('tr');
+                const username = String(user.username || 'Unknown user');
+                const usernameStrong = document.createElement('strong');
+                usernameStrong.textContent = username;
+                createCell(row, usernameStrong);
+                createCell(row, formatAmount(user.balance));
+                createCell(row, formatAmount(user.taskEarnings));
+                createCell(row, formatAmount(user.affiliate_balance));
+
+                const planCell = document.createElement('td');
+                const badge = document.createElement('span');
+                const isActive = user.planActivated === true || user.planActivated === 'true';
+                badge.className = `badge ${isActive ? 'active' : 'inactive'}`;
+                badge.textContent = isActive ? (user.activePackage || 'Active') : 'No Plan';
+                planCell.appendChild(badge);
+                row.appendChild(planCell);
+
+                const joined = user.created_at ? new Date(user.created_at) : null;
+                createCell(row, joined && !Number.isNaN(joined.getTime()) ? joined.toLocaleDateString() : '—');
+
+                const actions = document.createElement('td');
+                const adjustButton = document.createElement('button');
+                adjustButton.type = 'button';
+                adjustButton.className = 'action-btn';
+                adjustButton.textContent = 'Adjust Balance';
+                adjustButton.addEventListener('click', () => editUser(username));
+                actions.appendChild(adjustButton);
+
+                const planButton = document.createElement('button');
+                planButton.type = 'button';
+                planButton.className = 'action-btn plan-btn';
+                planButton.textContent = 'Change Plan';
+                planButton.addEventListener('click', () => openChangePlanModal(username));
+                actions.appendChild(planButton);
+                row.appendChild(actions);
+                tbody.appendChild(row);
             });
         }
 
-        function editUser(username) {
-            const newBalance = prompt(`Enter new deposit balance for ${username}:`);
-            if (newBalance && !isNaN(newBalance)) {
-                // This would call a backend endpoint to update balance
-                alert('Balance update feature - implement endpoint as needed');
+        async function editUser(username) {
+            const entered = prompt(`Enter a deposit-wallet adjustment for ${username}. Use a positive number to add funds or a negative number to subtract funds.`);
+            if (entered === null) return;
+            const adjustment = Number(entered);
+            if (!Number.isFinite(adjustment) || adjustment === 0) {
+                showPageMessage('error', 'Enter a non-zero numeric adjustment.');
+                return;
+            }
+            const action = adjustment > 0 ? 'add' : 'subtract';
+            const amount = Math.abs(adjustment);
+            if (!confirm(`${action === 'add' ? 'Add' : 'Subtract'} ${formatAmount(amount)} ${action === 'add' ? 'to' : 'from'} ${username}'s deposit wallet?`)) return;
+
+            try {
+                const { ok, data, networkError } = await window.apiFetchJson('/admin/adjust-balance', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, amount, walletType: 'balance', action })
+                });
+                if (!(ok && data.success)) throw new Error(networkError ? 'Unable to reach the balance service.' : data?.error || 'Unable to update the balance.');
+                showPageMessage('success', data.message || 'Wallet updated successfully.');
+                loadUsers();
+            } catch (error) {
+                showPageMessage('error', error.message || 'Unable to update the balance.');
             }
         }
-
-        let selectedPlanUsername = null;
 
         async function openChangePlanModal(username) {
             selectedPlanUsername = username;
             document.getElementById('changePlanUsername').textContent = username;
             const select = document.getElementById('changePlanPackage');
-            select.innerHTML = '<option value="">Loading packages…</option>';
+            select.replaceChildren(new Option('Loading packages…', ''));
             document.getElementById('changePlanModal').classList.add('open');
             try {
                 const { ok, data } = await window.apiFetchJson('/packages');
-                if (!(ok && data.success && Array.isArray(data.packages))) throw new Error(data.error || 'Unable to load packages.');
-                select.innerHTML = '<option value="">Select a package</option>' + data.packages.map((pkg) => {
-                    const amount = Number(pkg.capital || pkg.price || 0).toLocaleString();
-                    return `<option value="${pkg.id}">${pkg.name} — ₦${amount}</option>`;
-                }).join('');
+                if (!(ok && data.success && Array.isArray(data.packages))) throw new Error(data?.error || 'Unable to load packages.');
+                select.replaceChildren(new Option('Select a package', ''));
+                data.packages.forEach((pkg) => {
+                    const option = new Option(`${pkg.name || 'Package'} — ${formatAmount(pkg.capital ?? pkg.price)}`, pkg.id || '');
+                    if ((allUsers.find((user) => user.username === username)?.activePackageId || '') === option.value) option.selected = true;
+                    select.appendChild(option);
+                });
             } catch (error) {
-                select.innerHTML = '<option value="">Unable to load packages</option>';
-                if (typeof showToast === 'function') showToast('error', error.message || 'Unable to load packages.');
+                select.replaceChildren(new Option('Unable to load packages', ''));
+                showPageMessage('error', error.message || 'Unable to load packages.');
             }
         }
 
@@ -183,7 +246,7 @@
             const packageId = document.getElementById('changePlanPackage').value;
             const button = document.getElementById('changePlanSubmit');
             if (!selectedPlanUsername || !packageId) {
-                if (typeof showToast === 'function') showToast('error', 'Select a package first.');
+                showPageMessage('error', 'Select a package first.');
                 return;
             }
             if (!confirm(`Change ${selectedPlanUsername}'s plan? Any current active plan will be replaced.`)) return;
@@ -194,28 +257,28 @@
                     method: 'POST',
                     body: JSON.stringify({ username: selectedPlanUsername, packageId })
                 });
-                if (!(ok && data.success)) throw new Error(data.error || 'Unable to change the user plan.');
-                if (typeof showToast === 'function') showToast('success', data.message || 'User plan changed successfully.');
+                if (!(ok && data.success)) throw new Error(data?.error || 'Unable to change the user plan.');
+                showPageMessage('success', data.message || 'User plan changed successfully.');
                 closeChangePlanModal();
                 loadUsers();
             } catch (error) {
-                if (typeof showToast === 'function') showToast('error', error.message || 'Unable to change the user plan.');
-                else alert(error.message || 'Unable to change the user plan.');
+                showPageMessage('error', error.message || 'Unable to change the user plan.');
             } finally {
                 button.disabled = false;
                 button.textContent = 'Change Plan';
             }
         });
 
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            const filtered = allUsers.filter(user => user.username.toLowerCase().includes(searchTerm));
-            displayUsers(filtered);
+        document.getElementById('searchInput').addEventListener('input', (event) => {
+            const searchTerm = event.target.value.trim().toLowerCase();
+            displayUsers(allUsers.filter((user) => String(user.username || '').toLowerCase().includes(searchTerm)));
         });
 
         window.onload = () => {
-            const role = localStorage.getItem('role');
-            if (role !== 'admin') { window.location.href = '/login.html'; return; }
+            if (localStorage.getItem('role') !== 'admin' || !localStorage.getItem('token')) {
+                window.location.assign('/login.html');
+                return;
+            }
             loadUsers();
         };
     </script>

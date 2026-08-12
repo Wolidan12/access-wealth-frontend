@@ -90,7 +90,7 @@
         .task-icon { width: 80px; height: 80px; background: rgba(212, 175, 55, 0.1); color: var(--primary-yellow); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; margin: 0 auto 20px auto; border: 1px solid rgba(212, 175, 55, 0.3);}
         .task-amount { font-size: 45px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
         .task-desc { color: var(--text-muted); margin-bottom: 30px; font-size: 15px;}
-        
+
         .btn-task { background: var(--yellow-gradient); color: #0b1421; border: none; padding: 18px 50px; border-radius: 50px; font-size: 18px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3); transition: 0.3s; width: 100%; max-width: 400px;}
         .btn-task:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(212, 175, 55, 0.5); }
         .btn-task:disabled { background: #333; color: #777; box-shadow: none; cursor: not-allowed; transform: none; border: 1px solid #555;}
@@ -115,7 +115,7 @@
     <div class="mobile-header">
         <i class="fa-solid fa-bars-staggered menu-btn" onclick="toggleMobileSidebar()"></i>
         <div class="logo-text">ACCESS <span>WEALTH</span></div>
-        <img src="" class="avatar" id="mobileAvatar">
+        <img src="/logo192.png" alt="" class="avatar" id="mobileAvatar">
     </div>
     <div class="overlay-menu" id="overlayMenu" onclick="toggleMobileSidebar()"></div>
 
@@ -132,19 +132,19 @@
                 <a href="/sponsored-posts.html" class="sub-item"><i class="fa-solid fa-bullhorn main-icon"></i> Sponsored Posts</a>
             </div>
             <a href="/activation.html" class="nav-item"><i class="fa-solid fa-bolt main-icon"></i> <span>Account Activation</span></a>
-            <a href="/spin-win.html" class="nav-item"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin & Win</span></a>
+            <a href="/spin-win.html" class="nav-item"><i class="fa-solid fa-dharmachakra main-icon"></i> <span>Spin &amp; Win</span></a>
             <div class="nav-item has-dropdown" onclick="toggleDropdown('marketplaceDropdown', this)">
                 <div class="nav-title-group"><i class="fa-solid fa-shop main-icon"></i> <span>Marketplace</span></div>
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
             <div class="dropdown-container" id="marketplaceDropdown">
-                <a href="#" class="nav-item sub-item"><i class="fa-solid fa-cart-shopping main-icon"></i> All Markets</a>
-                <a href="#" class="nav-item sub-item"><i class="fa-solid fa-plus main-icon"></i> Add Product</a>
+                <span class="nav-item sub-item aw-feature-unavailable" aria-disabled="true" title="Marketplace is coming soon"><i class="fa-solid fa-cart-shopping main-icon"></i> All Markets (Coming soon)</span>
+                <span class="nav-item sub-item aw-feature-unavailable" aria-disabled="true" title="Marketplace is coming soon"><i class="fa-solid fa-plus main-icon"></i> Add Product (Coming soon)</span>
             </div>
             <a href="/withdraw.html" class="nav-item"><i class="fa-solid fa-wallet main-icon"></i> <span>Withdraw</span></a>
             <a href="/referral.html" class="nav-item"><i class="fa-solid fa-users main-icon"></i> <span>Top Earners</span></a>
-            <button onclick="window.location.href='/activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
-            <a href="#" class="nav-item" onclick="logout()" style="color: #ff4d4d; margin-top: 30px;"><i class="fa-solid fa-power-off main-icon" style="color: #ff4d4d;"></i> <span>Logout</span></a>
+            <button type="button" onclick="window.location.href='/activation.html'" class="btn-upgrade-sidebar"><i class="fa-regular fa-gem"></i> <span>Upgrade Account</span></button>
+            <a href="#" class="nav-item aw-sidebar-logout" onclick="logout(); return false;"><i class="fa-solid fa-power-off main-icon"></i> <span>Logout</span></a>
         </div>
     </div>
 
@@ -153,7 +153,7 @@
             <div class="header-left"><i class="fa-solid fa-bars-staggered" onclick="toggleDesktopSidebar()"></i></div>
             <div class="header-right">
                 <div class="user-info"><h4 id="displayName">USER</h4><p id="displayHandle">@user</p></div>
-                <img src="" class="avatar" id="desktopAvatar">
+                <img src="/logo192.png" alt="" class="avatar" id="desktopAvatar">
             </div>
         </div>
 
@@ -163,9 +163,9 @@
                 <i class="fa-solid fa-lock"></i>
                 <h2>Activation Required</h2>
                 <p>You must fund your account and activate a premium plan to unlock Daily Tasks and Sponsored Posts.</p>
-                <button onclick="window.location.href='/activation.html'">Activate Now</button>
+                <button type="button" onclick="window.location.href='/activation.html'">Activate Now</button>
             </div>
-            
+
             <div class="page-header">
                 <h1 class="page-title">24-Hour Daily Task</h1>
                 <p class="page-subtitle">Your daily earning potential is permanently linked to your active package.</p>
@@ -173,11 +173,11 @@
 
             <div class="task-card">
                 <div class="task-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
-                <p style="color: var(--primary-yellow); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;" id="planNameDisplay">Loading</p>
+                <p class="aw-plan-status-label" id="planNameDisplay">Loading</p>
                 <h1 class="task-amount" id="taskPayoutDisplay">₦0.00</h1>
-                <p class="task-desc">Click the button below to claim your daily guaranteed earnings to your task balance.</p>
-                
-                <button class="btn-task" id="taskBtn" onclick="claimTask()">Claim Earnings</button>
+                <p class="task-desc">Claim the daily earnings available from your active package to your task balance.</p>
+
+                <button type="button" class="btn-task" id="taskBtn" onclick="claimTask()">Claim Earnings</button>
                 <div class="timer-display" id="cooldownTimer">24:00:00</div>
             </div>
 
@@ -190,7 +190,7 @@
         function toggleDesktopSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
         function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlayMenu').classList.toggle('active'); }
         function toggleDropdown(dropdownId, element) { element.classList.toggle('open'); document.getElementById(dropdownId).classList.toggle('show'); element.classList.toggle('active'); }
-        function logout() { localStorage.clear(); window.location.href = '/login.html'; }
+        function logout() { window.clearAuthSession(); sessionStorage.clear(); window.location.assign('/login.html'); }
 
         // Daily payout is sourced from the user's actual active investment, not a browser-side plan map.
         let userPlan = null;
@@ -255,12 +255,12 @@
                     alert(`🎉 Task Completed! ₦${dailyPayout.toLocaleString()} has been added to your Task Earnings.`);
                     localStorage.setItem('taskEarnings', data.newBalance);
                     localStorage.setItem('lastTaskClaimTime', Date.now().toString());
-                    
+
                     // Trigger global sync to update all wallet displays across pages
                     if (typeof globalSync === 'function') {
                         globalSync();
                     }
-                    
+
                     startTimer(24 * 60 * 60 * 1000);
                 } else {
                     const alreadyClaimed = data?.already_claimed === true || data?.code === 'already_claimed' || data?.error === 'already_claimed';
@@ -290,7 +290,7 @@
         function startTimer(durationMs) {
             const btn = document.getElementById('taskBtn');
             const timerDisplay = document.getElementById('cooldownTimer');
-            
+
             btn.style.display = 'none';
             timerDisplay.style.display = 'block';
 

@@ -21,23 +21,23 @@
         .nav-item i.main-icon { margin-right: 15px; width: 20px; text-align: center; }
         .nav-item:hover, .nav-item.active { background: rgba(212, 175, 55, 0.1); color: var(--primary-yellow); }
         .nav-item.active { background: var(--primary-yellow); color: #0b1421; font-weight: 600; }
-        
+
         /* Main Content */
         .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 40px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; align-items: start;}
-        
+
         .page-header { grid-column: 1 / -1; margin-bottom: 10px; }
         .page-header h1 { font-size: 28px; color: var(--text-main); }
         .page-header p { color: var(--text-muted); font-size: 14px; }
 
         /* Form Card */
         .form-card, .history-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; padding: 35px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        
+
         /* Network Grid */
         .network-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
-        .network-option { background: rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px 10px; text-align: center; cursor: pointer; transition: 0.3s; }
-        .network-option h4 { font-size: 14px; font-weight: 600; color: var(--text-muted); transition: 0.3s; }
+        .network-option { background: rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px 10px; text-align: center; cursor: pointer; transition: 0.3s; color: inherit; font: inherit; }
+        .network-option h4, .network-option .network-name { font-size: 14px; font-weight: 600; color: var(--text-muted); transition: 0.3s; display: block; }
         .network-option.active { border-color: var(--primary-yellow); background: rgba(212, 175, 55, 0.05); transform: translateY(-3px); }
-        .network-option.active h4 { color: #fff; }
+        .network-option.active h4, .network-option.active .network-name { color: #fff; }
 
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
@@ -49,6 +49,10 @@
 
         .btn-submit { width: 100%; padding: 15px; border-radius: 50px; background: var(--yellow-gradient); color: #0b1421; font-weight: 700; border: none; cursor: pointer; margin-top: 10px; transition: 0.3s;}
         .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(212,175,55,0.3); }
+        .btn-submit:disabled { opacity: .65; cursor: not-allowed; transform: none; }
+        .form-feedback { display: none; margin: 0 0 18px; padding: 12px 14px; border-radius: 10px; font-size: 13px; line-height: 1.45; }
+        .form-feedback.success { display: block; color: #2ecc71; background: rgba(46,204,113,.1); border: 1px solid rgba(46,204,113,.35); }
+        .form-feedback.error { display: block; color: #ff6b6b; background: rgba(255,77,77,.1); border: 1px solid rgba(255,77,77,.35); }
 
         /* History Card */
         .history-card h3 { font-size: 16px; margin-bottom: 20px; color: var(--text-main); display: flex; align-items: center; gap: 10px;}
@@ -83,17 +87,18 @@
 
         <!-- Left Form -->
         <div class="form-card">
-            <label style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px; display:block;">Select Network</label>
+            <label class="aw-network-label">Select Network</label>
             <div class="network-grid">
-                <div class="network-option active" data-network="MTN"><h4>MTN</h4></div>
-                <div class="network-option" data-network="Airtel"><h4>Airtel</h4></div>
-                <div class="network-option" data-network="Glo"><h4>Glo</h4></div>
-                <div class="network-option" data-network="9Mobile"><h4>9Mobile</h4></div>
+                <button type="button" class="network-option active" data-network="MTN" aria-pressed="true"><span class="network-name">MTN</span></button>
+                <button type="button" class="network-option" data-network="Airtel" aria-pressed="false"><span class="network-name">Airtel</span></button>
+                <button type="button" class="network-option" data-network="Glo" aria-pressed="false"><span class="network-name">Glo</span></button>
+                <button type="button" class="network-option" data-network="9Mobile" aria-pressed="false"><span class="network-name">9Mobile</span></button>
             </div>
 
-            <form id="dataForm">
+            <div id="dataFeedback" class="form-feedback" role="alert" aria-live="assertive"></div>
+            <form id="dataForm" novalidate>
                 <div class="form-group">
-                    <label>Phone Number</label>
+                    <label for="phone">Phone Number</label>
                     <div class="input-wrapper">
                         <i class="fa-solid fa-phone"></i>
                         <input type="tel" id="phone" class="form-control" placeholder="080 000 0000" maxlength="11" required>
@@ -101,7 +106,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Select Plan</label>
+                    <label for="dataPlan">Select Plan</label>
                     <div class="input-wrapper">
                         <i class="fa-solid fa-database"></i>
                         <select id="dataPlan" class="form-control" required>
@@ -114,31 +119,98 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-submit">Recharge Data</button>
+                <button type="submit" class="btn-submit" id="dataSubmitBtn">Recharge Data</button>
             </form>
         </div>
 
         <!-- Right History -->
         <div class="history-card">
-            <h3><i class="fa-solid fa-clock-rotate-left" style="color: var(--primary-yellow);"></i> Purchase History</h3>
+            <h3><i class="fa-solid fa-clock-rotate-left aw-history-icon"></i> Purchase History</h3>
             <div class="empty-state">
                 <i class="fa-solid fa-receipt"></i>
-                <p>No transactions yet</p>
+                <p id="dataHistoryMessage">Your completed data purchase will be confirmed here. Detailed purchase history is not available yet.</p>
             </div>
         </div>
     </div>
 
+    <script src="global.js"></script>
     <script>
-        document.querySelectorAll('.network-option').forEach(opt => {
-            opt.addEventListener('click', () => {
-                document.querySelectorAll('.network-option').forEach(o => o.classList.remove('active'));
-                opt.classList.add('active');
+        let selectedNetwork = 'MTN';
+        let isSubmittingData = false;
+
+        function showDataFeedback(type, message) {
+            const feedback = document.getElementById('dataFeedback');
+            feedback.className = `form-feedback ${type}`;
+            feedback.textContent = message;
+        }
+
+        function clearDataFeedback() {
+            const feedback = document.getElementById('dataFeedback');
+            feedback.className = 'form-feedback';
+            feedback.textContent = '';
+        }
+
+        document.querySelectorAll('.network-option').forEach((option) => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.network-option').forEach((item) => {
+                    item.classList.remove('active');
+                    item.setAttribute('aria-pressed', 'false');
+                });
+                option.classList.add('active');
+                option.setAttribute('aria-pressed', 'true');
+                selectedNetwork = option.dataset.network;
             });
         });
 
-        document.getElementById('dataForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            alert("Data backend route will be added in server.js!");
+        document.getElementById('dataForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (isSubmittingData) return;
+
+            const phone = document.getElementById('phone').value.replace(/\D/g, '');
+            const amount = Number(document.getElementById('dataPlan').value);
+            const button = document.getElementById('dataSubmitBtn');
+
+            clearDataFeedback();
+            if (!/^0\d{10}$/.test(phone)) {
+                showDataFeedback('error', 'Enter a valid 11-digit Nigerian phone number.');
+                return;
+            }
+            if (!Number.isFinite(amount) || amount <= 0) {
+                showDataFeedback('error', 'Choose a data plan before continuing.');
+                return;
+            }
+
+            isSubmittingData = true;
+            button.disabled = true;
+            button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
+            try {
+                const { ok, data, networkError } = await window.apiFetchJson('/bills/data', {
+                    method: 'POST',
+                    body: JSON.stringify({ network: selectedNetwork, phone, amount })
+                });
+                if (!(ok && data.success)) {
+                    showDataFeedback('error', networkError
+                        ? 'We could not reach the data service. Please try again in a moment.'
+                        : data?.error || 'Unable to process this data purchase.');
+                    return;
+                }
+
+                if (Number.isFinite(Number(data.newBalance))) {
+                    localStorage.setItem('balance', String(Number(data.newBalance)));
+                }
+                showDataFeedback('success', `Your ₦${amount.toLocaleString()} ${selectedNetwork} data purchase was submitted for ${phone}.`);
+                document.getElementById('dataForm').reset();
+                document.getElementById('dataHistoryMessage').textContent = 'Your latest data purchase was submitted successfully. Detailed purchase history is not available yet.';
+                if (typeof window.globalSync === 'function') window.globalSync();
+            } catch (error) {
+                if (window.__AW_DEBUG__) console.error('Data purchase error:', error);
+                showDataFeedback('error', 'We could not complete the data purchase. Please try again.');
+            } finally {
+                isSubmittingData = false;
+                button.disabled = false;
+                button.textContent = 'Recharge Data';
+            }
         });
     </script>
 </body>

@@ -9,7 +9,15 @@ const hostname = window.location.hostname.toLowerCase();
 const isLocalApiSession = window.location.protocol === 'file:' || hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
 const isNetlifySession = hostname.endsWith('.netlify.app') || hostname === 'accesswealthhq.com' || hostname === 'www.accesswealthhq.com';
 const API_BASE_URL = !isLocalApiSession && isNetlifySession ? '/api' : `${BACKEND_HOST}/api`;
-const GLOBAL_SYNC_SKIP_PAGES = ['login.html', 'register.html', 'admin.html', 'support-agent.html', 'forgot-password.html', 'reset-password.html'];
+const GLOBAL_SYNC_SKIP_PAGES = ['login.html', 'register.html', 'admin.html', 'admin-users.html', 'support-agent.html', 'forgot-password.html', 'reset-password.html'];
+const ADMIN_PAGE_NAMES = new Set(['admin.html', 'admin-users.html']);
+const SUPPORT_PAGE_NAMES = new Set(['support-agent.html']);
+const AUTH_STORAGE_KEYS = [
+    'token', 'user', 'username', 'role', 'planActivated', 'activePackage',
+    'activePackageId', 'my_referral_id', 'referred_by', 'balance',
+    'wallet_balance', 'taskEarnings', 'daily_earnings', 'affiliate_balance',
+    'profile_complete', 'bank_complete', 'account_complete', 'lastTaskClaimTime'
+];
 window.__AW_DEBUG__ = isLocalApiSession;
 window.ACCESS_WEALTH_API_BASE_URL = API_BASE_URL;
 
@@ -18,6 +26,55 @@ window.ACCESS_WEALTH_API_BASE_URL = API_BASE_URL;
 // ==========================================
 function apiUrl(path) {
     return path.startsWith('http') ? path : `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+}
+
+function currentPageName() {
+    const pathname = window.location.pathname || '';
+    return pathname.split('/').filter(Boolean).pop() || '';
+}
+
+function apiPathParam(value) {
+    return encodeURIComponent(String(value ?? ''));
+}
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, (character) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+    })[character]);
+}
+
+function safeExternalUrl(value) {
+    if (!value) return '';
+    try {
+        const url = new URL(String(value), window.location.origin);
+        return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+    } catch (_) {
+        return '';
+    }
+}
+
+function formatNaira(value, options = {}) {
+    const amount = Number(value);
+    const normalizedAmount = Number.isFinite(amount) ? amount : 0;
+    return new Intl.NumberFormat('en-NG', {
+        style: 'currency',
+        currency: 'NGN',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+        ...options
+    }).format(normalizedAmount);
+}
+
+function clearAuthSession() {
+    AUTH_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
+}
+
+function userAvatarUrl(username) {
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(String(username || 'User'))}&background=d4af37&color=112A46&bold=true`;
 }
 
 async function apiFetch(path, options = {}) {
@@ -45,9 +102,17 @@ function isAuthRoute(path) {
 }
 
 function redirectToLoginAfterRefreshFailure() {
-    if (window.location.pathname.endsWith('/login.html')) return;
-    localStorage.removeItem('token');
+    clearAuthSession();
+    if (currentPageName() === 'login.html') return;
     window.location.assign('/login.html');
+}
+
+function saveRefreshUser(user) {
+    if (!user || typeof user !== 'object') return;
+    const username = user.username || localStorage.getItem('username');
+    if (username) localStorage.setItem('username', username);
+    localStorage.setItem('user', JSON.stringify({ ...user, username: username || user.username || '' }));
+    if (user.role) localStorage.setItem('role', user.role);
 }
 
 async function refreshAccessToken() {
@@ -62,6 +127,7 @@ async function refreshAccessToken() {
         const token = data.token || data.newToken || data.access_token || data.accessToken || data.data?.token;
         if (!response.ok || !token) return null;
         localStorage.setItem('token', token);
+        saveRefreshUser(data.user || data.data?.user);
         return token;
     })();
     try { return await refreshInFlight; } finally { refreshInFlight = null; }
@@ -117,6 +183,12 @@ window.apiFetch = (path, options = {}) => authorizedFetch(path, options);
 window.apiFetchJson = apiFetchJson;
 window.apiFetchMultipart = apiFetchMultipart;
 window.refreshAccessToken = refreshAccessToken;
+window.apiPathParam = apiPathParam;
+window.escapeHtml = escapeHtml;
+window.safeExternalUrl = safeExternalUrl;
+window.formatNaira = formatNaira;
+window.clearAuthSession = clearAuthSession;
+window.userAvatarUrl = userAvatarUrl;
 
 // ==========================================
 // THEME MANAGEMENT (FIXED)
@@ -174,139 +246,145 @@ window.initTheme = initTheme;
 window.setupThemeToggle = setupThemeToggle;
 
 // ==========================================
-// SYNC ENGINE (unchanged)
+// SESSION SYNC
 // ==========================================
 function isPageAllowedForSync() {
-    const href = window.location.href;
-    return !GLOBAL_SYNC_SKIP_PAGES.some(page => href.includes(page));
+    return !GLOBAL_SYNC_SKIP_PAGES.includes(currentPageName());
+}
+
+function normalizeUserPayload(user, fallbackUsername = '') {
+    const source = user && typeof user === 'object' ? user : {};
+    return {
+        ...source,
+        username: source.username || fallbackUsername,
+        role: source.role || 'user',
+        profile_complete: source.profile_complete === true || source.profile_complete === 'true',
+        bank_complete: source.bank_complete === true || source.bank_complete === 'true',
+        account_complete: source.account_complete === true || source.account_complete === 'true',
+        planActivated: source.planActivated === true || source.planActivated === 'true' || source.plan_activated === true || source.plan_activated === 'true'
+    };
+}
+
+function storeNormalizedUser(normalizedUser) {
+    const walletBalance = Number(normalizedUser.wallet_balance ?? normalizedUser.balance ?? 0);
+    const safeWalletBalance = Number.isFinite(walletBalance) ? walletBalance : 0;
+    const taskEarnings = Number(normalizedUser.taskEarnings ?? 0) || 0;
+    const dailyEarnings = Number(normalizedUser.daily_earnings ?? 0) || 0;
+    const affiliateBalance = Number(normalizedUser.affiliate_balance ?? 0) || 0;
+
+    localStorage.setItem('username', normalizedUser.username || '');
+    localStorage.setItem('user', JSON.stringify(normalizedUser));
+    localStorage.setItem('role', normalizedUser.role || 'user');
+    localStorage.setItem('profile_complete', normalizedUser.profile_complete ? 'true' : 'false');
+    localStorage.setItem('bank_complete', normalizedUser.bank_complete ? 'true' : 'false');
+    localStorage.setItem('account_complete', normalizedUser.account_complete ? 'true' : 'false');
+    localStorage.setItem('balance', String(safeWalletBalance));
+    localStorage.setItem('wallet_balance', String(safeWalletBalance));
+    localStorage.setItem('taskEarnings', String(taskEarnings));
+    localStorage.setItem('daily_earnings', String(dailyEarnings));
+    localStorage.setItem('affiliate_balance', String(affiliateBalance));
+    localStorage.setItem('planActivated', normalizedUser.planActivated ? 'true' : 'false');
+    localStorage.setItem('activePackage', normalizedUser.activePackage || '');
+    localStorage.setItem('activePackageId', normalizedUser.activePackageId || '');
+    localStorage.setItem('my_referral_id', normalizedUser.my_referral_id || normalizedUser.referralId || '');
+    localStorage.setItem('referred_by', normalizedUser.referred_by || '');
+
+    return { safeWalletBalance, taskEarnings, dailyEarnings, affiliateBalance };
+}
+
+function updateSyncedPage(normalizedUser, balances) {
+    const username = normalizedUser.username || '';
+    safeUpdate('sidebarName', username.toUpperCase());
+    safeUpdate('cardName', username);
+    safeUpdate('displayName', username.toUpperCase());
+    safeUpdate('displayHandle', `@${username.toLowerCase().replace(/\s+/g, '')}`);
+
+    const avatarUrl = userAvatarUrl(username);
+    ['sidebarAvatar', 'cardAvatar', 'desktopAvatar', 'mobileAvatar'].forEach((id) => {
+        const avatar = document.getElementById(id);
+        if (avatar) avatar.src = avatarUrl;
+    });
+
+    const refLinkInput = document.getElementById('refLinkInput');
+    if (refLinkInput) {
+        const refId = normalizedUser.my_referral_id || normalizedUser.referralId || '';
+        refLinkInput.value = `${window.location.origin}/register.html${refId ? `?ref=${encodeURIComponent(refId)}` : ''}`;
+    }
+
+    safeMoneyUpdate('liveBalanceDisplay', balances.safeWalletBalance);
+
+    if (normalizedUser.planActivated) {
+        safeUpdate('sidebarStatus', `Premium (${normalizedUser.activePackage || 'Active plan'})`);
+        safeUpdate('accountStatusText', `Premium account (${normalizedUser.activePackage || 'Active plan'})`);
+        const setupCard = document.getElementById('setupCard');
+        if (setupCard) setupCard.style.display = 'none';
+        const activateBtn = document.getElementById('activateBtn');
+        if (activateBtn) activateBtn.style.display = 'none';
+    } else {
+        safeUpdate('sidebarStatus', 'No active plan');
+        safeUpdate('accountStatusText', 'No active plan');
+    }
 }
 
 async function globalSync() {
-    let username = localStorage.getItem('username');
-    const storedUser = localStorage.getItem('user');
+    if (!isPageAllowedForSync()) return;
+
     const token = localStorage.getItem('token');
-    const currentUrl = window.location.href;
-
-    if (!username) {
-        if (storedUser) {
-            try {
-                const parsedUser = JSON.parse(storedUser);
-                if (parsedUser.username) {
-                    username = parsedUser.username;
-                    localStorage.setItem('username', username);
-                }
-            } catch (e) {}
-        }
-        
-        if (!username && token) {
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                if (payload.username) {
-                    username = payload.username;
-                    localStorage.setItem('username', username);
-                }
-            } catch (e) {}
-        }
-    }
-
-    const isLoggedIn = Boolean(username || token);
-
-    if (!isPageAllowedForSync()) {
-        return;
-    }
-
-    if (!isLoggedIn || !username) {
-        if (!currentUrl.includes('login.html') && !currentUrl.includes('register.html')) {
-            window.location.href = 'login.html';
-        }
-        return;
-    }
-
-    const role = localStorage.getItem('role');
-    if (role === 'support' && !window.location.href.includes('support-agent.html')) { 
-        window.location.href = 'support-agent.html'; 
-        return; 
-    }
-    if (role === 'admin' && !window.location.href.includes('admin.html')) {
-        window.location.href = 'admin.html';
+    if (!token) {
+        clearAuthSession();
+        window.location.assign('/login.html');
         return;
     }
 
     try {
-        const { ok, data, error } = await apiFetchJson(`/user/${username}?t=${Date.now()}`);
-        
-        if (ok && data.success) {
-            // Keep one normalized copy of the complete user payload for every page.
-            const u = data.user || {};
-            const normalizedUser = {
-                ...u,
-                username: u.username || username,
-                profile_complete: u.profile_complete === true || u.profile_complete === 'true',
-                bank_complete: u.bank_complete === true || u.bank_complete === 'true',
-                account_complete: u.account_complete === true || u.account_complete === 'true',
-                planActivated: u.planActivated === true || u.planActivated === 'true' || u.plan_activated === true || u.plan_activated === 'true'
-            };
-            username = normalizedUser.username;
-            localStorage.setItem('username', username);
-            localStorage.setItem('user', JSON.stringify(normalizedUser));
-            localStorage.setItem('profile_complete', normalizedUser.profile_complete ? 'true' : 'false');
-            localStorage.setItem('bank_complete', normalizedUser.bank_complete ? 'true' : 'false');
-            localStorage.setItem('account_complete', normalizedUser.account_complete ? 'true' : 'false');
-            const walletBalance = Number(u.wallet_balance ?? u.balance ?? 0);
-            
-            localStorage.setItem('balance', walletBalance); 
-            localStorage.setItem('wallet_balance', walletBalance);
-            localStorage.setItem('taskEarnings', u.taskEarnings || 0); 
-            localStorage.setItem('daily_earnings', u.daily_earnings || 0); 
-            localStorage.setItem('affiliate_balance', u.affiliate_balance || 0); 
-            localStorage.setItem('planActivated', normalizedUser.planActivated ? 'true' : 'false');
-            localStorage.setItem('activePackage', u.activePackage || 'Standard');
-            localStorage.setItem('activePackageId', u.activePackageId || '');
-            localStorage.setItem('my_referral_id', u.my_referral_id || u.referralId || ''); // ✅ FIX: store referral ID
-            localStorage.setItem('referred_by', u.referred_by || '');
+        // Syncing the authenticated session is safer than building a route from
+        // a stored username, and it restores an interrupted local session.
+        const { ok, data } = await apiFetchJson('/user/sync', {
+            method: 'POST',
+            body: JSON.stringify({})
+        });
+        if (!(ok && data.success && data.user)) return;
 
-            safeUpdate('sidebarName', username.toUpperCase());
-            safeUpdate('cardName', username);
-            safeUpdate('displayName', username.toUpperCase());
-            safeUpdate('displayHandle', "@" + username.toLowerCase().replace(/\s+/g, ''));
-            
-            const avatarUrl = `https://ui-avatars.com/api/?name=${username}&background=d4af37&color=112A46&bold=true`;
-            if (document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').src = avatarUrl;
-            if (document.getElementById('cardAvatar')) document.getElementById('cardAvatar').src = avatarUrl;
-            if (document.getElementById('desktopAvatar')) document.getElementById('desktopAvatar').src = avatarUrl;
-            if (document.getElementById('mobileAvatar')) document.getElementById('mobileAvatar').src = avatarUrl;
-            
-            const refLinkInput = document.getElementById('refLinkInput');
-            if (refLinkInput) refLinkInput.value = `${window.location.origin}/register.html?ref=${u.my_referral_id}`;
+        const normalizedUser = normalizeUserPayload(data.user, localStorage.getItem('username') || '');
+        const balances = storeNormalizedUser(normalizedUser);
+        const page = currentPageName();
 
-            safeMoneyUpdate('liveBalanceDisplay', walletBalance); 
-
-            // Dashboard access and upgrade state are controlled only by plan activation, never profile flags.
-            if (normalizedUser.planActivated) {
-                safeUpdate('sidebarStatus', `Premium (${u.activePackage})`);
-                safeUpdate('accountStatusText', `Premium account (${u.activePackage})`);
-                
-                const setupCard = document.getElementById('setupCard');
-                if(setupCard) setupCard.style.display = 'none';
-                
-                const activateBtn = document.getElementById('activateBtn');
-                if(activateBtn) activateBtn.style.display = 'none';
-            }
-
-            window.dispatchEvent(new Event('globalSyncComplete'));
+        if (normalizedUser.role === 'support' && !SUPPORT_PAGE_NAMES.has(page)) {
+            window.location.assign('/support-agent.html');
+            return;
         }
+        if (normalizedUser.role === 'admin' && !ADMIN_PAGE_NAMES.has(page)) {
+            window.location.assign('/admin.html');
+            return;
+        }
+
+        updateSyncedPage(normalizedUser, balances);
+        window.dispatchEvent(new Event('globalSyncComplete'));
     } catch (err) {
-        if (window.__AW_DEBUG__) console.error("Access Wealth Sync Blocked. Check Terminal.", err);
+        if (window.__AW_DEBUG__) console.error('Access Wealth session sync failed.', err);
     }
 }
 
-function safeUpdate(id, text) { const el = document.getElementById(id); if (el) el.innerText = text; }
-function safeMoneyUpdate(id, amount) { const el = document.getElementById(id); if (el) el.innerText = amount.toLocaleString(undefined, {minimumFractionDigits: 2}); }
+function safeUpdate(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = text;
+}
 
-window.logout = function() { 
-    localStorage.clear(); 
+function safeMoneyUpdate(id, amount) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const numericAmount = Number(amount);
+    el.innerText = (Number.isFinite(numericAmount) ? numericAmount : 0).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+window.globalSync = globalSync;
+window.logout = function() {
+    clearAuthSession();
     sessionStorage.clear();
-    window.location.href = '/login.html'; 
+    window.location.assign('/login.html');
 };
 
 // ==========================================
@@ -616,7 +694,9 @@ function ensureConsistentTitle() {
 }
 
 document.addEventListener('DOMContentLoaded', ensureConsistentTitle);
-document.addEventListener('DOMContentLoaded', injectMobileNav);
+document.addEventListener('DOMContentLoaded', () => {
+    if (isPageAllowedForSync()) injectMobileNav();
+});
 
 // ==========================================
 // INITIALIZE THEME AND TOGGLE ON PAGE LOAD
