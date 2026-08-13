@@ -291,28 +291,62 @@
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
 
                 try {
+                    const payload = { username, password };
+                    if (referred_by) {
+                        payload.referred_by = referred_by;
+                        payload.referral_code = referred_by;
+                        payload.ref = referred_by;
+                    }
+
                     const result = await window.apiFetchJson('/register', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username, password, referred_by })
+                        body: JSON.stringify(payload)
                     });
 
-                    if (result.ok && result.data?.success) {
-                        const data = result.data;
-                        localStorage.setItem('token', data.token);
-                        localStorage.setItem('user', JSON.stringify(data.user || { username }));
-                        localStorage.setItem('username', data.user ? data.user.username : username);
-                        localStorage.setItem('role', data.user ? data.user.role : 'user');
-                        localStorage.setItem('planActivated', (data.user && data.user.planActivated) || 'false');
-                        localStorage.setItem('my_referral_id', (data.user && (data.user.my_referral_id || data.user.referralId)) || '');
+                    if (result.ok && result.data && result.data.success !== false) {
+                        const data = result.data || {};
+                        const nestedData = data.data && typeof data.data === 'object' ? data.data : {};
+                        const token = [
+                            data.token,
+                            data.accessToken,
+                            data.access_token,
+                            data.newToken,
+                            data.jwt,
+                            nestedData.token,
+                            nestedData.accessToken,
+                            nestedData.access_token
+                        ].find((value) => typeof value === 'string' && value.trim());
 
-                        if (typeof showToast === 'function') showToast('success', 'Account created successfully!');
-                        else alert("Account created successfully! You are now logged in.");
-                        window.location.href = '/dashboard.html';
+                        const user = (data.user && typeof data.user === 'object' ? data.user : null)
+                            || (nestedData.user && typeof nestedData.user === 'object' ? nestedData.user : null)
+                            || { username };
+                        const resolvedUsername = user.username || data.username || nestedData.username || username;
+
+                        if (token) {
+                            const planActivated = user.planActivated === true || user.planActivated === 'true' || user.plan_activated === true || user.plan_activated === 'true';
+                            localStorage.setItem('token', token.trim());
+                            localStorage.setItem('user', JSON.stringify({ ...user, username: resolvedUsername }));
+                            localStorage.setItem('username', resolvedUsername);
+                            localStorage.setItem('role', user.role || data.role || nestedData.role || 'user');
+                            localStorage.setItem('planActivated', planActivated ? 'true' : 'false');
+                            localStorage.setItem('activePackage', user.activePackage || data.activePackage || nestedData.activePackage || '');
+                            localStorage.setItem('my_referral_id', user.my_referral_id || user.referralId || data.my_referral_id || nestedData.my_referral_id || '');
+
+                            if (typeof showToast === 'function') showToast('success', 'Account created successfully!');
+                            window.location.href = '/dashboard.html';
+                            return;
+                        } else {
+                            if (typeof showToast === 'function') showToast('success', 'Account created successfully! Please log in.');
+                            else alert('Account created successfully! Please log in.');
+                            window.location.href = '/login.html';
+                            return;
+                        }
                     } else {
+                        const serverError = result.data?.error || result.data?.message || result.data?.msg || result.error;
                         errorEl.innerText = result.networkError
-                            ? 'We could not reach the account service. Please try again in a moment.'
-                            : result.data?.error || 'Registration failed. Username might be taken.';
+                            ? 'We could not reach the account service. Please check your internet connection and try again.'
+                            : serverError || 'Registration failed. Username might be taken.';
                         errorEl.style.display = 'block';
                         btn.disabled = false;
                         btn.innerHTML = 'Create Account';

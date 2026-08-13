@@ -4,11 +4,10 @@
 // /api/* to the Railway service (see netlify.toml), preventing a browser CORS
 // failure when visitors use a Netlify domain, a deploy preview, or the custom
 // domain. Local/file development continues to call Railway directly.
-const BACKEND_HOST = 'https://access-wealth-backend-production.up.railway.app';
+const BACKEND_HOST = window.__ACCESS_WEALTH_BACKEND_URL__ || 'https://access-wealth-backend-production.up.railway.app';
 const hostname = window.location.hostname.toLowerCase();
 const isLocalApiSession = window.location.protocol === 'file:' || hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
-const isNetlifySession = hostname.endsWith('.netlify.app') || hostname === 'accesswealthhq.com' || hostname === 'www.accesswealthhq.com';
-const API_BASE_URL = !isLocalApiSession && isNetlifySession ? '/api' : `${BACKEND_HOST}/api`;
+const API_BASE_URL = `${BACKEND_HOST}/api`;
 const GLOBAL_SYNC_SKIP_PAGES = ['login.html', 'register.html', 'admin.html', 'admin-users.html', 'support-agent.html', 'forgot-password.html', 'reset-password.html'];
 const ADMIN_PAGE_NAMES = new Set(['admin.html', 'admin-users.html']);
 const SUPPORT_PAGE_NAMES = new Set(['support-agent.html']);
@@ -25,7 +24,13 @@ window.ACCESS_WEALTH_API_BASE_URL = API_BASE_URL;
 // API HELPERS — token refresh is shared by JSON and multipart requests.
 // ==========================================
 function apiUrl(path) {
-    return path.startsWith('http') ? path : `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+    if (!path) return API_BASE_URL;
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    if (cleanPath.startsWith('/api/')) {
+        return `${BACKEND_HOST}${cleanPath}`;
+    }
+    return `${API_BASE_URL}${cleanPath}`;
 }
 
 function currentPageName() {
@@ -90,7 +95,7 @@ async function apiFetch(path, options = {}) {
             status: 0,
             statusText: message,
             networkError: true,
-            json: async () => ({ success: false, error: 'We could not reach the service. Please try again in a moment.' }),
+            json: async () => ({ success: false, error: 'We could not reach the server. Please check your internet connection and try again.' }),
             text: async () => message
         };
     }
@@ -153,7 +158,9 @@ async function authorizedFetch(path, options = {}, canRefresh = true) {
 async function responseResult(response) {
     let data;
     try { data = await response.json(); }
-    catch (_) { data = { success: false, error: 'Unable to parse server response.' }; }
+    catch (_) { data = { success: false, error: response.statusText || 'Unable to parse server response.' }; }
+    const isSuccess = response.ok && data.success !== false;
+    const errorMessage = data.error || data.message || data.msg || data.error_description || (!response.ok ? (response.statusText || 'API request failed') : null);
     return {
         response,
         ok: response.ok,
@@ -161,8 +168,8 @@ async function responseResult(response) {
         statusText: response.statusText,
         networkError: response.networkError === true,
         data,
-        success: response.ok && data.success !== false,
-        error: data.error || (!response.ok ? data.message || response.statusText || 'API request failed' : null)
+        success: isSuccess,
+        error: errorMessage
     };
 }
 

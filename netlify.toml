@@ -1,15 +1,11 @@
 [build]
 publish = "public"
 
-# Browser API calls stay on the frontend origin. This avoids CORS failures for
-# the custom domain, Netlify domain, and deploy previews while preserving the
-# backend's existing /api contract.
 [[redirects]]
 from = "/api/*"
 to = "https://access-wealth-backend-production.up.railway.app/api/:splat"
 status = 200
 force = true
-headers = { Origin = "https://accesswealthhq.com" }
 
 [[redirects]]
 from = "/"

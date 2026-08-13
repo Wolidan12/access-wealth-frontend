@@ -450,30 +450,6 @@
             }
         }
 
-        function getQueryParam(name) {
-            const params = new URLSearchParams(window.location.search);
-            return params.get(name);
-        }
-
-        async function verifyDeposit(reference) {
-            if (!reference) return;
-            try {
-                const { ok, data } = await window.apiFetchJson(`/squad/transaction/${window.apiPathParam(reference)}`);
-                const settled = (data && (data.success || data.status === 'success'));
-                if (ok && settled) {
-                    if (typeof showToast === 'function') showToast('success', data.message || 'Deposit credited successfully');
-                    else alert(data.message || 'Deposit credited successfully');
-                    if (typeof globalSync === 'function') globalSync();
-                } else {
-                    const msg = data.error || 'Payment verification failed';
-                    if (typeof showToast === 'function') showToast('error', msg);
-                    else alert(msg);
-                }
-            } catch (error) {
-                console.error('Verify deposit error:', error);
-            }
-        }
-
         async function loadBroadcastNotice() {
             try {
                 const { ok, data } = await window.apiFetchJson('/broadcasts');
@@ -732,7 +708,6 @@
             loadBroadcastNotice();
             loadRecentDeposits();
             loadActiveInvestmentEarnings();
-            verifyDeposit(getQueryParam('reference'));
         });
         updateBalanceDisplay();
     </script>
