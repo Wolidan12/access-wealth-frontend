@@ -281,27 +281,44 @@
                 btn.innerHTML = defaultButtonLabel;
             }
 
-            // The current API returns `user`, but accepting the older flat
-            // response shape keeps a successful login from being reported as a
-            // misleading network error during a rolling backend deploy.
+            // Accepts standard, nested, or flat response structures from the backend
             function normalizeLoginSession(data, submittedUsername) {
                 const payload = data && typeof data === 'object' ? data : {};
-                const suppliedUser = payload.user && typeof payload.user === 'object' ? payload.user : {};
-                const token = [payload.token, payload.accessToken, payload.access_token]
-                    .find((value) => typeof value === 'string' && value.trim());
-                const resolvedUsername = suppliedUser.username || payload.username || submittedUsername;
+                const nestedData = payload.data && typeof payload.data === 'object' ? payload.data : {};
+                const suppliedUser = (payload.user && typeof payload.user === 'object' ? payload.user : null)
+                    || (nestedData.user && typeof nestedData.user === 'object' ? nestedData.user : null)
+                    || (typeof nestedData === 'object' && !nestedData.token ? nestedData : {})
+                    || {};
+
+                const token = [
+                    payload.token,
+                    payload.accessToken,
+                    payload.access_token,
+                    payload.newToken,
+                    payload.jwt,
+                    nestedData.token,
+                    nestedData.accessToken,
+                    nestedData.access_token,
+                    nestedData.newToken,
+                    nestedData.jwt
+                ].find((value) => typeof value === 'string' && value.trim());
+
+                const resolvedUsername = suppliedUser.username 
+                    || payload.username 
+                    || nestedData.username 
+                    || submittedUsername;
 
                 if (!token || !resolvedUsername) return null;
 
                 return {
-                    token,
+                    token: token.trim(),
                     user: {
                         ...suppliedUser,
                         username: resolvedUsername,
-                        role: suppliedUser.role || payload.role || 'user',
-                        planActivated: suppliedUser.planActivated ?? suppliedUser.plan_activated ?? payload.planActivated ?? 'false',
-                        activePackage: suppliedUser.activePackage ?? payload.activePackage ?? '',
-                        my_referral_id: suppliedUser.my_referral_id ?? payload.my_referral_id ?? ''
+                        role: suppliedUser.role || payload.role || nestedData.role || 'user',
+                        planActivated: suppliedUser.planActivated ?? suppliedUser.plan_activated ?? payload.planActivated ?? nestedData.planActivated ?? 'false',
+                        activePackage: suppliedUser.activePackage ?? payload.activePackage ?? nestedData.activePackage ?? '',
+                        my_referral_id: suppliedUser.my_referral_id ?? suppliedUser.referralId ?? payload.my_referral_id ?? nestedData.my_referral_id ?? ''
                     }
                 };
             }
@@ -312,7 +329,7 @@
                 localStorage.setItem('token', token);
                 localStorage.setItem('user', JSON.stringify(user));
                 localStorage.setItem('username', user.username);
-                localStorage.setItem('role', user.role);
+                localStorage.setItem('role', user.role || 'user');
                 localStorage.setItem('planActivated', planActivated ? 'true' : 'false');
                 localStorage.setItem('activePackage', user.activePackage || '');
                 localStorage.setItem('my_referral_id', user.my_referral_id || '');
@@ -345,36 +362,34 @@
                         body: JSON.stringify({ username, password })
                     });
 
-                    if (result.ok && result.data?.success) {
+                    if (result.ok && result.data && result.data.success !== false) {
                         const session = normalizeLoginSession(result.data, username);
-                        if (!session) {
-                            showError('We could not complete sign-in. Please try again.');
+                        if (session) {
+                            try {
+                                storeLoginSession(session);
+                            } catch (storageError) {
+                                console.error('Could not save login session:', storageError);
+                                showError('Your browser could not save the sign-in session. Enable site storage and try again.');
+                                return;
+                            }
+
+                            redirecting = true;
+                            if (session.user.role === 'admin') {
+                                window.location.href = '/admin.html';
+                            } else if (session.user.role === 'support') {
+                                window.location.href = '/support-agent.html';
+                            } else {
+                                window.location.href = '/dashboard.html';
+                            }
                             return;
                         }
-
-                        try {
-                            storeLoginSession(session);
-                        } catch (storageError) {
-                            console.error('Could not save login session:', storageError);
-                            showError('Your browser could not save the sign-in session. Enable site storage and try again.');
-                            return;
-                        }
-
-                        redirecting = true;
-                        if (session.user.role === 'admin') {
-                            window.location.href = '/admin.html';
-                        } else if (session.user.role === 'support') {
-                            window.location.href = '/support-agent.html';
-                        } else {
-                            window.location.href = '/dashboard.html';
-                        }
-                        return;
                     }
 
+                    const serverError = result.data?.error || result.data?.message || result.data?.msg || result.error;
                     showError(
                         result.networkError
-                            ? 'We could not reach the sign-in service. Please try again in a moment.'
-                            : result.data?.error || 'Invalid username or password.'
+                            ? 'We could not reach the sign-in service. Please check your internet connection and try again.'
+                            : serverError || 'Invalid username or password.'
                     );
                 } catch (err) {
                     console.error('Login error:', err);
