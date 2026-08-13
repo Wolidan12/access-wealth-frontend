@@ -195,9 +195,28 @@ async function responseResult(response) {
     };
 }
 
+function isExpiredTokenPayload(data) {
+    if (!data || typeof data !== 'object') return false;
+    const message = String(data.error || data.message || data.msg || data.error_description || '').toLowerCase();
+    return /(?:invalid|expired|expire|missing|malformed)\s*(?:access\s*)?(?:auth(?:entication)?\s*)?token|token\s*(?:is\s*)?(?:invalid|expired|expire)/.test(message);
+}
+
 async function apiFetchJson(path, options = {}) {
     const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-    return responseResult(await authorizedFetch(path, { ...options, headers }));
+    let result = await responseResult(await authorizedFetch(path, { ...options, headers }));
+
+    // A few older API handlers return an expired-token error in a 200 JSON
+    // response instead of HTTP 401. Refresh and replay that request once too.
+    if (!isAuthRoute(path) && result.ok && result.data?.success === false && isExpiredTokenPayload(result.data)) {
+        const freshToken = await refreshAccessToken();
+        if (freshToken) {
+            headers.Authorization = `Bearer ${freshToken}`;
+            result = await responseResult(await apiFetch(path, { ...options, headers }));
+        } else {
+            redirectToLoginAfterRefreshFailure();
+        }
+    }
+    return result;
 }
 
 async function apiFetchMultipart(path, formData, options = {}) {
@@ -283,6 +302,8 @@ function isPageAllowedForSync() {
 
 function normalizeUserPayload(user, fallbackUsername = '') {
     const source = user && typeof user === 'object' ? user : {};
+    const legacyPlan = source.activePackage || source.active_package || source.package || source.plan || source.active_plan;
+    const hasLegacyPlan = Boolean(legacyPlan && (typeof legacyPlan !== 'object' || Object.keys(legacyPlan).length));
     return {
         ...source,
         username: source.username || fallbackUsername,
@@ -290,7 +311,10 @@ function normalizeUserPayload(user, fallbackUsername = '') {
         profile_complete: source.profile_complete === true || source.profile_complete === 'true',
         bank_complete: source.bank_complete === true || source.bank_complete === 'true',
         account_complete: source.account_complete === true || source.account_complete === 'true',
-        planActivated: source.planActivated === true || source.planActivated === 'true' || source.plan_activated === true || source.plan_activated === 'true'
+        // Legacy accounts can carry their active plan rather than the newer
+        // plan_activated flag. Do not erase that entitlement in local state.
+        planActivated: source.planActivated === true || source.planActivated === 'true' || source.plan_activated === true || source.plan_activated === 'true' || hasLegacyPlan,
+        activePackage: source.activePackage || source.active_package || source.package?.name || source.plan?.name || source.active_plan?.name || ''
     };
 }
 
