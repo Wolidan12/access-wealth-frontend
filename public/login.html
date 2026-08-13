@@ -235,18 +235,18 @@
 
         <form id="loginForm" novalidate>
             <div class="form-group">
-                <label>Username or email</label>
+                <label for="loginUsername">Username or email</label>
                 <div class="input-wrap">
                     <i class="fa-regular fa-user"></i>
-                    <input type="text" id="loginUsername" placeholder="Enter your username or email" autocomplete="username" required>
+                    <input type="text" id="loginUsername" name="username" placeholder="Enter your username or email" autocomplete="username" inputmode="email" required>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Password</label>
+                <label for="loginPassword">Password</label>
                 <div class="input-wrap">
                     <i class="fa-solid fa-lock"></i>
-                    <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password" required>
+                    <input type="password" id="loginPassword" name="password" placeholder="Enter your password" autocomplete="current-password" required>
                 </div>
             </div>
 
@@ -262,13 +262,15 @@
         </div>
     </div>
 
-    <script src="global.js"></script>
+    <script src="/global.js"></script>
+    <script src="/signin.js"></script>
     <script>
         (function() {
             const form = document.getElementById('loginForm');
             const btn = document.getElementById('loginBtn');
             const errorEl = document.getElementById('errorMsg');
             const defaultButtonLabel = 'Login to Dashboard';
+            const SignIn = window.AccessWealthSignIn;
             let isSubmittingLogin = false;
 
             function showError(message) {
@@ -281,119 +283,107 @@
                 btn.innerHTML = defaultButtonLabel;
             }
 
-            // Accepts standard, nested, or flat response structures from the backend
-            function normalizeLoginSession(data, submittedUsername) {
-                const payload = data && typeof data === 'object' ? data : {};
-                const nestedData = payload.data && typeof payload.data === 'object' ? payload.data : {};
-                const suppliedUser = (payload.user && typeof payload.user === 'object' ? payload.user : null)
-                    || (nestedData.user && typeof nestedData.user === 'object' ? nestedData.user : null)
-                    || (typeof nestedData === 'object' && !nestedData.token ? nestedData : {})
-                    || {};
-
-                const token = [
-                    payload.token,
-                    payload.accessToken,
-                    payload.access_token,
-                    payload.newToken,
-                    payload.jwt,
-                    nestedData.token,
-                    nestedData.accessToken,
-                    nestedData.access_token,
-                    nestedData.newToken,
-                    nestedData.jwt
-                ].find((value) => typeof value === 'string' && value.trim());
-
-                const resolvedUsername = suppliedUser.username 
-                    || payload.username 
-                    || nestedData.username 
-                    || submittedUsername;
-
-                if (!token || !resolvedUsername) return null;
-
-                return {
-                    token: token.trim(),
-                    user: {
-                        ...suppliedUser,
-                        username: resolvedUsername,
-                        role: suppliedUser.role || payload.role || nestedData.role || 'user',
-                        planActivated: suppliedUser.planActivated ?? suppliedUser.plan_activated ?? payload.planActivated ?? nestedData.planActivated ?? 'false',
-                        activePackage: suppliedUser.activePackage ?? payload.activePackage ?? nestedData.activePackage ?? '',
-                        my_referral_id: suppliedUser.my_referral_id ?? suppliedUser.referralId ?? payload.my_referral_id ?? nestedData.my_referral_id ?? ''
-                    }
-                };
-            }
-
             function storeLoginSession(session) {
                 const { token, user } = session;
                 const planActivated = user.planActivated === true || user.planActivated === 'true' || user.plan_activated === true || user.plan_activated === 'true';
                 localStorage.setItem('token', token);
                 localStorage.setItem('user', JSON.stringify(user));
-                localStorage.setItem('username', user.username);
+                localStorage.setItem('username', user.username || '');
                 localStorage.setItem('role', user.role || 'user');
                 localStorage.setItem('planActivated', planActivated ? 'true' : 'false');
                 localStorage.setItem('activePackage', user.activePackage || '');
-                localStorage.setItem('my_referral_id', user.my_referral_id || '');
+                localStorage.setItem('my_referral_id', user.my_referral_id || user.referralId || '');
             }
 
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
+            function logLoginFailure({ response, data, error }) {
+                console.error('Login request failed:', {
+                    status: response ? response.status : undefined,
+                    data: SignIn.redactAuthData(data),
+                    error: error && error.message ? error.message : error
+                });
+            }
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
                 if (isSubmittingLogin) return;
 
-                const username = document.getElementById('loginUsername').value.trim();
-                // Password whitespace can be intentional, so only use trimming
-                // to test whether it is blank; send the original value to the API.
-                const password = document.getElementById('loginPassword').value;
-
-                if (!username || !password.trim()) {
-                    showError('Please enter both username and password.');
+                const fields = SignIn.validateLoginFields(
+                    document.getElementById('loginUsername').value,
+                    document.getElementById('loginPassword').value
+                );
+                if (!fields.ok) {
+                    showError(fields.error);
                     return;
                 }
+
+                const username = fields.username;
+                const password = fields.password;
+                const request = SignIn.buildLoginRequest(username, password);
 
                 isSubmittingLogin = true;
                 errorEl.style.display = 'none';
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
                 let redirecting = false;
+                let response;
+                let data;
 
                 try {
-                    const result = await window.apiFetchJson('/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username, password })
+                    response = await fetch(request.url, {
+                        method: request.method,
+                        headers: request.headers,
+                        body: request.body
                     });
 
-                    if (result.ok && result.data && result.data.success !== false) {
-                        const session = normalizeLoginSession(result.data, username);
-                        if (session) {
-                            try {
-                                storeLoginSession(session);
-                            } catch (storageError) {
-                                console.error('Could not save login session:', storageError);
-                                showError('Your browser could not save the sign-in session. Enable site storage and try again.');
-                                return;
-                            }
+                    const contentType = response.headers.get('content-type') || '';
+                    const rawBody = await response.text();
+                    data = SignIn.parseResponseBody(contentType, rawBody);
 
-                            redirecting = true;
-                            if (session.user.role === 'admin') {
-                                window.location.href = '/admin.html';
-                            } else if (session.user.role === 'support') {
-                                window.location.href = '/support-agent.html';
-                            } else {
-                                window.location.href = '/dashboard.html';
-                            }
-                            return;
-                        }
+                    if (!response.ok) {
+                        throw new Error(
+                            SignIn.getSignInErrorMessage({ status: response.status, data }) ||
+                            data.error ||
+                            `Sign-in failed with HTTP ${response.status}`
+                        );
                     }
 
-                    const serverError = result.data?.error || result.data?.message || result.data?.msg || result.error;
-                    showError(
-                        result.networkError
-                            ? 'We could not reach the sign-in service. Please check your internet connection and try again.'
-                            : serverError || 'Invalid username or password.'
-                    );
-                } catch (err) {
-                    console.error('Login error:', err);
-                    showError('We could not complete sign-in. Please try again.');
+                    const session = SignIn.extractLoginSession(data);
+                    if (!session || !session.token || !session.user) {
+                        throw new Error('The server returned an incomplete sign-in response.');
+                    }
+
+                    const user = {
+                        ...session.user,
+                        username: session.user.username || username
+                    };
+
+                    try {
+                        localStorage.setItem('token', session.token);
+                        localStorage.setItem('user', JSON.stringify(user));
+                        storeLoginSession({ token: session.token, user });
+                    } catch (storageError) {
+                        console.error('Could not save login session:', storageError);
+                        showError('Your browser could not save the sign-in session. Enable site storage and try again.');
+                        return;
+                    }
+
+                    redirecting = true;
+                    if (user.role === 'admin') {
+                        window.location.href = '/admin.html';
+                    } else if (user.role === 'support') {
+                        window.location.href = '/support-agent.html';
+                    } else {
+                        window.location.href = '/dashboard.html';
+                    }
+                } catch (error) {
+                    const networkError = !response;
+                    const message = SignIn.getSignInErrorMessage({
+                        status: response && response.status,
+                        data,
+                        networkError
+                    });
+                    logLoginFailure({ response, data, error });
+                    showError(networkError ? 'We could not complete sign-in. Please try again.' : (error && error.message) || message);
                 } finally {
                     isSubmittingLogin = false;
                     if (!redirecting) resetButton();

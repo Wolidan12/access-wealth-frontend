@@ -1,0 +1,8 @@
+# Proxy API calls to Railway so the browser stays same-origin in production.
+# The trailing ! forces this rule ahead of the static-site fallback.
+/api/*  https://access-wealth-backend-production.up.railway.app/api/:splat  200!
+
+/  /login.html  200
+
+# Preserve the existing static-site fallback after the API proxy.
+/*  /index.html  200

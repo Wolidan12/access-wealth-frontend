@@ -1,13 +1,15 @@
 // global.js - Master Sync Engine + Theme Toggle (FULLY CORRECTED)
 
-// Keep browser API calls on the same origin in production. Netlify rewrites
-// /api/* to the Railway service (see netlify.toml), preventing a browser CORS
-// failure when visitors use a Netlify domain, a deploy preview, or the custom
-// domain. Local/file development continues to call Railway directly.
+// Keep browser API calls on the same origin in production. Netlify, Vercel,
+// and public/_redirects rewrite /api/* to the Railway service, preventing a
+// browser CORS failure on the custom domain, deploy previews, or any other
+// hosted origin. Never point the deployed website at localhost.
+// file:// and local-host development without a proxy still call Railway.
 const BACKEND_HOST = window.__ACCESS_WEALTH_BACKEND_URL__ || 'https://access-wealth-backend-production.up.railway.app';
 const hostname = window.location.hostname.toLowerCase();
 const isLocalApiSession = window.location.protocol === 'file:' || hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
-const API_BASE_URL = `${BACKEND_HOST}/api`;
+const API_ORIGIN = isLocalApiSession ? BACKEND_HOST : '';
+const API_BASE_URL = `${API_ORIGIN}/api`;
 const GLOBAL_SYNC_SKIP_PAGES = ['login.html', 'register.html', 'admin.html', 'admin-users.html', 'support-agent.html', 'forgot-password.html', 'reset-password.html'];
 const ADMIN_PAGE_NAMES = new Set(['admin.html', 'admin-users.html']);
 const SUPPORT_PAGE_NAMES = new Set(['support-agent.html']);
@@ -28,7 +30,7 @@ function apiUrl(path) {
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
     if (cleanPath.startsWith('/api/')) {
-        return `${BACKEND_HOST}${cleanPath}`;
+        return `${API_ORIGIN}${cleanPath}`;
     }
     return `${API_BASE_URL}${cleanPath}`;
 }
@@ -95,6 +97,7 @@ async function apiFetch(path, options = {}) {
             status: 0,
             statusText: message,
             networkError: true,
+            headers: { get: () => '' },
             json: async () => ({ success: false, error: 'We could not reach the server. Please check your internet connection and try again.' }),
             text: async () => message
         };
@@ -156,9 +159,28 @@ async function authorizedFetch(path, options = {}, canRefresh = true) {
 }
 
 async function responseResult(response) {
+    const contentType = (response.headers && typeof response.headers.get === 'function'
+        ? response.headers.get('content-type')
+        : '') || '';
     let data;
-    try { data = await response.json(); }
-    catch (_) { data = { success: false, error: response.statusText || 'Unable to parse server response.' }; }
+    try {
+        if (typeof response.text === 'function') {
+            const raw = await response.text();
+            if (contentType.includes('application/json') || (!contentType && raw && raw.trim().startsWith('{'))) {
+                data = raw ? JSON.parse(raw) : {};
+            } else {
+                try {
+                    data = raw ? JSON.parse(raw) : { error: response.statusText || 'Empty response from server.' };
+                } catch (_) {
+                    data = { success: false, error: raw || response.statusText || 'Unable to parse server response.' };
+                }
+            }
+        } else {
+            data = await response.json();
+        }
+    } catch (_) {
+        data = { success: false, error: response.statusText || 'Unable to parse server response.' };
+    }
     const isSuccess = response.ok && data.success !== false;
     const errorMessage = data.error || data.message || data.msg || data.error_description || (!response.ok ? (response.statusText || 'API request failed') : null);
     return {
