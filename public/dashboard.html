@@ -133,7 +133,16 @@
         .investment-stat { padding:13px; border:1px solid var(--border-light); border-radius:12px; background:rgba(212,175,55,.06); }
         .investment-stat span { color:var(--text-muted); font-size:10px; text-transform:uppercase; letter-spacing:.06em; display:block; }
         .investment-stat strong { color:var(--text-main); display:block; margin-top:5px; font-size:15px; }
-        .investment-empty { color:var(--text-muted); font-size:14px; text-align:center; padding:10px; }
+        .investment-empty { color:var(--text-muted); font-size:14px; text-align:center; padding:10px; grid-column:1 / -1; }
+        .investment-cta { display:inline-block; background:var(--yellow-gradient); color:#0b1421; border:none; padding:11px 22px; border-radius:9px; font-weight:700; font-size:14px; cursor:pointer; text-decoration:none; font-family:inherit; }
+        .investment-cta:hover { box-shadow:0 6px 16px rgba(212,175,55,.3); }
+        .investment-error-text { color:#ff8a8a; display:block; line-height:1.6; }
+        .investment-progress { margin-top:18px; }
+        .investment-progress-labels { display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:12px; color:var(--text-muted); margin-bottom:8px; flex-wrap:wrap; }
+        .investment-progress-labels strong { color:var(--primary-yellow); font-size:14px; }
+        .investment-progress-track { height:9px; border-radius:50px; background:rgba(255,255,255,.08); overflow:hidden; }
+        .investment-progress-fill { height:100%; border-radius:50px; background:var(--yellow-gradient); transition:width .4s ease; }
+        .investment-progress-note { display:block; margin-top:8px; font-size:11px; color:var(--text-muted); }
         .status-title { font-size: 18px; margin-bottom: 5px; color: var(--primary-yellow); }
         .status-percent { font-size: 13px; color: var(--text-main); }
         .progress-track { width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; margin: 15px 0; overflow: hidden; }
@@ -452,9 +461,11 @@
 
         async function loadBroadcastNotice() {
             try {
-                const { ok, data } = await window.apiFetchJson('/broadcasts');
+                let result = await window.apiFetchJson('/broadcasts');
+                if (!result.ok && result.status === 404) result = await window.apiFetchJson('/broadcasts/all');
+                const { ok, data } = result;
                 const notice = document.getElementById('broadcastNotice');
-                if (ok && data.success && data.broadcasts && data.broadcasts.length) {
+                if (ok && data?.success && Array.isArray(data.broadcasts) && data.broadcasts.length) {
                     const latest = data.broadcasts[0];
                     const title = window.escapeHtml(latest.title || 'Admin Announcement');
                     const message = window.escapeHtml(latest.message || '');
@@ -524,10 +535,16 @@
 
         // --- Load Broadcasts ---
         async function loadBroadcasts() {
+            const container = document.getElementById('broadcastContainer');
             try {
-                const { ok, data } = await window.apiFetchJson('/broadcasts/all');
-                const container = document.getElementById('broadcastContainer');
-                if (ok && data.success && data.broadcasts && data.broadcasts.length > 0) {
+                let result = await window.apiFetchJson('/broadcasts');
+                if (!result.ok && result.status === 404) result = await window.apiFetchJson('/broadcasts/all');
+                const { ok, data } = result;
+                if (!ok || data?.success === false) {
+                    container.innerHTML = `<p class="empty-state-muted">${window.escapeHtml(window.describeApiErrorMessage(result))}</p>`;
+                    return;
+                }
+                if (Array.isArray(data.broadcasts) && data.broadcasts.length > 0) {
                     container.innerHTML = data.broadcasts.map((broadcast) => {
                         const title = window.escapeHtml(broadcast.title || 'Announcement');
                         const message = window.escapeHtml(broadcast.message || '');
@@ -539,16 +556,21 @@
                 }
             } catch (err) {
                 if (window.__AW_DEBUG__) console.error("Broadcast error:", err);
-                document.getElementById('broadcastContainer').innerHTML = '<p class="empty-state-muted">Unable to load announcements.</p>';
+                container.innerHTML = '<p class="empty-state-muted">Could not reach the server — check your connection and try again.</p>';
             }
         }
 
         // --- Load Sponsored Tasks ---
         async function loadSponsoredTasks() {
+            const container = document.getElementById('sponsoredContainer');
             try {
-                const { ok, data } = await window.apiFetchJson('/sponsored-posts');
-                const container = document.getElementById('sponsoredContainer');
-                if (ok && data.success && data.posts && data.posts.length > 0) {
+                const result = await window.apiFetchJson('/sponsored-posts');
+                const { ok, data } = result;
+                if (!ok || data?.success === false) {
+                    container.innerHTML = `<p class="empty-state-muted">${window.escapeHtml(window.describeApiErrorMessage(result))}</p>`;
+                    return;
+                }
+                if (Array.isArray(data.posts) && data.posts.length > 0) {
                     container.innerHTML = data.posts.map((post) => {
                         const postId = Number(post.id);
                         if (!Number.isSafeInteger(postId)) return '';
@@ -569,7 +591,7 @@
                 }
             } catch (err) {
                 if (window.__AW_DEBUG__) console.error("Sponsored tasks error:", err);
-                document.getElementById('sponsoredContainer').innerHTML = '<p class="empty-state-muted">Unable to load sponsored tasks.</p>';
+                container.innerHTML = '<p class="empty-state-muted">Could not reach the server — check your connection and try again.</p>';
             }
         }
 
@@ -592,17 +614,18 @@
             btn.textContent = 'Submitting...';
 
             try {
-                const { ok, data } = await window.apiFetchJson('/submit-sponsored-task', {
+                const result = await window.apiFetchJson('/submit-sponsored-task', {
                     method: 'POST',
                     body: JSON.stringify({ post_id: postId })
                 });
+                const { ok, data } = result;
 
                 if (ok && data.success) {
                     showToast('success', 'Task submitted for admin review!');
                     btn.textContent = '⏳ Pending Review';
                     document.getElementById(`status-${postId}`).innerHTML = '<span class="task-status-pending">⏳ Submitted for review</span>';
                 } else {
-                    alert(data.error || 'Failed to submit task');
+                    window.showToast('error', window.describeApiErrorMessage(result));
                     btn.disabled = false;
                     btn.textContent = 'Submit Task';
                 }
@@ -618,8 +641,13 @@
             if (!container) return;
             container.innerHTML = '<p class="empty-state-muted">Loading deposits...</p>';
             try {
-                const { ok, data } = await window.apiFetchJson('/my-deposits');
-                if (ok && data.success && data.deposits && data.deposits.length > 0) {
+                const result = await window.apiFetchJson('/my-deposits');
+                const { ok, data } = result;
+                if (!ok || data?.success === false) {
+                    container.innerHTML = `<p class="empty-state-muted">${window.escapeHtml(window.describeApiErrorMessage(result))}</p>`;
+                    return;
+                }
+                if (Array.isArray(data.deposits) && data.deposits.length > 0) {
                     const recent = data.deposits.slice(0, 5);
                     let html = '<ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;">';
                     recent.forEach(dep => {
@@ -642,7 +670,7 @@
                 }
             } catch (err) {
                 if (window.__AW_DEBUG__) console.error('Recent deposits error:', err);
-                container.innerHTML = '<p class="empty-state-muted">Unable to load deposits.</p>';
+                container.innerHTML = '<p class="empty-state-muted">Could not reach the server — check your connection and try again.</p>';
             }
         }
 
@@ -652,71 +680,137 @@
         }
 
         function investmentNaira(value) {
-            return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(investmentNumber(value));
+            return typeof window.formatNairaAmount === 'function'
+                ? window.formatNairaAmount(value, { decimals: 2 })
+                : `₦${investmentNumber(value).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         }
 
+        // daily_rate is a fraction from the API — render it as a whole percentage.
         function investmentRate(value) {
-            const rate = investmentNumber(value);
-            const percentage = Math.abs(rate) <= 1 ? rate * 100 : rate;
-            return `${percentage.toLocaleString('en-NG', { maximumFractionDigits: 2 })}%`;
+            return typeof window.formatPercent === 'function'
+                ? window.formatPercent(value)
+                : `${(investmentNumber(value) * 100).toLocaleString('en-NG', { maximumFractionDigits: 2 })}%`;
         }
 
-        function activeInvestmentPayload(payload) {
-            // Support the current response and legacy API responses, where the
-            // investment can be wrapped in data or called a plan/package.
-            const data = payload?.data && typeof payload.data === 'object' && !Array.isArray(payload.data) ? payload.data : (payload || {});
-            return data.investment || data.activeInvestment || data.active_investment || data.plan || data.package || data.active_plan || null;
+        function setInvestmentCard({ name, status, statusColor, body }) {
+            const nameEl = document.getElementById('activeInvestmentName');
+            const statusEl = document.getElementById('activeInvestmentStatus');
+            const statsEl = document.getElementById('activeInvestmentStats');
+            nameEl.textContent = name;
+            statusEl.textContent = status;
+            statusEl.style.color = statusColor;
+            statsEl.innerHTML = body;
         }
 
-        async function loadActiveInvestmentEarnings() {
-            const name = document.getElementById('activeInvestmentName');
-            const status = document.getElementById('activeInvestmentStatus');
-            const stats = document.getElementById('activeInvestmentStats');
-            try {
-                const { ok, data } = await window.apiFetchJson('/active-investment');
-                if (!ok || data?.success === false) throw new Error(data?.error || 'Unable to load active investment.');
-                const investment = activeInvestmentPayload(data);
-                if (!investment) {
-                    name.textContent = 'No active investment yet.';
-                    status.textContent = 'Not active';
-                    stats.innerHTML = '<div class="investment-empty">Choose a package to start earning daily ROI. <a href="/activation.html" style="color:var(--primary-yellow);">View packages</a></div>';
-                    return;
-                }
-                // Read the rate from the investment itself. This preserves rates on legacy plans.
-                const planName = investment.package_name || investment.packageName || investment.package?.name || investment.plan_name || investment.planName || investment.plan?.name || 'Active investment';
-                const capital = investment.capital ?? investment.amount ?? investment.invested_amount ?? investment.package?.capital ?? investment.plan?.capital ?? 0;
-                const rate = investment.daily_rate ?? investment.dailyRate ?? investment.package?.daily_rate ?? investment.package?.dailyRate ?? investment.plan?.daily_rate ?? investment.plan?.dailyRate ?? 0;
-                const daily = investment.daily_earning ?? investment.dailyEarning ?? investment.package?.daily_earning ?? investment.plan?.daily_earning ?? (investmentNumber(capital) * (Math.abs(investmentNumber(rate)) <= 1 ? investmentNumber(rate) : investmentNumber(rate) / 100));
-                const days = investment.cycle_days ?? investment.cycleDays ?? investment.duration_days ?? investment.package?.cycle_days ?? investment.plan?.cycle_days ?? 0;
-                const payout = investment.total_payout ?? investment.totalPayout ?? investment.package?.total_payout ?? investment.plan?.total_payout ?? (investmentNumber(capital) + (investmentNumber(daily) * investmentNumber(days)));
-                name.textContent = planName;
-                status.textContent = 'Active';
-                stats.innerHTML = `
+        // "No plan yet" and "we could not load your plan" are different things.
+        // Only the second one is an error.
+        function renderNoActivePlan() {
+            setInvestmentCard({
+                name: "You don't have an active plan yet.",
+                status: 'No plan',
+                statusColor: 'var(--text-muted)',
+                body: `<div class="investment-empty">
+                    Pick a plan to start earning daily returns.
+                    <div style="margin-top:12px;"><a class="investment-cta" href="/activation.html">View plans</a></div>
+                </div>`
+            });
+        }
+
+        function renderInvestmentError(message) {
+            setInvestmentCard({
+                name: 'Unable to load your plan.',
+                status: 'Unavailable',
+                statusColor: 'var(--danger, #ff4d4d)',
+                body: `<div class="investment-empty">
+                    <span class="investment-error-text">${window.escapeHtml(message)}</span>
+                    <div style="margin-top:12px;"><button type="button" class="investment-cta" id="retryInvestmentBtn">Retry</button></div>
+                </div>`
+            });
+            const retry = document.getElementById('retryInvestmentBtn');
+            if (retry) retry.addEventListener('click', loadActiveInvestmentEarnings);
+        }
+
+        function renderActiveInvestment(investment) {
+            // Always render the investment.* snapshot: legacy plans keep their
+            // original rates even after the package catalogue changes.
+            const planName = investment.package_name || 'Active plan';
+            const capital = investmentNumber(investment.capital);
+            const dailyEarning = investmentNumber(investment.daily_earning);
+            const cycleDays = investmentNumber(investment.cycle_days);
+            const totalPayout = investmentNumber(investment.total_payout);
+            const daysCredited = Math.max(0, investmentNumber(investment.days_credited));
+            const progress = cycleDays > 0 ? Math.min(100, (daysCredited / cycleDays) * 100) : 0;
+            const daysLeft = cycleDays > 0 ? Math.max(0, cycleDays - daysCredited) : 0;
+
+            setInvestmentCard({
+                name: planName,
+                status: 'Active',
+                statusColor: '#2ecc71',
+                body: `
                     <div class="investment-stat"><span>Capital</span><strong>${investmentNaira(capital)}</strong></div>
-                    <div class="investment-stat"><span>Daily ROI</span><strong>${investmentRate(rate)}</strong></div>
-                    <div class="investment-stat"><span>Daily earning</span><strong>${investmentNaira(daily)}</strong></div>
-                    <div class="investment-stat"><span>Cycle</span><strong>${investmentNumber(days).toLocaleString()} days</strong></div>
-                    <div class="investment-stat"><span>Total payout</span><strong>${investmentNaira(payout)}</strong></div>`;
-            } catch (error) {
-                if (window.__AW_DEBUG__) console.error('Active investment error:', error);
-                name.textContent = 'Investment details unavailable.';
-                status.textContent = 'Unavailable';
-                stats.innerHTML = '<div class="investment-empty">We could not load your active investment right now.</div>';
+                    <div class="investment-stat"><span>Daily ROI</span><strong>${investmentRate(investment.daily_rate)}</strong></div>
+                    <div class="investment-stat"><span>Daily earning</span><strong>${investmentNaira(dailyEarning)}</strong></div>
+                    <div class="investment-stat"><span>Cycle</span><strong>${cycleDays.toLocaleString('en-NG')} days</strong></div>
+                    <div class="investment-stat"><span>Total payout</span><strong>${investmentNaira(totalPayout)}</strong></div>`
+            });
+
+            const statsEl = document.getElementById('activeInvestmentStats');
+            const progressBlock = document.createElement('div');
+            progressBlock.className = 'investment-progress';
+            progressBlock.innerHTML = `
+                <div class="investment-progress-labels">
+                    <span>Cycle progress — day ${daysCredited.toLocaleString('en-NG')} of ${cycleDays.toLocaleString('en-NG')}</span>
+                    <strong>${Math.round(progress)}%</strong>
+                </div>
+                <div class="investment-progress-track"><div class="investment-progress-fill" style="width:${progress.toFixed(2)}%;"></div></div>
+                <span class="investment-progress-note">${daysLeft.toLocaleString('en-NG')} day${daysLeft === 1 ? '' : 's'} remaining in this cycle.</span>`;
+            statsEl.insertAdjacentElement('afterend', progressBlock);
+        }
+
+        // GET /api/active-investment -> { success, hasActive, investment, balance }
+        async function loadActiveInvestmentEarnings() {
+            document.querySelectorAll('.investment-progress').forEach((el) => el.remove());
+            const result = await window.apiFetchJson('/active-investment');
+
+            if (!(result.ok && result.data?.success)) {
+                // Genuine request failure — surface the real reason plus a retry.
+                const info = typeof window.describeApiError === 'function'
+                    ? window.describeApiError(result)
+                    : { message: result?.data?.error || 'The request failed.' };
+                renderInvestmentError(info.message);
+                if (window.__AW_DEBUG__) console.error('Active investment request failed:', info);
+                return;
             }
+
+            const { hasActive, investment, balance } = result.data;
+            if (balance !== undefined && balance !== null && Number.isFinite(Number(balance))) {
+                localStorage.setItem('balance', String(Number(balance)));
+                localStorage.setItem('wallet_balance', String(Number(balance)));
+                updateBalanceDisplay();
+            }
+
+            if (hasActive === false || investment === null || !investment) {
+                renderNoActivePlan();
+                return;
+            }
+
+            renderActiveInvestment(investment);
         }
 
         // --- Global sync listener ---
+        function refreshDashboardPanels() {
+            loadBroadcastNotice();
+            loadBroadcasts();
+            loadSponsoredTasks();
+            loadRecentDeposits();
+            loadActiveInvestmentEarnings();
+        }
+
         window.addEventListener('globalSyncComplete', () => {
             updateBalanceDisplay();
-            loadBroadcastNotice();
-            loadRecentDeposits();
-            loadActiveInvestmentEarnings();
+            refreshDashboardPanels();
         });
-        document.addEventListener('DOMContentLoaded', () => {
-            loadBroadcastNotice();
-            loadRecentDeposits();
-            loadActiveInvestmentEarnings();
-        });
+        document.addEventListener('DOMContentLoaded', refreshDashboardPanels);
         updateBalanceDisplay();
     </script>
 </body>

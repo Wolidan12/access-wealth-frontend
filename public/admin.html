@@ -95,6 +95,33 @@
         .cell-sm { font-size: 12px; }
         .cell-note { font-size: 12px; max-width: 150px; word-wrap: break-word; }
 
+        /* Access / error banner — must be impossible to miss. */
+        .access-banner { display: none; border-radius: 15px; padding: 22px 24px; margin-bottom: 28px; border: 1px solid var(--danger); background: rgba(255, 77, 77, 0.12); box-shadow: 0 8px 26px rgba(0,0,0,0.35); }
+        .access-banner.is-visible { display: block; }
+        .access-banner.warn { border-color: #f39c12; background: rgba(243, 156, 18, 0.12); }
+        .access-banner-title { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
+        .access-banner-title i { color: var(--danger); }
+        .access-banner.warn .access-banner-title i { color: #f39c12; }
+        .access-banner-message { color: #ffd9d9; font-size: 14px; line-height: 1.6; }
+        .access-banner.warn .access-banner-message { color: #ffe6bd; }
+        .access-banner-detail { display: block; margin-top: 6px; font-size: 13px; color: var(--text-muted); }
+        .access-banner-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+        .access-banner-actions button, .access-banner-actions a { padding: 11px 20px; border-radius: 9px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+        .banner-btn-primary { background: var(--primary-yellow); color: #0b1421; }
+        .banner-btn-secondary { background: transparent; border: 1px solid rgba(255,255,255,0.25) !important; color: var(--text-main); }
+        .inline-error { color: var(--danger); font-size: 13px; margin-top: 12px; display: none; line-height: 1.6; }
+        .inline-error.is-visible { display: block; }
+        .stat-error h2 { color: var(--text-muted) !important; font-size: 22px; }
+
+        /* Row-action modals for Adjust / Change Plan */
+        .admin-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 2000; align-items: center; justify-content: center; padding: 20px; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+        .admin-modal.is-open { display: flex; }
+        .admin-modal-content { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 16px; padding: 26px; width: 100%; max-width: 430px; max-height: 90vh; overflow-y: auto; }
+        .admin-modal-content h3 { font-size: 18px; margin-bottom: 6px; }
+        .admin-modal-content .modal-sub { color: var(--text-muted); font-size: 13px; margin-bottom: 18px; }
+        .admin-modal-actions { display: flex; gap: 12px; margin-top: 20px; }
+        .admin-modal-actions button { flex: 1; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; }
+
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
@@ -151,7 +178,7 @@
             <a class="nav-item" onclick="switchTab('financials', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-wallet"></i> Manual Credit</a>
 
             <div class="nav-label">Communication</div>
-            <a class="nav-item" onclick="switchTab('broadcast', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-bullhorn"></i> Broadcast</a>
+            <a class="nav-item" onclick="switchTab('broadcast', this); loadBroadcastHistory(); toggleSidebarMobileOnly();"><i class="fa-solid fa-bullhorn"></i> Broadcast</a>
             <a class="nav-item" onclick="switchTab('sponsored', this); toggleSidebarMobileOnly();"><i class="fa-solid fa-ad"></i> Sponsored Posts</a>
             <a class="nav-item" onclick="switchTab('settings', this); loadSiteSettings(); toggleSidebarMobileOnly();"><i class="fa-solid fa-sliders"></i> Site Settings</a>
 
@@ -167,6 +194,12 @@
 
     <div class="main-content">
 
+        <div class="access-banner" id="accessBanner" role="alert" aria-live="assertive">
+            <div class="access-banner-title"><i class="fa-solid fa-triangle-exclamation"></i> <span id="accessBannerTitle">Admin access required</span></div>
+            <div class="access-banner-message" id="accessBannerMessage"></div>
+            <div class="access-banner-actions" id="accessBannerActions"></div>
+        </div>
+
         <div id="dashboard" class="admin-section active">
             <div class="page-header"><div><h1>Platform Overview</h1><p>Welcome back, Administrator.</p></div></div>
             <div class="stats-grid">
@@ -176,6 +209,7 @@
                 <div class="stat-card stat-card-warn"><h3>Pending Deposits</h3><h2 id="statPendingDeposits" class="text-warn">0</h2></div>
                 <div class="stat-card stat-card-danger"><h3>Pending Withdrawals</h3><h2 id="statPendingWithdrawals" class="text-danger">0</h2></div>
             </div>
+            <p class="inline-error" id="statsError" role="alert"></p>
             <div class="card">
                 <div class="card-title"><i class="fa-solid fa-boxes-stacked"></i> Investment Packages</div>
                 <p class="package-helper-text">Reseed all fixed investment packages from server configuration into the database.</p>
@@ -193,10 +227,15 @@
         <div id="users" class="admin-section">
             <div class="page-header"><div><h1>User Management</h1><p>Monitor balances across all wallet categories.</p></div></div>
             <div class="card">
+                <div class="toolbar-wrap">
+                    <input type="search" id="userSearch" class="form-control" style="max-width:280px;" placeholder="Filter by username" aria-label="Filter users by username">
+                    <button type="button" class="action-btn filter-btn filter-all" onclick="loadUsers()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                    <span id="userCount" class="review-meta" style="align-self:center;"></span>
+                </div>
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th scope="col">Username</th><th scope="col">Total Bal</th><th scope="col">Deposit</th><th scope="col">Engage</th><th scope="col">Daily</th><th scope="col">Affiliate</th><th scope="col">Plan Status</th><th scope="col">Actions</th></tr></thead>
-                        <tbody id="userTableBody"><tr><td colspan="8" class="text-center">Loading users</td></tr></tbody>
+                        <thead><tr><th scope="col">Username</th><th scope="col">Main Wallet</th><th scope="col">Engage</th><th scope="col">Daily</th><th scope="col">Affiliate</th><th scope="col">Total</th><th scope="col">Plan</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
+                        <tbody id="userTableBody"><tr><td colspan="9" class="text-center">Loading users…</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -287,9 +326,14 @@
             <div class="card">
                 <form id="broadcastForm">
                     <div class="form-group"><label>Title</label><input type="text" id="broadcastTitle" class="form-control" placeholder="Announcement Title"></div>
-                    <div class="form-group"><label>Message</label><textarea id="broadcastMessage" class="form-control" rows="5" placeholder="Enter your message here..." required></textarea></div>
+                    <div class="form-group"><label>Message <span class="text-danger">*</span></label><textarea id="broadcastMessage" class="form-control" rows="5" placeholder="Enter your message here..." required></textarea></div>
                     <button type="submit" class="btn-submit btn-broadcast">Send Broadcast</button>
+                    <p class="inline-error" id="broadcastError" role="alert"></p>
                 </form>
+            </div>
+            <div class="card">
+                <div class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Broadcasts users can see</div>
+                <div id="broadcastList"><p class="review-meta">Loading broadcasts…</p></div>
             </div>
         </div>
 
@@ -338,6 +382,47 @@
 
     </div>
 
+    <div class="admin-modal" id="adjustModal" role="dialog" aria-modal="true" aria-labelledby="adjustModalTitle">
+        <div class="admin-modal-content">
+            <h3 id="adjustModalTitle">Adjust Balance</h3>
+            <p class="modal-sub">Add or subtract funds for <strong id="adjustModalUser">—</strong>.</p>
+            <div class="form-group">
+                <label for="adjustModalWallet">Wallet</label>
+                <select id="adjustModalWallet" class="form-control">
+                    <option value="balance">Main / Deposit Wallet</option>
+                    <option value="taskEarnings">Engagements Wallet</option>
+                    <option value="daily_earnings">Daily Earnings Wallet</option>
+                    <option value="affiliate_balance">Affiliates Wallet</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="adjustModalAmount">Amount (₦)</label>
+                <input type="number" id="adjustModalAmount" class="form-control" min="0" step="0.01" placeholder="0.00">
+            </div>
+            <div class="admin-modal-actions">
+                <button type="button" class="btn-cancel banner-btn-secondary" onclick="closeAdjustModal()">Cancel</button>
+                <button type="button" class="btn-submit btn-subtract" id="adjustModalSubtract">Subtract</button>
+                <button type="button" class="btn-submit btn-credit" id="adjustModalAdd">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-modal" id="planModal" role="dialog" aria-modal="true" aria-labelledby="planModalTitle">
+        <div class="admin-modal-content">
+            <h3 id="planModalTitle">Change Plan</h3>
+            <p class="modal-sub">Assign a plan to <strong id="planModalUser">—</strong>. Any active plan is replaced.</p>
+            <div class="form-group">
+                <label for="planModalPackage">Plan</label>
+                <select id="planModalPackage" class="form-control"><option value="">Loading plans…</option></select>
+            </div>
+            <p class="inline-error" id="planModalError"></p>
+            <div class="admin-modal-actions">
+                <button type="button" class="btn-cancel banner-btn-secondary" onclick="closePlanModal()">Cancel</button>
+                <button type="button" class="btn-submit" id="planModalConfirm">Assign Plan</button>
+            </div>
+        </div>
+    </div>
+
     <script src="global.js"></script>
     <script>
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); }
@@ -349,12 +434,167 @@
             document.getElementById(tabId).classList.add('active');
             window.scrollTo(0, 0);
         }
-        function logout() { window.clearAuthSession(); sessionStorage.clear(); window.location.assign('/login.html'); }
+        function logout() { window.clearAuthSession(); sessionStorage.clear(); window.location.assign('/login.html?reason=logged-out'); }
 
-        window.onload = () => {
-            const role = localStorage.getItem('role');
-            if (role !== 'admin' || !localStorage.getItem('token')) { window.location.assign('/login.html'); return; }
-            loadDashboardStats();
+        // The Command Center renders its own sign-in banner, so global.js must
+        // not bounce this page to /login.html behind our back.
+        window.__AW_SUPPRESS_LOGIN_REDIRECT__ = true;
+
+        // ==========================================
+        // ACCESS GUARD + SHARED ERROR REPORTING
+        // Every /admin/* endpoint answers 403 {"error":"Admin access required"}
+        // for a non-admin account. Say that plainly instead of pretending the
+        // data failed to load or rendering zeros.
+        // ==========================================
+        let adminAccessBlocked = false;
+
+        function describe(result) {
+            return typeof window.describeApiError === 'function'
+                ? window.describeApiError(result)
+                : { message: result?.data?.error || 'Request failed.', isNetwork: false, isAuth: false, isForbidden: false, isAdminForbidden: false, status: result?.status || 0 };
+        }
+
+        function showAccessBanner({ title, message, detail, variant = 'danger', actions = [] }) {
+            const banner = document.getElementById('accessBanner');
+            document.getElementById('accessBannerTitle').textContent = title;
+            const messageEl = document.getElementById('accessBannerMessage');
+            messageEl.replaceChildren(document.createTextNode(message));
+            if (detail) {
+                const small = document.createElement('span');
+                small.className = 'access-banner-detail';
+                small.textContent = detail;
+                messageEl.appendChild(small);
+            }
+            const actionsEl = document.getElementById('accessBannerActions');
+            actionsEl.replaceChildren();
+            actions.forEach((action) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = action.secondary ? 'banner-btn-secondary' : 'banner-btn-primary';
+                button.textContent = action.label;
+                button.addEventListener('click', action.onClick);
+                actionsEl.appendChild(button);
+            });
+            banner.classList.toggle('warn', variant === 'warn');
+            banner.classList.add('is-visible');
+            window.scrollTo(0, 0);
+        }
+
+        function hideAccessBanner() {
+            document.getElementById('accessBanner').classList.remove('is-visible');
+        }
+
+        function goToAdminLogin(reason) {
+            window.clearAuthSession();
+            sessionStorage.clear();
+            window.location.assign(`/login.html?reason=${encodeURIComponent(reason || 'admin-required')}`);
+        }
+
+        function showNotAdminBanner(detail) {
+            adminAccessBlocked = true;
+            showAccessBanner({
+                title: 'Admin access required',
+                message: 'You are not signed in as an administrator. Please log in with an admin account.',
+                detail: detail ? `Server response: ${detail}` : '',
+                actions: [{ label: 'Log in as admin', onClick: () => goToAdminLogin('admin-required') }]
+            });
+        }
+
+        function showSessionExpiredBanner(detail) {
+            adminAccessBlocked = true;
+            showAccessBanner({
+                title: 'Session expired',
+                message: 'Your admin session has expired. Please log in again to continue.',
+                detail: detail ? `Server response: ${detail}` : '',
+                actions: [{ label: 'Log in again', onClick: () => goToAdminLogin('session-expired') }]
+            });
+        }
+
+        function showNetworkBanner() {
+            showAccessBanner({
+                title: 'Cannot reach the server',
+                message: 'Could not reach the server — check your connection and try again.',
+                variant: 'warn',
+                actions: [
+                    { label: 'Retry', onClick: () => { hideAccessBanner(); bootstrapAdmin(); } },
+                    { label: 'Log in again', secondary: true, onClick: () => goToAdminLogin('session-expired') }
+                ]
+            });
+        }
+
+        /**
+         * Central handler for a failed /admin/* result.
+         * Returns the message the calling section should render inline.
+         */
+        function handleAdminFailure(result) {
+            const info = describe(result);
+            if (info.isNetwork) {
+                showNetworkBanner();
+            } else if (info.isAuth) {
+                showSessionExpiredBanner(info.serverMessage);
+            } else if (info.isForbidden) {
+                // 403 with any admin/access-denied reason means "wrong account".
+                showNotAdminBanner(info.serverMessage);
+            }
+            return info.message;
+        }
+
+        function setInlineError(id, message) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = message || '';
+            el.classList.toggle('is-visible', Boolean(message));
+        }
+
+        function tableError(tbody, colspan, message) {
+            tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center text-error">${window.escapeHtml(message)}</td></tr>`;
+        }
+
+        // Validate admin rights against the server, not just localStorage.role,
+        // because a stale local role would otherwise look like a data failure.
+        async function verifyAdminAccess() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showNotAdminBanner('No sign-in token found in this browser.');
+                return false;
+            }
+            if (localStorage.getItem('role') && localStorage.getItem('role') !== 'admin') {
+                showNotAdminBanner(`This account is signed in as "${localStorage.getItem('role')}".`);
+                return false;
+            }
+
+            const result = await window.apiFetchJson('/admin/stats');
+            if (result.ok && result.data?.success) {
+                adminAccessBlocked = false;
+                hideAccessBanner();
+                localStorage.setItem('role', 'admin');
+                renderDashboardStats(result.data.stats || {});
+                return true;
+            }
+
+            const message = handleAdminFailure(result);
+            setInlineError('statsError', message);
+            renderStatsUnavailable();
+            return !(adminAccessBlocked || describe(result).isNetwork);
+        }
+
+        async function bootstrapAdmin() {
+            const allowed = await verifyAdminAccess();
+            if (!allowed) {
+                // Do not fire the remaining admin calls; they would all fail the
+                // same way and bury the real reason under repeated errors.
+                const message = adminAccessBlocked
+                    ? 'You are not signed in as an administrator. Please log in with an admin account.'
+                    : 'Could not reach the server — check your connection and try again.';
+                tableError(document.getElementById('userTableBody'), 9, message);
+                tableError(document.getElementById('depositTableBody'), 9, message);
+                tableError(document.getElementById('withdrawalTableBody'), 8, message);
+                tableError(document.getElementById('taskSubmissionsTable'), 6, message);
+                document.getElementById('broadcastList').innerHTML = `<p class="text-error">${window.escapeHtml(message)}</p>`;
+                setInlineError('broadcastError', message);
+                return;
+            }
+
             loadLegacyMigrationStatus();
             loadUsers();
             loadPlanOptions();
@@ -362,24 +602,75 @@
             loadDeposits('pending');
             loadAllWithdrawals('pending');
             loadTaskSubmissions();
-        };
+            loadBroadcastHistory();
+        }
+
+        window.addEventListener('accessWealthSessionEnded', () => showSessionExpiredBanner());
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('adjustModalAdd').addEventListener('click', () => submitRowAdjustment('add'));
+            document.getElementById('adjustModalSubtract').addEventListener('click', () => submitRowAdjustment('subtract'));
+            document.getElementById('planModalConfirm').addEventListener('click', submitRowPlanChange);
+            document.getElementById('userSearch').addEventListener('input', renderUsers);
+            document.querySelectorAll('.admin-modal').forEach((modal) => {
+                modal.addEventListener('click', (event) => { if (event.target === modal) modal.classList.remove('is-open'); });
+            });
+            document.addEventListener('keydown', (event) => {
+                if (event.key !== 'Escape') return;
+                document.querySelectorAll('.admin-modal.is-open').forEach((modal) => modal.classList.remove('is-open'));
+            });
+        });
+
+        window.onload = bootstrapAdmin;
 
         // ==========================================
-        // DASHBOARD STATS
+        // DASHBOARD STATS — GET /api/admin/stats -> data.stats
         // ==========================================
+        function statCount(value) {
+            return typeof window.formatCount === 'function' ? window.formatCount(value) : String(Number(value) || 0);
+        }
+
+        function statNaira(value) {
+            return typeof window.formatNairaAmount === 'function'
+                ? window.formatNairaAmount(value, { decimals: 2 })
+                : `₦${(Number(value) || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
+        }
+
+        function renderDashboardStats(stats) {
+            const safeStats = stats && typeof stats === 'object' ? stats : {};
+            document.querySelectorAll('.stat-card').forEach((card) => card.classList.remove('stat-error'));
+            document.getElementById('statTotalUsers').textContent = statCount(safeStats.totalUsers);
+            document.getElementById('statActivePlans').textContent = statCount(safeStats.activePlans);
+            document.getElementById('statRevenue').textContent = statNaira(safeStats.revenue);
+            document.getElementById('statPendingDeposits').textContent = statCount(safeStats.pendingDeposits);
+            document.getElementById('statPendingWithdrawals').textContent = statCount(safeStats.pendingWithdrawals);
+            const depositBadge = document.getElementById('badgeDeposits');
+            if (depositBadge) depositBadge.textContent = statCount(safeStats.pendingDeposits);
+            const withdrawalBadge = document.getElementById('badgeWithdrawals');
+            if (withdrawalBadge) withdrawalBadge.textContent = statCount(safeStats.pendingWithdrawals);
+            setInlineError('statsError', '');
+        }
+
+        // A failed stats call must never look like a platform with zero users.
+        function renderStatsUnavailable() {
+            ['statTotalUsers', 'statActivePlans', 'statRevenue', 'statPendingDeposits', 'statPendingWithdrawals'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.textContent = '—';
+                el.closest('.stat-card')?.classList.add('stat-error');
+            });
+        }
+
         async function loadDashboardStats() {
-            try {
-                const { ok, data } = await window.apiFetchJson('/admin/stats');
-                if (ok && data.success) {
-                    document.getElementById('statTotalUsers').innerText = data.stats.totalUsers || 0;
-                    document.getElementById('statActivePlans').innerText = data.stats.activePlans || 0;
-                    document.getElementById('statRevenue').innerText = `₦${(data.stats.revenue || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                    document.getElementById('statPendingDeposits').innerText = data.stats.pendingDeposits || 0;
-                    document.getElementById('badgeDeposits').innerText = data.stats.pendingDeposits || 0;
-                    document.getElementById('statPendingWithdrawals').innerText = data.stats.pendingWithdrawals || 0;
-                    document.getElementById('badgeWithdrawals').innerText = data.stats.pendingWithdrawals || 0;
-                }
-            } catch (error) { if (window.__AW_DEBUG__) console.error("Stats Error:", error); }
+            const result = await window.apiFetchJson('/admin/stats');
+            if (result.ok && result.data?.success) {
+                renderDashboardStats(result.data.stats || {});
+                hideAccessBanner();
+                adminAccessBlocked = false;
+                return;
+            }
+            renderStatsUnavailable();
+            setInlineError('statsError', handleAdminFailure(result));
         }
 
         async function reseedPackages() {
@@ -391,11 +682,12 @@
             btn.disabled = true;
 
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/packages/reseed', { method: 'POST' });
-                if (ok && data.success) {
-                    showToast('success', data.message || `Reseeded ${data.total || 0} packages successfully.`);
+                const result = await window.apiFetchJson('/admin/packages/reseed', { method: 'POST' });
+                if (result.ok && result.data?.success) {
+                    showToast('success', result.data.message || `Reseeded ${result.data.total || 0} packages successfully.`);
+                    loadPlanOptions();
                 } else {
-                    showToast('error', data.error || 'Failed to reseed packages.');
+                    showToast('error', handleAdminFailure(result));
                 }
             } catch (error) {
                 showToast('error', 'Server error while reseeding packages.');
@@ -410,9 +702,10 @@
             const runBtn = document.getElementById('btnRunLegacyMigration');
 
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/migrations/legacy-plans/status');
-                if (!(ok && data.success)) {
-                    statusEl.innerText = 'Unable to fetch migration status right now.';
+                const result = await window.apiFetchJson('/admin/migrations/legacy-plans/status');
+                const { ok, data } = result;
+                if (!(ok && data?.success)) {
+                    statusEl.innerText = describe(result).message;
                     return;
                 }
 
@@ -461,8 +754,9 @@
             statusEl.innerText = 'Status: running';
 
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/migrations/legacy-plans/run', { method: 'POST' });
-                if (ok && data.success) {
+                const result = await window.apiFetchJson('/admin/migrations/legacy-plans/run', { method: 'POST' });
+                const { ok, data } = result;
+                if (ok && data?.success) {
                     showToast('success', data.message || 'Legacy migration completed.');
                     const totalRefund = Number(data.summary?.total_refunded || 0).toLocaleString();
                     statusEl.innerText = `Status: completed. Refunded ₦${totalRefund} across ${data.summary?.plans_refunded || 0} plans.`;
@@ -471,7 +765,7 @@
                     loadUsers();
                     loadDashboardStats();
                 } else {
-                    showToast('error', data.error || 'Migration failed.');
+                    showToast('error', handleAdminFailure(result));
                     runBtn.disabled = false;
                     runBtn.innerText = oldText;
                     statusEl.innerText = 'Status: failed';
@@ -501,119 +795,245 @@
             return cell;
         }
 
+        let adminUsers = [];
+
+        function userMainBalance(user) {
+            // The API exposes both fields; treat wallet_balance as authoritative
+            // and fall back to balance for older records.
+            const wallet = Number(user?.wallet_balance);
+            if (Number.isFinite(wallet) && user?.wallet_balance !== null && user?.wallet_balance !== undefined && user?.wallet_balance !== '') return wallet;
+            const balance = Number(user?.balance);
+            return Number.isFinite(balance) ? balance : 0;
+        }
+
+        function isPlanActive(user) {
+            return user?.planActivated === true || user?.planActivated === 'true';
+        }
+
+        function userStatus(user) {
+            return String(user?.status || 'active').toLowerCase();
+        }
+
+        function renderUsers() {
+            const tbody = document.getElementById('userTableBody');
+            const filter = (document.getElementById('userSearch')?.value || '').trim().toLowerCase();
+            const rows = filter
+                ? adminUsers.filter((user) => String(user.username || '').toLowerCase().includes(filter))
+                : adminUsers;
+
+            const counter = document.getElementById('userCount');
+            if (counter) counter.textContent = `${statCount(rows.length)} of ${statCount(adminUsers.length)} users`;
+
+            tbody.replaceChildren();
+            if (!rows.length) {
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center">${adminUsers.length ? 'No users match that filter.' : 'No users found.'}</td></tr>`;
+                return;
+            }
+
+            rows.forEach((user) => {
+                const row = document.createElement('tr');
+                const username = String(user.username || 'Unknown user');
+                const main = userMainBalance(user);
+                const engage = Number(user.taskEarnings) || 0;
+                const daily = Number(user.daily_earnings) || 0;
+                const affiliate = Number(user.affiliate_balance) || 0;
+
+                const userCell = document.createElement('strong');
+                userCell.textContent = username;
+                appendAdminCell(row, userCell);
+                appendAdminCell(row, adminAmount(main), 'font-bold');
+                appendAdminCell(row, adminAmount(engage));
+                appendAdminCell(row, adminAmount(daily));
+                appendAdminCell(row, adminAmount(affiliate));
+                appendAdminCell(row, adminAmount(main + engage + daily + affiliate), 'font-bold');
+
+                // Plan column: activePackage || 'No Plan', badge active when planActivated.
+                const planCell = document.createElement('td');
+                const planBadge = document.createElement('span');
+                const active = isPlanActive(user);
+                planBadge.className = `badge ${active ? 'success' : 'warning'}`;
+                planBadge.textContent = user.activePackage || 'No Plan';
+                planCell.appendChild(planBadge);
+                row.appendChild(planCell);
+
+                const status = userStatus(user);
+                const banned = status === 'banned';
+                const statusCell = document.createElement('td');
+                const statusBadge = document.createElement('span');
+                statusBadge.className = `badge ${banned ? 'danger' : 'success'}`;
+                statusBadge.textContent = banned ? 'Banned' : (status.charAt(0).toUpperCase() + status.slice(1));
+                statusCell.appendChild(statusBadge);
+                row.appendChild(statusCell);
+
+                const actionCell = document.createElement('td');
+                const adjustButton = document.createElement('button');
+                adjustButton.type = 'button';
+                adjustButton.className = 'action-btn';
+                adjustButton.textContent = 'Adjust';
+                adjustButton.addEventListener('click', () => openAdjustModal(username));
+                actionCell.appendChild(adjustButton);
+
+                const planButton = document.createElement('button');
+                planButton.type = 'button';
+                planButton.className = 'action-btn';
+                planButton.textContent = 'Change Plan';
+                planButton.addEventListener('click', () => openPlanModal(username));
+                actionCell.appendChild(planButton);
+
+                const statusButton = document.createElement('button');
+                statusButton.type = 'button';
+                statusButton.className = 'action-btn';
+                statusButton.style.color = banned ? 'var(--success)' : 'var(--danger)';
+                statusButton.style.borderColor = banned ? 'var(--success)' : 'var(--danger)';
+                statusButton.textContent = banned ? 'Activate' : 'Ban';
+                statusButton.addEventListener('click', () => toggleUserStatus(username, banned ? 'active' : 'banned'));
+                actionCell.appendChild(statusButton);
+                row.appendChild(actionCell);
+
+                tbody.appendChild(row);
+            });
+        }
+
         async function loadUsers() {
             const tbody = document.getElementById('userTableBody');
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center">Loading users</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center">Loading users…</td></tr>';
+            const result = await window.apiFetchJson('/admin/users');
+            if (!(result.ok && result.data?.success && Array.isArray(result.data.users))) {
+                adminUsers = [];
+                // Never a generic "Unable to load users" — say what the server said.
+                tableError(tbody, 9, handleAdminFailure(result));
+                const counter = document.getElementById('userCount');
+                if (counter) counter.textContent = '';
+                return;
+            }
+            adminAccessBlocked = false;
+            adminUsers = result.data.users;
+            renderUsers();
+        }
+
+        // ==========================================
+        // ROW ACTIONS — Adjust / Change Plan / Ban
+        // ==========================================
+        let adjustModalUsername = '';
+        let planModalUsername = '';
+
+        function openAdjustModal(username) {
+            adjustModalUsername = username;
+            document.getElementById('adjustModalUser').textContent = username;
+            document.getElementById('adjustModalAmount').value = '';
+            document.getElementById('adjustModal').classList.add('is-open');
+            document.getElementById('adjustModalAmount').focus();
+        }
+
+        function closeAdjustModal() {
+            document.getElementById('adjustModal').classList.remove('is-open');
+            adjustModalUsername = '';
+        }
+
+        async function submitRowAdjustment(action) {
+            const amount = Number(document.getElementById('adjustModalAmount').value);
+            if (!Number.isFinite(amount) || amount <= 0) {
+                window.showToast('error', 'Enter an amount greater than zero.');
+                return;
+            }
+            const walletType = document.getElementById('adjustModalWallet').value;
+            const buttons = [document.getElementById('adjustModalAdd'), document.getElementById('adjustModalSubtract')];
+            buttons.forEach((button) => { button.disabled = true; });
             try {
-                const { ok, data, networkError } = await window.apiFetchJson('/admin/users');
-                if (!(ok && data.success && Array.isArray(data.users))) {
-                    const message = networkError ? 'Unable to reach the user service.' : data?.error || 'Unable to load users.';
-                    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-error">${window.escapeHtml(message)}</td></tr>`;
-                    return;
+                const result = await window.apiFetchJson('/admin/adjust-balance', {
+                    method: 'POST',
+                    body: JSON.stringify({ username: adjustModalUsername, amount, walletType, action })
+                });
+                if (result.ok && result.data?.success) {
+                    window.showToast('success', result.data.message || 'Balance updated.');
+                    closeAdjustModal();
+                    await Promise.all([loadUsers(), loadDashboardStats()]);
+                } else {
+                    window.showToast('error', handleAdminFailure(result));
                 }
-                tbody.replaceChildren();
-                data.users.forEach((user) => {
-                    const row = document.createElement('tr');
-                    const username = String(user.username || 'Unknown user');
-                    const total = ['balance', 'taskEarnings', 'daily_earnings', 'affiliate_balance']
-                        .reduce((sum, key) => sum + (Number(user[key]) || 0), 0);
-                    const userCell = document.createElement('strong');
-                    userCell.textContent = username;
-                    appendAdminCell(row, userCell);
-                    appendAdminCell(row, adminAmount(total), 'font-bold');
-                    appendAdminCell(row, adminAmount(user.balance));
-                    appendAdminCell(row, adminAmount(user.taskEarnings));
-                    appendAdminCell(row, adminAmount(user.daily_earnings));
-                    appendAdminCell(row, adminAmount(user.affiliate_balance));
-
-                    const planCell = document.createElement('td');
-                    const planBadge = document.createElement('span');
-                    const active = user.planActivated === true || user.planActivated === 'true';
-                    planBadge.className = `badge ${active ? 'success' : 'warning'}`;
-                    planBadge.textContent = active ? (user.activePackage || 'Premium') : 'No Plan';
-                    planCell.appendChild(planBadge);
-                    row.appendChild(planCell);
-
-                    const actionCell = document.createElement('td');
-                    const adjustButton = document.createElement('button');
-                    adjustButton.type = 'button';
-                    adjustButton.className = 'action-btn';
-                    adjustButton.textContent = 'Adjust';
-                    adjustButton.addEventListener('click', () => quickAdjust(username));
-                    actionCell.appendChild(adjustButton);
-                    const planButton = document.createElement('button');
-                    planButton.type = 'button';
-                    planButton.className = 'action-btn';
-                    planButton.textContent = 'Change Plan';
-                    planButton.addEventListener('click', () => quickAssignPlan(username));
-                    actionCell.appendChild(planButton);
-                    const statusButton = document.createElement('button');
-                    const banned = String(user.status || 'active').toLowerCase() === 'banned';
-                    statusButton.type = 'button';
-                    statusButton.className = 'action-btn';
-                    statusButton.style.color = banned ? 'var(--success)' : 'var(--danger)';
-                    statusButton.style.borderColor = banned ? 'var(--success)' : 'var(--danger)';
-                    statusButton.textContent = banned ? 'Activate' : 'Ban';
-                    statusButton.addEventListener('click', () => toggleUserStatus(username, banned ? 'active' : 'banned'));
-                    actionCell.appendChild(statusButton);
-                    row.appendChild(actionCell);
-                    tbody.appendChild(row);
-                });
-            } catch (error) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-error">Unable to load users.</td></tr>';
+            } finally {
+                buttons.forEach((button) => { button.disabled = false; });
             }
         }
 
-        function quickAdjust(username) {
-            const input = document.getElementById('adjustUsername');
-            input.value = username;
-            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            input.focus();
+        function openPlanModal(username) {
+            planModalUsername = username;
+            document.getElementById('planModalUser').textContent = username;
+            setInlineError('planModalError', '');
+            document.getElementById('planModal').classList.add('is-open');
+            const select = document.getElementById('planModalPackage');
+            if (!select.options.length || !select.options[0].value) loadPlanOptions();
         }
 
-        function quickAssignPlan(username) {
-            const input = document.getElementById('planUsername');
-            input.value = username;
-            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            input.focus();
+        function closePlanModal() {
+            document.getElementById('planModal').classList.remove('is-open');
+            planModalUsername = '';
         }
 
-        async function loadPlanOptions() {
-            const select = document.getElementById('planPackage');
+        async function submitRowPlanChange() {
+            const packageId = document.getElementById('planModalPackage').value;
+            if (!packageId) {
+                setInlineError('planModalError', 'Select a plan first.');
+                return;
+            }
+            const button = document.getElementById('planModalConfirm');
+            button.disabled = true;
+            button.textContent = 'Assigning…';
             try {
-                const { ok, data } = await window.apiFetchJson('/packages');
-                if (!(ok && data.success && Array.isArray(data.packages))) throw new Error(data?.error || 'Unable to load plans.');
-                select.replaceChildren(new Option('Select a plan', ''));
-                data.packages.forEach((pkg) => {
-                    select.appendChild(new Option(`${pkg.name || 'Package'} — ${adminAmount(pkg.capital)}`, pkg.id || ''));
+                const result = await window.apiFetchJson('/admin/change-user-plan', {
+                    method: 'POST',
+                    body: JSON.stringify({ username: planModalUsername, packageId })
                 });
-            } catch (_) {
-                select.replaceChildren(new Option('Unable to load plans', ''));
+                if (result.ok && result.data?.success) {
+                    window.showToast('success', result.data.message || 'Plan assigned.');
+                    closePlanModal();
+                    await Promise.all([loadUsers(), loadDashboardStats()]);
+                } else {
+                    setInlineError('planModalError', handleAdminFailure(result));
+                }
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Assign Plan';
             }
+        }
+
+        // Plan selects (form + row modal) are driven only by GET /api/packages.
+        async function loadPlanOptions() {
+            const selects = ['planPackage', 'planModalPackage'].map((id) => document.getElementById(id)).filter(Boolean);
+            const result = await window.apiFetchJson('/packages');
+            if (!(result.ok && result.data?.success && Array.isArray(result.data.packages))) {
+                const message = describe(result).message;
+                selects.forEach((select) => select.replaceChildren(new Option(message, '')));
+                setInlineError('planModalError', message);
+                return;
+            }
+            selects.forEach((select) => {
+                select.replaceChildren(new Option('Select a plan', ''));
+                result.data.packages.forEach((pkg) => {
+                    select.appendChild(new Option(`${pkg.name || 'Package'} — ${adminAmount(pkg.capital)}`, pkg.id ?? ''));
+                });
+            });
         }
 
         async function toggleUserStatus(username, status) {
-            try {
-                const { ok, data } = await window.apiFetchJson('/admin/toggle-user-status', {
-                    method: 'POST',
-                    body: JSON.stringify({ username, status })
-                });
-                if (ok && data.success) {
-                    showToast('success', data.message || 'User status updated');
-                    loadUsers();
-                    loadDashboardStats();
-                } else {
-                    window.showToast('error', data?.error || 'Failed to update user status');
-                }
-            } catch (error) {
-                window.showToast('error', 'Unable to update user status.');
+            const verb = status === 'banned' ? 'Ban' : 'Activate';
+            if (!confirm(`${verb} ${username}?`)) return;
+            const result = await window.apiFetchJson('/admin/toggle-user-status', {
+                method: 'POST',
+                body: JSON.stringify({ username, status })
+            });
+            if (result.ok && result.data?.success) {
+                window.showToast('success', result.data.message || `User ${status === 'banned' ? 'banned' : 'activated'}.`);
+                await Promise.all([loadUsers(), loadDashboardStats()]);
+                return;
             }
+            window.showToast('error', handleAdminFailure(result));
         }
 
         async function loadSiteSettings() {
             try {
                 const { ok, data } = await window.apiFetchJson('/site-settings');
-                if (ok && data.success) {
+                if (ok && data?.success) {
                     const settings = data.settings || {};
                     Object.entries(settings).forEach(([key, value]) => {
                         const el = document.getElementById(key);
@@ -635,11 +1055,11 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
             btn.disabled = true;
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/settings', { method: 'POST', body: JSON.stringify(payload) });
-                if (ok && data.success) {
-                    showToast('success', 'Site settings updated');
+                const result = await window.apiFetchJson('/admin/settings', { method: 'POST', body: JSON.stringify(payload) });
+                if (result.ok && result.data?.success) {
+                    showToast('success', result.data.message || 'Site settings updated');
                 } else {
-                    window.showToast('error', data?.error || 'Failed to save settings');
+                    window.showToast('error', handleAdminFailure(result));
                 }
             } catch (error) {
                 window.showToast('error', 'Unable to save settings.');
@@ -662,10 +1082,10 @@
             const tbody = document.getElementById('depositTableBody');
             tbody.innerHTML = '<tr><td colspan="9" class="text-center">Loading deposits</td></tr>';
             try {
-                const { ok, data, networkError } = await window.apiFetchJson(`/admin/deposits?status=${encodeURIComponent(status)}&t=${Date.now()}`);
-                if (!(ok && data.success && Array.isArray(data.deposits))) {
-                    const message = networkError ? 'Unable to reach the deposit service.' : data?.error || 'Failed to load deposits.';
-                    tbody.innerHTML = `<tr><td colspan="9" class="text-center text-error">${window.escapeHtml(message)}</td></tr>`;
+                const result = await window.apiFetchJson(`/admin/deposits?status=${encodeURIComponent(status)}&t=${Date.now()}`);
+                const { ok, data } = result;
+                if (!(ok && data?.success && Array.isArray(data.deposits))) {
+                    tableError(tbody, 9, handleAdminFailure(result));
                     return;
                 }
                 tbody.replaceChildren();
@@ -775,9 +1195,9 @@
         async function approveDeposit(id) {
             if(!confirm("Approve this deposit and credit the user's wallet?")) return;
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/approve-deposit', { method: 'POST', body: JSON.stringify({ depositId: id }) });
-                if(ok && data.success) { window.showToast('success', data.message || 'Deposit approved.'); loadDeposits(); loadDashboardStats(); loadUsers(); }
-                else window.showToast('error', data?.error || 'Unable to approve deposit.');
+                const result = await window.apiFetchJson('/admin/approve-deposit', { method: 'POST', body: JSON.stringify({ depositId: id }) });
+                if(result.ok && result.data?.success) { window.showToast('success', result.data.message || 'Deposit approved.'); loadDeposits(); loadDashboardStats(); loadUsers(); }
+                else window.showToast('error', handleAdminFailure(result));
             } catch(e) { window.showToast('error', 'Unable to approve deposit.'); }
         }
 
@@ -785,9 +1205,9 @@
             const note = prompt("Enter a reason for declining this deposit (optional):", "Your deposit was declined. Please contact support.");
             if (note === null) return;
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/decline-deposit', { method: 'POST', body: JSON.stringify({ depositId: id, note: note || 'Your deposit was declined. Please contact support.' }) });
-                if(ok && data.success) { window.showToast('success', 'Deposit declined.'); loadDeposits(); loadDashboardStats(); loadUsers(); }
-                else window.showToast('error', data?.error || 'Unable to decline deposit.');
+                const result = await window.apiFetchJson('/admin/decline-deposit', { method: 'POST', body: JSON.stringify({ depositId: id, note: note || 'Your deposit was declined. Please contact support.' }) });
+                if(result.ok && result.data?.success) { window.showToast('success', result.data.message || 'Deposit declined.'); loadDeposits(); loadDashboardStats(); loadUsers(); }
+                else window.showToast('error', handleAdminFailure(result));
             } catch(e) { window.showToast('error', 'Unable to decline deposit.'); }
         }
 
@@ -802,10 +1222,10 @@
             tbody.innerHTML = '<tr><td colspan="8" class="text-center">Loading withdrawals...</td></tr>';
             try {
                 const url = status === 'all' ? '/admin/all-withdrawals' : `/admin/withdrawals?status=${encodeURIComponent(status)}`;
-                const { ok, data, networkError } = await window.apiFetchJson(url);
-                if (!(ok && data.success && Array.isArray(data.withdrawals))) {
-                    const message = networkError ? 'Unable to reach the withdrawal service.' : data?.error || 'Unable to load withdrawals.';
-                    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-error">${window.escapeHtml(message)}</td></tr>`;
+                const result = await window.apiFetchJson(url);
+                const { ok, data } = result;
+                if (!(ok && data?.success && Array.isArray(data.withdrawals))) {
+                    tableError(tbody, 8, handleAdminFailure(result));
                     return;
                 }
                 tbody.replaceChildren();
@@ -875,32 +1295,32 @@
         async function approveWithdrawalWithNote(id, note) {
             if(!confirm("Approve this withdrawal?")) return;
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/approve-withdrawal', {
+                const result = await window.apiFetchJson('/admin/approve-withdrawal', {
                     method: 'POST',
                     body: JSON.stringify({ id, note })
                 });
-                if(ok && data.success) {
-                    showToast('success', 'Withdrawal Approved!');
+                if(result.ok && result.data?.success) {
+                    showToast('success', result.data.message || 'Withdrawal approved.');
                     loadAllWithdrawals(currentWithdrawalsFilter);
                     loadDashboardStats();
                     loadUsers();
-                } else window.showToast('error', data?.error || 'Unable to approve withdrawal.');
+                } else window.showToast('error', handleAdminFailure(result));
             } catch(e) { window.showToast('error', 'Unable to approve withdrawal.'); }
         }
 
         async function declineWithdrawalWithNote(id, note) {
             if(!confirm("Decline this withdrawal? User will be refunded.")) return;
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/decline-withdrawal', {
+                const result = await window.apiFetchJson('/admin/decline-withdrawal', {
                     method: 'POST',
                     body: JSON.stringify({ id, note })
                 });
-                if(ok && data.success) {
-                    showToast('warning', 'Withdrawal Declined. User refunded.');
+                if(result.ok && result.data?.success) {
+                    showToast('warning', result.data.message || 'Withdrawal declined. User refunded.');
                     loadAllWithdrawals(currentWithdrawalsFilter);
                     loadDashboardStats();
                     loadUsers();
-                } else window.showToast('error', data?.error || 'Unable to decline withdrawal.');
+                } else window.showToast('error', handleAdminFailure(result));
             } catch(e) { window.showToast('error', 'Unable to decline withdrawal.'); }
         }
 
@@ -920,9 +1340,9 @@
             const walletType = document.getElementById('creditWallet').value;
             const payload = { username, amount: parseFloat(amount), walletType };
             try {
-                const { ok, data, status } = await window.apiFetchJson('/admin/manual-credit', { method: 'POST', body: JSON.stringify(payload) });
-                if (ok && data.success) {
-                    showToast('success', data.message || "Credit successful!");
+                const result = await window.apiFetchJson('/admin/manual-credit', { method: 'POST', body: JSON.stringify(payload) });
+                if (result.ok && result.data?.success) {
+                    showToast('success', result.data.message || "Credit successful!");
                     document.getElementById('manualCreditForm').reset();
                     // Add slight delay to ensure database write is committed, then refresh
                     setTimeout(() => {
@@ -930,8 +1350,7 @@
                         loadDashboardStats();
                     }, 500);
                 } else {
-                    if (window.__AW_DEBUG__) console.error('Manual credit error:', data?.error);
-                    window.showToast('error', data?.error || 'Failed to process credit.');
+                    window.showToast('error', handleAdminFailure(result));
                 }
             } catch (err) {
                 if (window.__AW_DEBUG__) console.error('Manual credit request failed:', err);
@@ -954,19 +1373,19 @@
             const walletType = document.getElementById('adjustWallet').value;
 
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/adjust-balance', {
+                const result = await window.apiFetchJson('/admin/adjust-balance', {
                     method: 'POST',
                     body: JSON.stringify({ username, amount, walletType, action })
                 });
-                if (ok && data.success) {
-                    showToast('success', data.message);
+                if (result.ok && result.data?.success) {
+                    showToast('success', result.data.message || 'Balance updated.');
                     document.getElementById('adjustBalanceForm').reset();
                     // Add slight delay to ensure database write is committed, then refresh
                     setTimeout(() => {
                         loadUsers();
                         loadDashboardStats();
                     }, 500);
-                } else window.showToast('error', data?.error || 'Unable to adjust the balance.');
+                } else window.showToast('error', handleAdminFailure(result));
             } catch (err) { window.showToast('error', 'Unable to adjust the balance.'); }
             finally { btn.innerText = action === 'add' ? 'Add Funds' : 'Subtract Funds'; btn.disabled = false; }
         }
@@ -986,16 +1405,16 @@
             btn.disabled = true;
             btn.innerText = 'Assigning...';
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/change-user-plan', {
+                const result = await window.apiFetchJson('/admin/change-user-plan', {
                     method: 'POST', body: JSON.stringify({ username, packageId })
                 });
-                if (!(ok && data.success)) throw new Error(data.error || 'Unable to assign the plan.');
-                showToast('success', data.message);
+                if (!(result.ok && result.data?.success)) throw new Error(handleAdminFailure(result));
+                showToast('success', result.data.message || 'Plan assigned.');
                 document.getElementById('changePlanForm').reset();
                 loadUsers();
                 loadDashboardStats();
             } catch (error) {
-                alert(error.message || 'Unable to assign the plan.');
+                window.showToast('error', error.message || 'Unable to assign the plan.');
             } finally {
                 btn.disabled = false;
                 btn.innerText = 'Assign Plan';
@@ -1014,11 +1433,11 @@
             btn.disabled = true;
             btn.innerText = 'Clearing...';
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/clear-total-balance', {
+                const result = await window.apiFetchJson('/admin/clear-total-balance', {
                     method: 'POST', body: JSON.stringify({ username, confirmation })
                 });
-                if (!(ok && data.success)) throw new Error(data.error || 'Unable to clear balance.');
-                showToast('success', data.message);
+                if (!(result.ok && result.data?.success)) throw new Error(handleAdminFailure(result));
+                showToast('success', result.data.message || 'Balances cleared.');
                 document.getElementById('clearBalanceForm').reset();
                 loadUsers();
                 loadDashboardStats();
@@ -1037,7 +1456,10 @@
             event.preventDefault();
             const title = document.getElementById('broadcastTitle').value.trim();
             const message = document.getElementById('broadcastMessage').value.trim();
+            setInlineError('broadcastError', '');
+            // message is the only required field.
             if (!message) {
+                setInlineError('broadcastError', 'Enter a broadcast message first.');
                 window.showToast('error', 'Enter a broadcast message first.');
                 return;
             }
@@ -1045,20 +1467,53 @@
             button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
             button.disabled = true;
             try {
-                const { ok, data, networkError } = await window.apiFetchJson('/admin/broadcast', {
+                const result = await window.apiFetchJson('/admin/broadcast', {
                     method: 'POST',
                     body: JSON.stringify({ title, message })
                 });
-                if (!(ok && data.success)) throw new Error(networkError ? 'Unable to reach the broadcast service.' : data?.error || 'Unable to send broadcast.');
-                window.showToast('success', data.message || 'Broadcast sent!');
-                event.target.reset();
-            } catch (error) {
-                window.showToast('error', error.message || 'Unable to send broadcast.');
+                if (result.ok && result.data?.success) {
+                    // Show the server's own confirmation ("Broadcast sent to all users").
+                    window.showToast('success', result.data.message || 'Broadcast sent to all users');
+                    event.target.reset();
+                    loadBroadcastHistory();
+                    return;
+                }
+                const failure = handleAdminFailure(result);
+                setInlineError('broadcastError', failure);
+                window.showToast('error', failure);
             } finally {
                 button.textContent = 'Send Broadcast';
                 button.disabled = false;
             }
         });
+
+        // Mirror of what users see on their dashboard: GET /api/broadcasts,
+        // falling back to /api/broadcasts/all on older deployments.
+        async function loadBroadcastHistory() {
+            const container = document.getElementById('broadcastList');
+            if (!container) return;
+            container.innerHTML = '<p class="review-meta">Loading broadcasts…</p>';
+            let result = await window.apiFetchJson('/broadcasts');
+            if (!result.ok && result.status === 404) result = await window.apiFetchJson('/broadcasts/all');
+            if (!(result.ok && result.data?.success && Array.isArray(result.data.broadcasts))) {
+                container.innerHTML = `<p class="text-error">${window.escapeHtml(describe(result).message)}</p>`;
+                return;
+            }
+            if (!result.data.broadcasts.length) {
+                container.innerHTML = '<p class="review-meta">No broadcasts have been sent yet.</p>';
+                return;
+            }
+            container.innerHTML = result.data.broadcasts.map((broadcast) => {
+                const title = window.escapeHtml(broadcast.title || 'Announcement');
+                const message = window.escapeHtml(broadcast.message || '');
+                const when = window.escapeHtml(adminDate(broadcast.created_at, true));
+                return `<div style="padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <strong style="color:var(--primary-yellow);">${title}</strong>
+                    <div style="font-size:13px;margin-top:6px;line-height:1.6;">${message}</div>
+                    <span class="review-meta">${when}</span>
+                </div>`;
+            }).join('');
+        }
 
         // ==========================================
         // SPONSORED POSTS
@@ -1082,12 +1537,12 @@
             button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
             button.disabled = true;
             try {
-                const { ok, data, networkError } = await window.apiFetchJson('/admin/sponsored-post', {
+                const result = await window.apiFetchJson('/admin/sponsored-post', {
                     method: 'POST',
                     body: JSON.stringify(postData)
                 });
-                if (!(ok && data.success)) throw new Error(networkError ? 'Unable to reach the sponsored-post service.' : data?.error || 'Unable to create sponsored post.');
-                window.showToast('success', data.message || 'Sponsored post created!');
+                if (!(result.ok && result.data?.success)) throw new Error(handleAdminFailure(result));
+                window.showToast('success', result.data.message || 'Sponsored post created!');
                 event.target.reset();
                 document.getElementById('postRequiredPlan').value = 'all';
             } catch (error) {
@@ -1105,10 +1560,10 @@
             const tbody = document.getElementById('taskSubmissionsTable');
             tbody.innerHTML = '<tr><td colspan="6" class="text-center">Loading submissions...</td></tr>';
             try {
-                const { ok, data, networkError } = await window.apiFetchJson('/admin/sponsored-submissions');
-                if (!(ok && data.success && Array.isArray(data.submissions))) {
-                    const message = networkError ? 'Unable to reach the submission service.' : data?.error || 'Unable to load submissions.';
-                    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-error">${window.escapeHtml(message)}</td></tr>`;
+                const result = await window.apiFetchJson('/admin/sponsored-submissions');
+                const { ok, data } = result;
+                if (!(ok && data?.success && Array.isArray(data.submissions))) {
+                    tableError(tbody, 6, handleAdminFailure(result));
                     return;
                 }
                 tbody.replaceChildren();
@@ -1146,16 +1601,16 @@
         async function approveSubmission(id) {
             if(!confirm("Approve this submission and credit the user?")) return;
             try {
-                const { ok, data } = await window.apiFetchJson('/admin/approve-sponsored-submission', {
+                const result = await window.apiFetchJson('/admin/approve-sponsored-submission', {
                     method: 'POST',
                     body: JSON.stringify({ submission_id: id })
                 });
-                if(ok && data.success) {
-                    showToast('success', 'Submission approved and user credited!');
+                if(result.ok && result.data?.success) {
+                    showToast('success', result.data.message || 'Submission approved and user credited!');
                     loadTaskSubmissions();
                     loadDashboardStats();
                     loadUsers();
-                } else window.showToast('error', data?.error || 'Unable to approve submission.');
+                } else window.showToast('error', handleAdminFailure(result));
             } catch(e) { window.showToast('error', 'Unable to approve submission.'); }
         }
     </script>
