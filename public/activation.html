@@ -64,7 +64,15 @@
         .calculator-result { border-radius:10px; padding:13px; background:rgba(212,175,55,.08); }
         .calculator-result span { display:block; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; font-size:10px; }
         .calculator-result strong { display:block; color:var(--primary-yellow); margin-top:4px; font-size:16px; }
-        .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .plans-grid { display: flex; flex-direction: column; gap: 40px; }
+        .tier-group { }
+        .tier-heading { font-size: 15px; text-transform: uppercase; letter-spacing: .12em; color: var(--primary-yellow); margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+        .tier-heading span { font-size: 11px; letter-spacing: .05em; color: var(--text-muted); text-transform: none; }
+        .tier-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 24px; }
+        .plan-afford-warning { color: #ff9b9b; font-size: 12px; margin-bottom: 14px; background: rgba(255,77,77,.1); border-radius: 8px; padding: 9px 11px; line-height: 1.5; }
+        .active-investment-status.is-error { border-color: rgba(255,77,77,.45); background: rgba(255,77,77,.1); color: #ffb3b3; }
+        .btn-activate[disabled] { opacity: .5; cursor: not-allowed; }
+        .btn-activate[disabled]:hover { transform: none; box-shadow: none; }
 
         .plan-card { background: var(--bg-cards); border: 1px solid var(--border-light); border-radius: 20px; padding: 30px; transition: 0.3s; position: relative; overflow: hidden; display: flex; flex-direction: column; }
         .plan-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(212, 175, 55, 0.15); border-color: var(--primary-yellow); }
@@ -110,7 +118,8 @@
             .sidebar.active { left: 0; }
             .mobile-header { display: flex; }
             .main-content { margin-left: 0; width: 100%; padding: 100px 20px 40px 20px; }
-            .plans-grid, .calculator-controls, .calculator-results { grid-template-columns: 1fr; }
+            .tier-cards, .calculator-controls, .calculator-results { grid-template-columns: 1fr; }
+            .plan-card { padding: 24px; }
         }
     </style>
     <link rel="stylesheet" href="/brand.css">
@@ -178,7 +187,7 @@
             </div>
 
             <div class="warning-text" id="modalWarning">
-                <i class="fa-solid fa-circle-exclamation"></i> Insufficient funds in Deposit Wallet. Please fund your Account to proceed.
+                <i class="fa-solid fa-circle-exclamation"></i> <span id="modalWarningText">Insufficient balance. Please fund your account to proceed.</span>
             </div>
             <a href="/deposit.html" class="btn-fund hidden" id="btnFund">Fund Account Now</a>
 
@@ -209,42 +218,101 @@
         }
 
         function formatCurrency(amount) {
-            return window.formatNaira ? window.formatNaira(amount) : `₦${asNumber(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            return typeof window.formatNairaAmount === 'function'
+                ? window.formatNairaAmount(amount, { decimals: 2 })
+                : `₦${asNumber(amount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         }
 
+        // daily_rate arrives as a fraction (0.05); show whole percentages.
         function formatPercentage(rate) {
-            const value = asNumber(rate);
-            const percentage = Math.abs(value) <= 1 ? value * 100 : value;
-            return `${percentage.toLocaleString('en-NG', { maximumFractionDigits: 2 })}%`;
+            return typeof window.formatPercent === 'function'
+                ? window.formatPercent(rate)
+                : `${(asNumber(rate) * 100).toLocaleString('en-NG', { maximumFractionDigits: 2 })}%`;
         }
 
-        // Package endpoints have existed under both the old "plans" names and
-        // the current "packages" names. Normalize their payloads here so a
-        // harmless response wrapper or legacy field name never leaves the
-        // package screen blank.
-        function packageId(pkg) { return pkg?.id ?? pkg?.package_id ?? pkg?.packageId ?? pkg?.plan_id ?? pkg?.planId ?? ''; }
-        function packageName(pkg) { return pkg?.name || pkg?.package_name || pkg?.package?.name || pkg?.plan_name || pkg?.plan?.name || pkg?.tier || 'Investment Package'; }
-        function packageCapital(pkg) { return asNumber(pkg?.capital ?? pkg?.amount ?? pkg?.price ?? pkg?.investment_amount ?? pkg?.minimum_amount); }
-        function packageRate(pkg) { return pkg?.daily_rate ?? pkg?.dailyRate ?? pkg?.roi ?? pkg?.daily_roi ?? 0; }
-        function packageDailyEarning(pkg) { return pkg?.daily_earning ?? pkg?.dailyEarning ?? (packageCapital(pkg) * (Math.abs(asNumber(packageRate(pkg))) <= 1 ? asNumber(packageRate(pkg)) : asNumber(packageRate(pkg)) / 100)); }
-        function packageCycleDays(pkg) { return pkg?.cycle_days ?? pkg?.cycleDays ?? pkg?.duration_days ?? pkg?.duration ?? 0; }
-        function packageTotalPayout(pkg) { return pkg?.total_payout ?? pkg?.totalPayout ?? (packageCapital(pkg) + packageDailyEarning(pkg) * asNumber(packageCycleDays(pkg))); }
-        function packageReferralBonus(pkg) { return pkg?.referral_bonus ?? pkg?.referralBonus ?? pkg?.referral_commission ?? 0; }
-        function currentInvestmentCapital() { return asNumber(activeInvestment?.capital ?? activeInvestment?.amount ?? activeInvestment?.invested_amount ?? activeInvestment?.package?.capital ?? activeInvestment?.plan?.capital); }
+        // GET /api/packages returns: id, name, tier, capital, daily_rate,
+        // cycle_days, daily_earning, total_payout, referral_bonus.
+        // Every figure on this page comes from that payload — nothing hardcoded.
+        function packageId(pkg) { return pkg?.id ?? ''; }
+        function packageName(pkg) { return pkg?.name || 'Investment Package'; }
+        function packageTier(pkg) { return String(pkg?.tier || 'Other').trim() || 'Other'; }
+        function packageCapital(pkg) { return asNumber(pkg?.capital); }
+        function packageRate(pkg) { return asNumber(pkg?.daily_rate); }
+        function packageDailyEarning(pkg) { return asNumber(pkg?.daily_earning); }
+        function packageCycleDays(pkg) { return asNumber(pkg?.cycle_days); }
+        function packageTotalPayout(pkg) { return asNumber(pkg?.total_payout); }
+        function packageReferralBonus(pkg) { return asNumber(pkg?.referral_bonus); }
+
+        // The active investment snapshot keeps its own rates for legacy plans.
+        function currentInvestmentCapital() { return asNumber(activeInvestment?.capital); }
         function hasActiveInvestment() { return Boolean(activeInvestment); }
         function isCurrentPackage(pkg) {
-            const activeId = activeInvestment?.package_id ?? activeInvestment?.packageId ?? activeInvestment?.plan_id ?? activeInvestment?.planId ?? activeInvestment?.package?.id ?? activeInvestment?.plan?.id;
+            const activeId = activeInvestment?.package_id;
             if (activeId !== undefined && activeId !== null && activeId !== '') return String(activeId) === String(packageId(pkg));
-            // Older active-investment records only include the plan name.
-            return hasActiveInvestment() && packageName(activeInvestment).toLowerCase() === packageName(pkg).toLowerCase();
+            return hasActiveInvestment() && String(activeInvestment?.package_name || '').toLowerCase() === packageName(pkg).toLowerCase();
         }
+        // Upgrades only move up: a bigger capital than the current plan.
         function isEligiblePackage(pkg) {
             return !hasActiveInvestment() || packageCapital(pkg) > currentInvestmentCapital();
         }
+        // Upgrade cost is the capital difference; a first activation costs full capital.
         function costForPackage(pkg) {
             return hasActiveInvestment() ? Math.max(0, packageCapital(pkg) - currentInvestmentCapital()) : packageCapital(pkg);
         }
         function escaped(value) { return window.escapeHtml ? window.escapeHtml(value) : String(value ?? ''); }
+
+        function tierGroups() {
+            // Group by the tier field from GET /api/packages, ordered by the
+            // cheapest capital in each tier so cards read low → high.
+            const groups = new Map();
+            packages.forEach((pkg) => {
+                const tier = packageTier(pkg);
+                if (!groups.has(tier)) groups.set(tier, []);
+                groups.get(tier).push(pkg);
+            });
+            return [...groups.entries()]
+                .map(([tier, items]) => ({
+                    tier,
+                    items: items.slice().sort((a, b) => packageCapital(a) - packageCapital(b))
+                }))
+                .sort((a, b) => packageCapital(a.items[0]) - packageCapital(b.items[0]));
+        }
+
+        function planCardMarkup(pkg) {
+            const current = isCurrentPackage(pkg);
+            const eligible = isEligiblePackage(pkg);
+            const cost = costForPackage(pkg);
+            const affordable = walletBalance >= cost;
+            const disabled = investmentLookupFailed || current || !eligible;
+            const label = investmentLookupFailed
+                ? 'Check plan status'
+                : current
+                    ? 'Current Package'
+                    : !eligible
+                        ? 'Lower Tier'
+                        : hasActiveInvestment() ? 'Upgrade Package' : 'Activate Package';
+            const costRow = hasActiveInvestment() && eligible && !current
+                ? `<li><i class="fa-solid fa-arrow-up-right-dots"></i> Upgrade cost: ${formatCurrency(cost)}</li>`
+                : '';
+            const affordWarning = !disabled && !affordable
+                ? `<p class="plan-afford-warning">Insufficient balance — you need ${formatCurrency(cost - walletBalance)} more.</p>`
+                : '';
+            return `
+                <div class="plan-card ${current ? 'plan-card-current' : ''}">
+                    <div class="plan-name">${escaped(packageName(pkg))}</div>
+                    <div class="plan-price">${formatCurrency(packageCapital(pkg))}</div>
+                    <ul class="plan-features">
+                        <li><i class="fa-solid fa-chart-line"></i> Daily ROI: ${formatPercentage(packageRate(pkg))}</li>
+                        <li><i class="fa-solid fa-wallet"></i> Daily Earning: ${formatCurrency(packageDailyEarning(pkg))}</li>
+                        <li><i class="fa-solid fa-calendar-days"></i> Cycle: ${packageCycleDays(pkg).toLocaleString('en-NG')} days</li>
+                        <li><i class="fa-solid fa-coins"></i> Total Payout: ${formatCurrency(packageTotalPayout(pkg))}</li>
+                        <li><i class="fa-solid fa-user-plus"></i> Referral Bonus: ${formatCurrency(packageReferralBonus(pkg))}</li>
+                        ${costRow}
+                    </ul>
+                    ${affordWarning}
+                    <button class="btn-activate" type="button" data-package-id="${escaped(packageId(pkg))}" ${disabled ? 'disabled' : ''}>${label}</button>
+                </div>`;
+        }
 
         function renderPlans() {
             const plansGrid = document.getElementById('plansGrid');
@@ -253,26 +321,11 @@
                 return;
             }
 
-            plansGrid.innerHTML = packages.map((pkg) => {
-                const current = isCurrentPackage(pkg);
-                const eligible = isEligiblePackage(pkg);
-                const disabled = investmentLookupFailed || current || !eligible;
-                const label = investmentLookupFailed ? 'Check Plan Status' : (current ? 'Current Package' : (!eligible ? 'Lower Tier' : (hasActiveInvestment() ? 'Upgrade Package' : 'Activate Package')));
-                return `
-                    <div class="plan-card ${current ? 'plan-card-current' : ''}">
-                        <div class="plan-name">${escaped(packageName(pkg))}</div>
-                        <div class="plan-price">${formatCurrency(packageCapital(pkg))}</div>
-                        <ul class="plan-features">
-                            <li><i class="fa-solid fa-chart-line"></i> Daily ROI: ${formatPercentage(packageRate(pkg))}</li>
-                            <li><i class="fa-solid fa-wallet"></i> Daily Earning: ${formatCurrency(packageDailyEarning(pkg))}</li>
-                            <li><i class="fa-solid fa-calendar-days"></i> Cycle: ${asNumber(packageCycleDays(pkg)).toLocaleString()} days</li>
-                            <li><i class="fa-solid fa-coins"></i> Total Payout: ${formatCurrency(packageTotalPayout(pkg))}</li>
-                            <li><i class="fa-solid fa-user-plus"></i> Referral Bonus: ${formatCurrency(packageReferralBonus(pkg))}</li>
-                        </ul>
-                        <button class="btn-activate" type="button" data-package-id="${escaped(packageId(pkg))}" ${disabled ? 'disabled' : ''}>${label}</button>
-                    </div>
-                `;
-            }).join('');
+            plansGrid.innerHTML = tierGroups().map((group) => `
+                <section class="tier-group" aria-label="${escaped(group.tier)} plans">
+                    <h2 class="tier-heading">${escaped(group.tier)} <span>${group.items.length} plan${group.items.length === 1 ? '' : 's'}</span></h2>
+                    <div class="tier-cards">${group.items.map(planCardMarkup).join('')}</div>
+                </section>`).join('');
 
             plansGrid.querySelectorAll('[data-package-id]').forEach((button) => {
                 button.addEventListener('click', () => openModal(button.dataset.packageId));
@@ -326,6 +379,7 @@
             const fundBtn = document.getElementById('btnFund');
             const confirmBtn = document.getElementById('confirmBtn');
             const canAfford = walletBalance >= cost;
+            document.getElementById('modalWarningText').textContent = `Insufficient balance — this costs ${formatCurrency(cost)} and your wallet has ${formatCurrency(walletBalance)}. Fund your account to proceed.`;
             warning.style.display = canAfford ? 'none' : 'block';
             fundBtn.style.display = canAfford ? 'none' : 'block';
             confirmBtn.disabled = !canAfford;
@@ -351,7 +405,7 @@
             const isUpgrade = hasActiveInvestment();
             const cost = costForPackage(selectedPackage);
             if (walletBalance < cost) {
-                if (typeof window.showToast === 'function') window.showToast('error', 'Your deposit wallet does not have enough funds for this package.');
+                window.showToast('error', `Insufficient balance — this ${isUpgrade ? 'upgrade' : 'plan'} costs ${formatCurrency(cost)} and your wallet has ${formatCurrency(walletBalance)}.`);
                 return;
             }
 
@@ -362,16 +416,16 @@
             button.textContent = isUpgrade ? 'Upgrading…' : 'Activating…';
 
             try {
+                // POST /api/activate for a first plan; POST /api/upgrade-package
+                // for a move to a larger-capital plan. Both take { package_id }.
                 const endpoint = isUpgrade ? '/upgrade-package' : '/activate';
-                const { ok, data, networkError } = await window.apiFetchJson(endpoint, {
+                const result = await window.apiFetchJson(endpoint, {
                     method: 'POST',
                     body: JSON.stringify({ package_id: packageId(selectedPackage) })
                 });
-                if (!(ok && data.success)) {
-                    const message = networkError
-                        ? 'We could not reach the package service. Please try again in a moment.'
-                        : data?.error || 'We could not complete this package change.';
-                    if (typeof window.showToast === 'function') window.showToast('error', message); else alert(message);
+                const { ok, data } = result;
+                if (!(ok && data?.success)) {
+                    window.showToast('error', window.describeApiErrorMessage(result));
                     return;
                 }
 
@@ -380,8 +434,7 @@
                 localStorage.setItem('planActivated', 'true');
                 localStorage.setItem('activePackage', packageName(data.package || selectedPackage));
                 localStorage.setItem('activePackageId', packageId(data.package || selectedPackage));
-                const message = data.message || `${packageName(selectedPackage)} is now active.`;
-                if (typeof window.showToast === 'function') window.showToast('success', message); else alert(message);
+                window.showToast('success', data.message || `${packageName(selectedPackage)} is now active.`);
                 closeModal();
                 if (typeof window.globalSync === 'function') window.globalSync();
                 window.location.assign('/dashboard.html');
@@ -395,63 +448,64 @@
             }
         }
 
-        function unwrapPayload(payload) {
-            return payload?.data && typeof payload.data === 'object' && !Array.isArray(payload.data) ? payload.data : payload || {};
-        }
-
-        function activeInvestmentFrom(payload) {
-            const data = unwrapPayload(payload);
-            return data.investment || data.activeInvestment || data.active_investment || data.plan || data.package || data.active_plan || null;
-        }
-
-        function packageListFrom(payload) {
-            const data = unwrapPayload(payload);
-            const list = Array.isArray(payload) ? payload : (data.packages || data.plans || data.items || data.results || data.data);
-            return Array.isArray(list) ? list.filter((item) => item && typeof item === 'object') : [];
-        }
-
+        // GET /api/active-investment -> { success, hasActive, investment, balance }
         async function loadActiveInvestment() {
             const status = document.getElementById('activeInvestmentStatus');
-            try {
-                const { ok, data } = await window.apiFetchJson('/active-investment', { method: 'GET' });
-                if (!ok || data?.success === false) throw new Error(data?.error || 'Unable to load active investment.');
-                const investmentData = unwrapPayload(data);
-                investmentLookupFailed = false;
-                activeInvestment = activeInvestmentFrom(data);
-                walletBalance = asNumber(investmentData.balance ?? investmentData.wallet_balance ?? data.balance ?? localStorage.getItem('balance'));
-                if (activeInvestment) {
-                    status.classList.add('is-active');
-                    status.textContent = `Your current plan is ${packageName(activeInvestment)}. Only higher-tier packages are available for upgrade.`;
-                } else {
-                    status.classList.remove('is-active');
-                    status.textContent = 'You do not have an active investment yet. Choose a package to get started.';
-                }
-            } catch (error) {
+            const result = await window.apiFetchJson('/active-investment', { method: 'GET' });
+
+            if (!(result.ok && result.data?.success)) {
                 activeInvestment = null;
                 investmentLookupFailed = true;
                 status.classList.remove('is-active');
-                status.textContent = 'We could not check your current plan. Please refresh before making a package change.';
-                if (window.__AW_DEBUG__) console.error('Active investment load error:', error);
+                status.classList.add('is-error');
+                status.textContent = `${window.describeApiErrorMessage(result)} Refresh before making a package change.`;
+                if (window.__AW_DEBUG__) console.error('Active investment load error:', result);
+                return;
+            }
+
+            investmentLookupFailed = false;
+            status.classList.remove('is-error');
+            const { hasActive, investment, balance } = result.data;
+            activeInvestment = (hasActive === false || !investment) ? null : investment;
+            walletBalance = asNumber(balance ?? localStorage.getItem('balance'));
+
+            if (activeInvestment) {
+                status.classList.add('is-active');
+                status.textContent = `Your current plan is ${activeInvestment.package_name || 'an active plan'} (${formatCurrency(currentInvestmentCapital())} capital). Only higher-capital packages are available for upgrade.`;
+            } else {
+                status.classList.remove('is-active');
+                status.textContent = "You don't have an active plan yet. Choose a plan below to get started.";
             }
         }
 
+        // GET /api/packages, fetched once per page load.
+        async function loadPackages() {
+            const plansGrid = document.getElementById('plansGrid');
+            const result = await window.apiFetchJson('/packages', { method: 'GET' });
+            if (!(result.ok && result.data?.success && Array.isArray(result.data.packages))) {
+                packages = [];
+                const message = window.describeApiErrorMessage(result);
+                plansGrid.innerHTML = `<p class="plans-empty-state">${escaped(message)}<br><button type="button" class="btn-fund" style="margin:16px auto 0;max-width:200px;" id="retryPackagesBtn">Retry</button></p>`;
+                document.getElementById('retryPackagesBtn')?.addEventListener('click', loadUpgradeData);
+                document.getElementById('calculatorPackage').replaceChildren(new Option(message, ''));
+                if (window.__AW_DEBUG__) console.error('Package load error:', result);
+                return;
+            }
+            packages = result.data.packages;
+            renderPlans();
+            populateCalculator();
+        }
+
+        let packagesLoaded = false;
         async function loadUpgradeData() {
             await loadActiveInvestment();
-            try {
-                let result = await window.apiFetchJson('/packages', { method: 'GET' });
-                // Some deployed API versions still expose this public catalogue
-                // as /plans. Fall back only when /packages is unavailable.
-                if (!result.ok && result.status === 404) result = await window.apiFetchJson('/plans', { method: 'GET' });
-                const availablePackages = packageListFrom(result.data);
-                if (!result.ok || result.data?.success === false || !availablePackages.length) {
-                    throw new Error(result.data?.error || 'Unable to load package list.');
-                }
-                packages = availablePackages;
+            // Packages are static per deploy — fetch the catalogue once, then
+            // just re-render when the active plan/balance changes.
+            if (!packagesLoaded || !packages.length) {
+                await loadPackages();
+                packagesLoaded = packages.length > 0;
+            } else {
                 renderPlans();
-                populateCalculator();
-            } catch (error) {
-                document.getElementById('plansGrid').innerHTML = '<p class="plans-empty-state">Unable to load packages. Please refresh and try again.</p>';
-                if (window.__AW_DEBUG__) console.error('Package load error:', error);
             }
         }
 

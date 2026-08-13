@@ -76,6 +76,37 @@ function formatNaira(value, options = {}) {
     }).format(normalizedAmount);
 }
 
+// ₦ with thousand separators and no forced kobo — used by admin stats, plan
+// cards, and wallet tables so every screen formats money identically.
+function formatNairaAmount(value, options = {}) {
+    const amount = Number(value);
+    const normalizedAmount = Number.isFinite(amount) ? amount : 0;
+    const decimals = Number.isFinite(Number(options.decimals)) ? Number(options.decimals) : null;
+    return `₦${normalizedAmount.toLocaleString('en-NG', {
+        minimumFractionDigits: decimals ?? 0,
+        maximumFractionDigits: decimals ?? 2
+    })}`;
+}
+
+function formatCount(value) {
+    const amount = Number(value);
+    return (Number.isFinite(amount) ? amount : 0).toLocaleString('en-NG');
+}
+
+// daily_rate arrives as a fraction (0.05) or as a percentage (5). Percentages
+// render as whole numbers unless the plan genuinely needs decimals.
+function formatPercent(rate, options = {}) {
+    const parsed = Number(rate);
+    const value = Number.isFinite(parsed) ? parsed : 0;
+    const percentage = Math.abs(value) <= 1 ? value * 100 : value;
+    const rounded = Math.round(percentage);
+    const isWhole = Math.abs(percentage - rounded) < 0.005;
+    return `${percentage.toLocaleString('en-NG', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: isWhole ? 0 : (options.maximumFractionDigits ?? 2)
+    })}%`;
+}
+
 function clearAuthSession() {
     AUTH_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
 }
@@ -84,7 +115,13 @@ function userAvatarUrl(username) {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(String(username || 'User'))}&background=d4af37&color=112A46&bold=true`;
 }
 
-async function apiFetch(path, options = {}) {
+// NOTE: this is deliberately NOT named `apiFetch`. In a classic script a
+// top-level `function apiFetch` becomes a property of `window`, so the
+// `window.apiFetch = ... authorizedFetch(...)` export below would overwrite it
+// and make authorizedFetch call itself forever (RangeError: Maximum call stack
+// size exceeded). Every API call on every page failed because of that, which is
+// what surfaced as "plan unavailable" and "Unable to load users".
+async function rawApiFetch(path, options = {}) {
     try {
         return await fetch(apiUrl(path), options);
     } catch (networkError) {
@@ -109,10 +146,21 @@ function isAuthRoute(path) {
     return /\/(login|register|refresh-token)(?:\?|$)/.test(path);
 }
 
-function redirectToLoginAfterRefreshFailure() {
+function redirectToLoginAfterRefreshFailure(reason = 'session-expired') {
     clearAuthSession();
     if (currentPageName() === 'login.html') return;
-    window.location.assign('/login.html');
+    // Pages that render their own sign-in banner (admin Command Center) opt out
+    // of the automatic bounce so they can explain exactly what went wrong.
+    if (window.__AW_SUPPRESS_LOGIN_REDIRECT__ === true) {
+        window.dispatchEvent(new CustomEvent('accessWealthSessionEnded', { detail: { reason } }));
+        return;
+    }
+    // Preserve why the session ended so login.html can explain it instead of
+    // dropping the user on a blank form.
+    const params = new URLSearchParams({ reason: String(reason || 'session-expired') });
+    const next = `${window.location.pathname}${window.location.search}`;
+    if (next && next !== '/' && !next.startsWith('/login.html')) params.set('next', next);
+    window.location.assign(`/login.html?${params.toString()}`);
 }
 
 function saveRefreshUser(user) {
@@ -129,7 +177,7 @@ async function refreshAccessToken() {
         const currentToken = localStorage.getItem('token');
         const headers = { 'Content-Type': 'application/json' };
         if (currentToken) headers.Authorization = `Bearer ${currentToken}`;
-        const response = await apiFetch('/refresh-token', { method: 'POST', headers, body: '{}' });
+        const response = await rawApiFetch('/refresh-token', { method: 'POST', headers, body: '{}' });
         let data = {};
         try { data = await response.json(); } catch (_) {}
         const token = data.token || data.newToken || data.access_token || data.accessToken || data.data?.token;
@@ -141,18 +189,36 @@ async function refreshAccessToken() {
     try { return await refreshInFlight; } finally { refreshInFlight = null; }
 }
 
+// A 403 usually means "you are signed in, but not allowed here" (for example
+// {"error":"Admin access required"}). Refreshing the token cannot fix that, and
+// wiping the session hides the real reason from the user, so only refresh when
+// the 403 body actually complains about the token itself.
+async function isTokenProblemResponse(response) {
+    if (response.status === 401) return true;
+    if (response.status !== 403) return false;
+    try {
+        if (typeof response.clone !== 'function') return false;
+        const peek = response.clone();
+        const raw = await peek.text();
+        if (!raw) return false;
+        return isExpiredTokenPayload(JSON.parse(raw));
+    } catch (_) {
+        return false;
+    }
+}
+
 async function authorizedFetch(path, options = {}, canRefresh = true) {
     const headers = { ...(options.headers || {}) };
     const token = localStorage.getItem('token');
     if (token && !isAuthRoute(path)) headers.Authorization = `Bearer ${token}`;
-    let response = await apiFetch(path, { ...options, headers });
-    if (canRefresh && !isAuthRoute(path) && (response.status === 401 || response.status === 403)) {
+    let response = await rawApiFetch(path, { ...options, headers });
+    if (canRefresh && !isAuthRoute(path) && await isTokenProblemResponse(response)) {
         const freshToken = await refreshAccessToken();
         if (freshToken) {
             headers.Authorization = `Bearer ${freshToken}`;
-            response = await apiFetch(path, { ...options, headers }); // exactly one retry
+            response = await rawApiFetch(path, { ...options, headers }); // exactly one retry
         } else {
-            redirectToLoginAfterRefreshFailure();
+            redirectToLoginAfterRefreshFailure('session-expired');
         }
     }
     return response;
@@ -195,6 +261,135 @@ async function responseResult(response) {
     };
 }
 
+// ==========================================
+// SHARED API ERROR DESCRIPTION
+// Every page uses this so the real reason a request failed is always visible
+// instead of a generic "Unable to load" placeholder.
+// ==========================================
+const API_ERROR_KIND = {
+    NETWORK: 'network',
+    UNAUTHORIZED: 'unauthorized',
+    FORBIDDEN: 'forbidden',
+    NOT_FOUND: 'not_found',
+    SERVER: 'server',
+    EMPTY: 'empty'
+};
+
+const ADMIN_FORBIDDEN_MESSAGES = ['admin access required', 'access denied'];
+
+function serverErrorText(result) {
+    const data = result?.data;
+    if (data && typeof data === 'object') {
+        const message = data.error || data.message || data.msg || data.error_description;
+        if (message && String(message).trim()) return String(message).trim();
+    }
+    if (result?.error && String(result.error).trim()) return String(result.error).trim();
+    return '';
+}
+
+function isAdminForbidden(result) {
+    if (!result) return false;
+    const message = serverErrorText(result).toLowerCase();
+    return result.status === 403 && (
+        ADMIN_FORBIDDEN_MESSAGES.includes(message) || message.includes('admin access required')
+    );
+}
+
+/**
+ * Turn an apiFetchJson result into something a human can act on.
+ * @returns {{ kind: string, status: number, message: string, serverMessage: string,
+ *            isNetwork: boolean, isAuth: boolean, isForbidden: boolean, isAdminForbidden: boolean }}
+ */
+function describeApiError(result) {
+    const status = Number(result?.status || 0);
+    const serverMessage = serverErrorText(result);
+
+    if (result?.networkError || status === 0) {
+        return {
+            kind: API_ERROR_KIND.NETWORK,
+            status: 0,
+            serverMessage,
+            message: 'Could not reach the server — check your connection and try again.',
+            isNetwork: true,
+            isAuth: false,
+            isForbidden: false,
+            isAdminForbidden: false
+        };
+    }
+
+    if (status === 401) {
+        return {
+            kind: API_ERROR_KIND.UNAUTHORIZED,
+            status,
+            serverMessage,
+            message: serverMessage && !isExpiredTokenPayload(result?.data)
+                ? `${serverMessage} Please log in again.`
+                : 'Your session has expired. Please log in again.',
+            isNetwork: false,
+            isAuth: true,
+            isForbidden: false,
+            isAdminForbidden: false
+        };
+    }
+
+    if (status === 403) {
+        return {
+            kind: API_ERROR_KIND.FORBIDDEN,
+            status,
+            serverMessage,
+            // 403 bodies carry the reason ("Admin access required") — show it verbatim.
+            message: serverMessage || 'You do not have permission to perform this action.',
+            isNetwork: false,
+            isAuth: false,
+            isForbidden: true,
+            isAdminForbidden: isAdminForbidden(result)
+        };
+    }
+
+    if (status === 404) {
+        return {
+            kind: API_ERROR_KIND.NOT_FOUND,
+            status,
+            serverMessage,
+            message: serverMessage || 'That resource was not found on the server.',
+            isNetwork: false,
+            isAuth: false,
+            isForbidden: false,
+            isAdminForbidden: false
+        };
+    }
+
+    if (serverMessage) {
+        return {
+            kind: API_ERROR_KIND.SERVER,
+            status,
+            serverMessage,
+            message: serverMessage,
+            isNetwork: false,
+            isAuth: false,
+            isForbidden: false,
+            isAdminForbidden: false
+        };
+    }
+
+    return {
+        kind: API_ERROR_KIND.EMPTY,
+        status,
+        serverMessage,
+        message: status
+            ? `The server responded with an unexpected error (HTTP ${status}).`
+            : 'The server returned an unexpected response.',
+        isNetwork: false,
+        isAuth: false,
+        isForbidden: false,
+        isAdminForbidden: false
+    };
+}
+
+function describeApiErrorMessage(result) {
+    return describeApiError(result).message;
+}
+
 function isExpiredTokenPayload(data) {
     if (!data || typeof data !== 'object') return false;
     const message = String(data.error || data.message || data.msg || data.error_description || '').toLowerCase();
@@ -211,7 +406,7 @@ async function apiFetchJson(path, options = {}) {
         const freshToken = await refreshAccessToken();
         if (freshToken) {
             headers.Authorization = `Bearer ${freshToken}`;
-            result = await responseResult(await apiFetch(path, { ...options, headers }));
+            result = await responseResult(await rawApiFetch(path, { ...options, headers }));
         } else {
             redirectToLoginAfterRefreshFailure();
         }
@@ -235,7 +430,14 @@ window.apiPathParam = apiPathParam;
 window.escapeHtml = escapeHtml;
 window.safeExternalUrl = safeExternalUrl;
 window.formatNaira = formatNaira;
+window.formatNairaAmount = formatNairaAmount;
+window.formatCount = formatCount;
+window.formatPercent = formatPercent;
+window.describeApiError = describeApiError;
+window.describeApiErrorMessage = describeApiErrorMessage;
+window.API_ERROR_KIND = API_ERROR_KIND;
 window.clearAuthSession = clearAuthSession;
+window.redirectToLoginWithReason = redirectToLoginAfterRefreshFailure;
 window.userAvatarUrl = userAvatarUrl;
 
 // ==========================================
@@ -535,7 +737,7 @@ function showToast(type, message, timeout = 4000) {
         }
         const toast = document.createElement('div');
         toast.className = 'global-toast ' + (type || 'info');
-        toast.innerText = message;
+        toast.textContent = message;
         toast.style.marginBottom = '8px';
         toast.style.padding = '10px 14px';
         toast.style.borderRadius = '8px';

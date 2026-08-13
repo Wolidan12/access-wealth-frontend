@@ -208,6 +208,18 @@
             font-size: 0.92rem;
         }
 
+        .notice-msg {
+            background: rgba(212,175,55,0.10);
+            border: 1px solid rgba(212,175,55,0.28);
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            color: #d4af37;
+            display: none;
+            font-weight: 600;
+            font-size: 0.92rem;
+        }
+
         @media (max-width: 480px) {
             .auth-card { padding: 24px; }
             .auth-brand h1 { font-size: 1.3rem; }
@@ -232,6 +244,7 @@
         </div>
 
         <div class="error-msg" id="errorMsg" role="alert" aria-live="assertive"></div>
+        <div class="notice-msg" id="loginReasonNotice" role="status" aria-live="polite"></div>
 
         <form id="loginForm" novalidate>
             <div class="form-group">
@@ -274,8 +287,39 @@
             let isSubmittingLogin = false;
 
             function showError(message) {
-                errorEl.innerText = message;
+                errorEl.textContent = message;
                 errorEl.style.display = 'block';
+            }
+
+            // global.js routes here with ?reason=… when a session ends or an
+            // admin-only page rejects the account. Explain it instead of
+            // silently showing an empty form.
+            const REASON_MESSAGES = {
+                'session-expired': 'Your session expired. Please log in again to continue.',
+                'admin-required': 'That page requires an administrator account. Please log in with an admin account.',
+                'not-admin': 'That page requires an administrator account. Please log in with an admin account.',
+                'access-denied': 'Access denied for the previous page. Please log in with an account that has permission.',
+                'logged-out': 'You have been signed out.'
+            };
+
+            (function showLoginReason() {
+                const notice = document.getElementById('loginReasonNotice');
+                if (!notice) return;
+                let reason = '';
+                try { reason = new URLSearchParams(window.location.search).get('reason') || ''; } catch (_) { return; }
+                if (!reason) return;
+                notice.textContent = REASON_MESSAGES[reason] || reason;
+                notice.style.display = 'block';
+            })();
+
+            function postLoginTarget(role) {
+                if (role === 'admin') return '/admin.html';
+                if (role === 'support') return '/support-agent.html';
+                let next = '';
+                try { next = new URLSearchParams(window.location.search).get('next') || ''; } catch (_) {}
+                // Only same-origin paths are honoured; admin pages need an admin role.
+                if (next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/admin')) return next;
+                return '/dashboard.html';
             }
 
             function resetButton() {
@@ -322,6 +366,8 @@
 
                 isSubmittingLogin = true;
                 errorEl.style.display = 'none';
+                const reasonNotice = document.getElementById('loginReasonNotice');
+                if (reasonNotice) reasonNotice.style.display = 'none';
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
                 let redirecting = false;
@@ -368,13 +414,7 @@
                     }
 
                     redirecting = true;
-                    if (user.role === 'admin') {
-                        window.location.href = '/admin.html';
-                    } else if (user.role === 'support') {
-                        window.location.href = '/support-agent.html';
-                    } else {
-                        window.location.href = '/dashboard.html';
-                    }
+                    window.location.href = postLoginTarget(user.role);
                 } catch (error) {
                     const networkError = !response;
                     const message = SignIn.getSignInErrorMessage({
