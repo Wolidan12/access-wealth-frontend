@@ -218,19 +218,31 @@
             return `${percentage.toLocaleString('en-NG', { maximumFractionDigits: 2 })}%`;
         }
 
-        function packageId(pkg) { return pkg?.id || pkg?.package_id || pkg?.packageId || ''; }
-        function packageName(pkg) { return pkg?.name || pkg?.package_name || pkg?.tier || 'Investment Package'; }
-        function currentInvestmentCapital() { return asNumber(activeInvestment?.capital ?? activeInvestment?.amount ?? activeInvestment?.invested_amount); }
+        // Package endpoints have existed under both the old "plans" names and
+        // the current "packages" names. Normalize their payloads here so a
+        // harmless response wrapper or legacy field name never leaves the
+        // package screen blank.
+        function packageId(pkg) { return pkg?.id ?? pkg?.package_id ?? pkg?.packageId ?? pkg?.plan_id ?? pkg?.planId ?? ''; }
+        function packageName(pkg) { return pkg?.name || pkg?.package_name || pkg?.package?.name || pkg?.plan_name || pkg?.plan?.name || pkg?.tier || 'Investment Package'; }
+        function packageCapital(pkg) { return asNumber(pkg?.capital ?? pkg?.amount ?? pkg?.price ?? pkg?.investment_amount ?? pkg?.minimum_amount); }
+        function packageRate(pkg) { return pkg?.daily_rate ?? pkg?.dailyRate ?? pkg?.roi ?? pkg?.daily_roi ?? 0; }
+        function packageDailyEarning(pkg) { return pkg?.daily_earning ?? pkg?.dailyEarning ?? (packageCapital(pkg) * (Math.abs(asNumber(packageRate(pkg))) <= 1 ? asNumber(packageRate(pkg)) : asNumber(packageRate(pkg)) / 100)); }
+        function packageCycleDays(pkg) { return pkg?.cycle_days ?? pkg?.cycleDays ?? pkg?.duration_days ?? pkg?.duration ?? 0; }
+        function packageTotalPayout(pkg) { return pkg?.total_payout ?? pkg?.totalPayout ?? (packageCapital(pkg) + packageDailyEarning(pkg) * asNumber(packageCycleDays(pkg))); }
+        function packageReferralBonus(pkg) { return pkg?.referral_bonus ?? pkg?.referralBonus ?? pkg?.referral_commission ?? 0; }
+        function currentInvestmentCapital() { return asNumber(activeInvestment?.capital ?? activeInvestment?.amount ?? activeInvestment?.invested_amount ?? activeInvestment?.package?.capital ?? activeInvestment?.plan?.capital); }
         function hasActiveInvestment() { return Boolean(activeInvestment); }
         function isCurrentPackage(pkg) {
-            const activeId = activeInvestment?.package_id || activeInvestment?.packageId || activeInvestment?.plan_id || activeInvestment?.planId || activeInvestment?.package?.id;
-            return Boolean(activeId) && String(activeId) === String(packageId(pkg));
+            const activeId = activeInvestment?.package_id ?? activeInvestment?.packageId ?? activeInvestment?.plan_id ?? activeInvestment?.planId ?? activeInvestment?.package?.id ?? activeInvestment?.plan?.id;
+            if (activeId !== undefined && activeId !== null && activeId !== '') return String(activeId) === String(packageId(pkg));
+            // Older active-investment records only include the plan name.
+            return hasActiveInvestment() && packageName(activeInvestment).toLowerCase() === packageName(pkg).toLowerCase();
         }
         function isEligiblePackage(pkg) {
-            return !hasActiveInvestment() || asNumber(pkg.capital) > currentInvestmentCapital();
+            return !hasActiveInvestment() || packageCapital(pkg) > currentInvestmentCapital();
         }
         function costForPackage(pkg) {
-            return hasActiveInvestment() ? Math.max(0, asNumber(pkg.capital) - currentInvestmentCapital()) : asNumber(pkg.capital);
+            return hasActiveInvestment() ? Math.max(0, packageCapital(pkg) - currentInvestmentCapital()) : packageCapital(pkg);
         }
         function escaped(value) { return window.escapeHtml ? window.escapeHtml(value) : String(value ?? ''); }
 
@@ -249,13 +261,13 @@
                 return `
                     <div class="plan-card ${current ? 'plan-card-current' : ''}">
                         <div class="plan-name">${escaped(packageName(pkg))}</div>
-                        <div class="plan-price">${formatCurrency(pkg.capital)}</div>
+                        <div class="plan-price">${formatCurrency(packageCapital(pkg))}</div>
                         <ul class="plan-features">
-                            <li><i class="fa-solid fa-chart-line"></i> Daily ROI: ${formatPercentage(pkg.daily_rate)}</li>
-                            <li><i class="fa-solid fa-wallet"></i> Daily Earning: ${formatCurrency(pkg.daily_earning)}</li>
-                            <li><i class="fa-solid fa-calendar-days"></i> Cycle: ${asNumber(pkg.cycle_days).toLocaleString()} days</li>
-                            <li><i class="fa-solid fa-coins"></i> Total Payout: ${formatCurrency(pkg.total_payout)}</li>
-                            <li><i class="fa-solid fa-user-plus"></i> Referral Bonus: ${formatCurrency(pkg.referral_bonus)}</li>
+                            <li><i class="fa-solid fa-chart-line"></i> Daily ROI: ${formatPercentage(packageRate(pkg))}</li>
+                            <li><i class="fa-solid fa-wallet"></i> Daily Earning: ${formatCurrency(packageDailyEarning(pkg))}</li>
+                            <li><i class="fa-solid fa-calendar-days"></i> Cycle: ${asNumber(packageCycleDays(pkg)).toLocaleString()} days</li>
+                            <li><i class="fa-solid fa-coins"></i> Total Payout: ${formatCurrency(packageTotalPayout(pkg))}</li>
+                            <li><i class="fa-solid fa-user-plus"></i> Referral Bonus: ${formatCurrency(packageReferralBonus(pkg))}</li>
                         </ul>
                         <button class="btn-activate" type="button" data-package-id="${escaped(packageId(pkg))}" ${disabled ? 'disabled' : ''}>${label}</button>
                     </div>
@@ -273,21 +285,21 @@
             packages.forEach((pkg) => {
                 const option = document.createElement('option');
                 option.value = packageId(pkg);
-                option.textContent = `${packageName(pkg)} — ${formatPercentage(pkg.daily_rate)} daily`;
+                option.textContent = `${packageName(pkg)} — ${formatPercentage(packageRate(pkg))} daily`;
                 select.appendChild(option);
             });
             const capital = document.getElementById('calculatorCapital');
-            if (packages[0] && !capital.value) capital.value = asNumber(packages[0].capital);
+            if (packages[0] && !capital.value) capital.value = packageCapital(packages[0]);
             updateCalculator();
         }
 
         function updateCalculator() {
             const selected = packages.find((pkg) => String(packageId(pkg)) === String(document.getElementById('calculatorPackage').value));
             if (!selected) return;
-            const capital = Math.max(0, asNumber(document.getElementById('calculatorCapital').value || selected.capital));
-            const dailyRate = Math.abs(asNumber(selected.daily_rate)) <= 1 ? asNumber(selected.daily_rate) : asNumber(selected.daily_rate) / 100;
-            const cycleDays = asNumber(selected.cycle_days);
-            document.getElementById('calculatorRate').textContent = formatPercentage(selected.daily_rate);
+            const capital = Math.max(0, asNumber(document.getElementById('calculatorCapital').value || packageCapital(selected)));
+            const dailyRate = Math.abs(asNumber(packageRate(selected))) <= 1 ? asNumber(packageRate(selected)) : asNumber(packageRate(selected)) / 100;
+            const cycleDays = asNumber(packageCycleDays(selected));
+            document.getElementById('calculatorRate').textContent = formatPercentage(packageRate(selected));
             document.getElementById('calculatorDaily').textContent = formatCurrency(capital * dailyRate);
             document.getElementById('calculatorTotal').textContent = formatCurrency(capital + (capital * dailyRate * cycleDays));
         }
@@ -305,9 +317,9 @@
             document.getElementById('modalCostLabel').textContent = isUpgrade ? 'Upgrade Cost' : 'Plan Cost';
             document.getElementById('modalPlanName').textContent = packageName(selectedPackage);
             document.getElementById('modalPlanPrice').textContent = formatCurrency(cost);
-            document.getElementById('modalPlanRate').textContent = formatPercentage(selectedPackage.daily_rate);
-            document.getElementById('modalPlanDaily').textContent = formatCurrency(selectedPackage.daily_earning);
-            document.getElementById('modalPlanTotal').textContent = formatCurrency(selectedPackage.total_payout);
+            document.getElementById('modalPlanRate').textContent = formatPercentage(packageRate(selectedPackage));
+            document.getElementById('modalPlanDaily').textContent = formatCurrency(packageDailyEarning(selectedPackage));
+            document.getElementById('modalPlanTotal').textContent = formatCurrency(packageTotalPayout(selectedPackage));
             document.getElementById('modalCurrentBal').textContent = formatCurrency(walletBalance);
 
             const warning = document.getElementById('modalWarning');
@@ -383,16 +395,30 @@
             }
         }
 
+        function unwrapPayload(payload) {
+            return payload?.data && typeof payload.data === 'object' && !Array.isArray(payload.data) ? payload.data : payload || {};
+        }
+
+        function activeInvestmentFrom(payload) {
+            const data = unwrapPayload(payload);
+            return data.investment || data.activeInvestment || data.active_investment || data.plan || data.package || data.active_plan || null;
+        }
+
+        function packageListFrom(payload) {
+            const data = unwrapPayload(payload);
+            const list = Array.isArray(payload) ? payload : (data.packages || data.plans || data.items || data.results || data.data);
+            return Array.isArray(list) ? list.filter((item) => item && typeof item === 'object') : [];
+        }
+
         async function loadActiveInvestment() {
             const status = document.getElementById('activeInvestmentStatus');
             try {
                 const { ok, data } = await window.apiFetchJson('/active-investment', { method: 'GET' });
-                if (!(ok && data.success)) throw new Error(data?.error || 'Unable to load active investment.');
+                if (!ok || data?.success === false) throw new Error(data?.error || 'Unable to load active investment.');
+                const investmentData = unwrapPayload(data);
                 investmentLookupFailed = false;
-                activeInvestment = data.hasActive === true || data.investment || data.activeInvestment || data.active_investment
-                    ? (data.investment || data.activeInvestment || data.active_investment || null)
-                    : null;
-                walletBalance = asNumber(data.balance ?? localStorage.getItem('balance'));
+                activeInvestment = activeInvestmentFrom(data);
+                walletBalance = asNumber(investmentData.balance ?? investmentData.wallet_balance ?? data.balance ?? localStorage.getItem('balance'));
                 if (activeInvestment) {
                     status.classList.add('is-active');
                     status.textContent = `Your current plan is ${packageName(activeInvestment)}. Only higher-tier packages are available for upgrade.`;
@@ -412,9 +438,15 @@
         async function loadUpgradeData() {
             await loadActiveInvestment();
             try {
-                const { ok, data } = await window.apiFetchJson('/packages', { method: 'GET' });
-                if (!(ok && data.success && Array.isArray(data.packages))) throw new Error(data?.error || 'Unable to load package list.');
-                packages = data.packages;
+                let result = await window.apiFetchJson('/packages', { method: 'GET' });
+                // Some deployed API versions still expose this public catalogue
+                // as /plans. Fall back only when /packages is unavailable.
+                if (!result.ok && result.status === 404) result = await window.apiFetchJson('/plans', { method: 'GET' });
+                const availablePackages = packageListFrom(result.data);
+                if (!result.ok || result.data?.success === false || !availablePackages.length) {
+                    throw new Error(result.data?.error || 'Unable to load package list.');
+                }
+                packages = availablePackages;
                 renderPlans();
                 populateCalculator();
             } catch (error) {
