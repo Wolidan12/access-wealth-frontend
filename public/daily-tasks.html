@@ -197,15 +197,21 @@
         let dailyPayout = 0;
         let timerInterval;
 
+        function activeInvestmentFrom(payload) {
+            const data = payload?.data && typeof payload.data === 'object' && !Array.isArray(payload.data) ? payload.data : (payload || {});
+            return data.investment || data.activeInvestment || data.active_investment || data.plan || data.package || data.active_plan || null;
+        }
+
         async function loadTaskInvestment() {
             try {
                 const { ok, data } = await window.apiFetchJson('/active-investment');
-                const investment = ok && data.success ? (data.investment || data.activeInvestment || data.active_investment) : null;
+                if (!ok || data?.success === false) throw new Error(data?.error || 'No active investment');
+                const investment = activeInvestmentFrom(data);
                 if (!investment) throw new Error('No active investment');
-                userPlan = investment.package_name || investment.packageName || investment.package?.name || investment.plan_name || investment.planName || 'Active Investment';
-                const rate = Number(investment.daily_rate ?? investment.dailyRate ?? 0);
-                const capital = Number(investment.capital ?? investment.amount ?? investment.invested_amount ?? 0);
-                dailyPayout = Number(investment.daily_earning ?? investment.dailyEarning ?? (capital * (Math.abs(rate) <= 1 ? rate : rate / 100)));
+                userPlan = investment.package_name || investment.packageName || investment.package?.name || investment.plan_name || investment.planName || investment.plan?.name || 'Active Investment';
+                const rate = Number(investment.daily_rate ?? investment.dailyRate ?? investment.package?.daily_rate ?? investment.plan?.daily_rate ?? 0);
+                const capital = Number(investment.capital ?? investment.amount ?? investment.invested_amount ?? investment.package?.capital ?? investment.plan?.capital ?? 0);
+                dailyPayout = Number(investment.daily_earning ?? investment.dailyEarning ?? investment.package?.daily_earning ?? investment.plan?.daily_earning ?? (capital * (Math.abs(rate) <= 1 ? rate : rate / 100)));
                 if (!Number.isFinite(dailyPayout) || dailyPayout <= 0) throw new Error('Invalid investment earnings');
                 document.getElementById('planNameDisplay').innerText = userPlan;
                 document.getElementById('taskPayoutDisplay').innerText = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 2 }).format(dailyPayout);

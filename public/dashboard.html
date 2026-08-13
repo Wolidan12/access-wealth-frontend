@@ -661,13 +661,21 @@
             return `${percentage.toLocaleString('en-NG', { maximumFractionDigits: 2 })}%`;
         }
 
+        function activeInvestmentPayload(payload) {
+            // Support the current response and legacy API responses, where the
+            // investment can be wrapped in data or called a plan/package.
+            const data = payload?.data && typeof payload.data === 'object' && !Array.isArray(payload.data) ? payload.data : (payload || {});
+            return data.investment || data.activeInvestment || data.active_investment || data.plan || data.package || data.active_plan || null;
+        }
+
         async function loadActiveInvestmentEarnings() {
             const name = document.getElementById('activeInvestmentName');
             const status = document.getElementById('activeInvestmentStatus');
             const stats = document.getElementById('activeInvestmentStats');
             try {
                 const { ok, data } = await window.apiFetchJson('/active-investment');
-                const investment = ok && data.success ? (data.investment || data.activeInvestment || data.active_investment) : null;
+                if (!ok || data?.success === false) throw new Error(data?.error || 'Unable to load active investment.');
+                const investment = activeInvestmentPayload(data);
                 if (!investment) {
                     name.textContent = 'No active investment yet.';
                     status.textContent = 'Not active';
@@ -675,12 +683,12 @@
                     return;
                 }
                 // Read the rate from the investment itself. This preserves rates on legacy plans.
-                const planName = investment.package_name || investment.packageName || investment.package?.name || investment.plan_name || investment.planName || 'Active investment';
-                const capital = investment.capital ?? investment.amount ?? investment.invested_amount ?? 0;
-                const rate = investment.daily_rate ?? investment.dailyRate ?? 0;
-                const daily = investment.daily_earning ?? investment.dailyEarning ?? (investmentNumber(capital) * (Math.abs(investmentNumber(rate)) <= 1 ? investmentNumber(rate) : investmentNumber(rate) / 100));
-                const days = investment.cycle_days ?? investment.cycleDays ?? investment.duration_days ?? 0;
-                const payout = investment.total_payout ?? investment.totalPayout ?? (investmentNumber(capital) + (investmentNumber(daily) * investmentNumber(days)));
+                const planName = investment.package_name || investment.packageName || investment.package?.name || investment.plan_name || investment.planName || investment.plan?.name || 'Active investment';
+                const capital = investment.capital ?? investment.amount ?? investment.invested_amount ?? investment.package?.capital ?? investment.plan?.capital ?? 0;
+                const rate = investment.daily_rate ?? investment.dailyRate ?? investment.package?.daily_rate ?? investment.package?.dailyRate ?? investment.plan?.daily_rate ?? investment.plan?.dailyRate ?? 0;
+                const daily = investment.daily_earning ?? investment.dailyEarning ?? investment.package?.daily_earning ?? investment.plan?.daily_earning ?? (investmentNumber(capital) * (Math.abs(investmentNumber(rate)) <= 1 ? investmentNumber(rate) : investmentNumber(rate) / 100));
+                const days = investment.cycle_days ?? investment.cycleDays ?? investment.duration_days ?? investment.package?.cycle_days ?? investment.plan?.cycle_days ?? 0;
+                const payout = investment.total_payout ?? investment.totalPayout ?? investment.package?.total_payout ?? investment.plan?.total_payout ?? (investmentNumber(capital) + (investmentNumber(daily) * investmentNumber(days)));
                 name.textContent = planName;
                 status.textContent = 'Active';
                 stats.innerHTML = `
